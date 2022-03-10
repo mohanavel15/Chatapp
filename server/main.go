@@ -53,7 +53,7 @@ func main() {
 	db.AutoMigrate(&database.Invites{})
 
 	handler = &websocket.EventHandler{}
-	handler.Add("CONNECT", gateway.ConnectUser)
+	handler.Add("CONNECT", gateway.Connect)
 
 	handler.Add("CREATE_INVITE", gateway.CreateInvite)
 	handler.Add("REMOVE_INVITE", gateway.RemoveInvite)

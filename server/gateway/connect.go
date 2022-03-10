@@ -2,22 +2,23 @@ package gateway
 
 import (
 	"Chatapp/database"
+	"Chatapp/response"
 	"Chatapp/websocket"
 	"encoding/json"
 	"fmt"
 	"log"
 )
 
-func ConnectUser(ctx *websocket.Context) {
+func Connect(ctx *websocket.Context) {
 	data := ctx.Data
 
-	var connect websocket.Connect
-	err := json.Unmarshal(data, &connect)
+	var connect_req websocket.Connect
+	err := json.Unmarshal(data, &connect_req)
 	if err != nil {
 		return
 	}
 
-	token := connect.Token
+	token := connect_req.Token
 	if token == "" {
 		return
 	}
@@ -25,38 +26,40 @@ func ConnectUser(ctx *websocket.Context) {
 	get_session := database.Session{
 		AccessToken: token,
 	}
+
 	ctx.Db.Where(&get_session).First(&get_session)
 
-	if get_session.Uuid == "" {
+	if get_session.ID == 0 {
 		return
 	}
 
 	get_user := database.Account{
 		ID: get_session.AccountID,
 	}
+
 	ctx.Db.Where(&get_user).First(&get_user)
 
 	if get_user.Uuid == "" {
 		return
 	}
 
-	user := websocket.User{
-		Uuid:     get_user.Uuid,
-		Avatar:   get_user.Avatar,
-		Username: get_user.Username,
+	user := response.User{
+		Uuid:      get_user.Uuid,
+		Avatar:    get_user.Avatar,
+		Username:  get_user.Username,
+		CreatedAt: get_user.CreatedAt.String(),
+		UpdatedAt: get_user.UpdatedAt.String(),
 	}
 
-	ctx.Ws.User = &user
+	ctx.Ws.User = &get_user
 	log.Println(fmt.Sprintf("%s joined", ctx.Ws.User.Username))
 
-	// user_obj_string, _ := json.Marshal(user)
-
-	ws_res := websocket.WS_Message{
+	ws_msg := websocket.WS_Message{
 		Event: "READY",
 		Data:  user,
 	}
 
-	ws_res_string, _ := json.Marshal(ws_res)
+	ws_res, _ := json.Marshal(ws_msg)
 
-	ctx.Send([]byte(ws_res_string))
+	ctx.Send(ws_res)
 }
