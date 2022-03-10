@@ -1,10 +1,5 @@
 # Chatapp
 
-
-## Docker
-```bash
-docker-compose up -d
-```
 ## Setup Server
 
 In server folder
@@ -47,6 +42,12 @@ go get -u github.com/gorilla/mux
 go get -u github.com/gorilla/websocket
 go get -u golang.org/x/crypto/bcrypt
 go get -u github.com/golang-jwt/jwt
+```
+
+## Setup Database
+### Postgres Databse Docker
+```bash
+docker-compose up -d
 ```
 
 ## Setup Web Client
