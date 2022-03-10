@@ -1,0 +1,97 @@
+.Chat {
+  position: absolute;
+  top:0;
+  bottom:0;
+  right: 0;
+  text-align: left;
+  color: aliceblue;
+  background-color: #23272a;
+  overflow:hidden;
+  width: 85%;
+  display: flex;
+  flex-direction: column;
+}
+
+.channel-header {
+  height: 5rem;
+  width: 100%;
+  background-color: #2c2f33;
+  display: flex;
+  flex-direction: row;
+}
+
+.channel-header img {
+  margin: 0.5rem;
+  height: 4rem;
+  width: 4rem;
+  border-radius: 50%;
+}
+
+.chat-message {
+  width: 98%;
+  height: 90%;
+  margin-left: 2rem;
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
+
+.chat-input {
+  position: absolute;
+  bottom:0;
+  width: 95%;
+  height: 2rem;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  background-color: #2c2f33;
+  color: #ffffff;
+  margin: 2rem;
+  display: flex;
+  flex-direction: row;
+}
+  
+#chat-text {
+  margin: 0.3rem;
+  width: 90%;
+  border: none;
+  background-color: #2c2f33;
+  color: #ffffff;
+  margin-left: 1rem;
+  font-size: large;
+}
+
+#chat-text:focus {
+  outline: none;
+}
+
+#chat-file {
+  height: 2rem;
+  width: 2rem;
+  text-align: center;
+  font-size: x-large;
+  background: none;
+  border: none;
+  border-radius: 50%;
+}
+
+#chat-file:hover {
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+#chat-emoji-picker {
+  position: absolute;
+  right: 0;
+  height: 2rem;
+  width: 2rem;
+  text-align: center;
+  font-size: x-large;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  margin-right: 1rem;
+}
+#chat-emoji-picker:hover {
+  opacity: 0.5;
+  cursor: pointer;
+}

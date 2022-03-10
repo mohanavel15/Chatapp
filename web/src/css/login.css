@@ -1,0 +1,48 @@
+.Login {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    justify-content: center;
+}
+
+.login-container {
+    margin: auto;
+    margin-top: 10rem;
+    height: 30rem;
+    width: 30rem;
+    background-color: #23272a;
+}
+
+.register-container {
+    margin: auto;
+    margin-top: 10rem;
+    height: 35rem;
+    width: 30rem;
+    background-color: #23272a;
+}
+
+#login-input{
+    width: 70%;
+    height: 3rem;
+    margin-bottom: 1rem;
+    border: none;
+    background-color: #2c2f33;
+    color: aliceblue;
+    font-size: larger;
+}
+
+#login-button {
+    width: 70%;
+    height: 3rem;
+    margin: 1rem;
+    border: none;
+    background-color: #7289da;
+    color: aliceblue;
+    font-size: larger;
+}
+#login-button:hover {
+    opacity: 0.5;
+    cursor: pointer;
+}
