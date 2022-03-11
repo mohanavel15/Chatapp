@@ -65,7 +65,6 @@ func CreateChannel(ctx *Context) {
 func GetChannels(ctx *Context) {
 	_, w, db, user := ctx.Req, ctx.Res, ctx.Db, ctx.User
 
-	var channel database.Channel
 	var members []database.Member
 
 	member := database.Member{
@@ -77,7 +76,10 @@ func GetChannels(ctx *Context) {
 	res_obj := []response.Channel{}
 
 	for _, member := range members {
-		db.Where("id = ?", member.ChannelID).First(&channel)
+		var channel = database.Channel{
+			ID: member.ChannelID,
+		}
+		db.Where(&channel).First(&channel)
 
 		res_channel := response.Channel{
 			Uuid:           channel.Uuid,
