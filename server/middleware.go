@@ -2,13 +2,15 @@ package main
 
 import (
 	"Chatapp/database"
+	"Chatapp/restapi"
+	"Chatapp/websocket"
 	"net/http"
 
 	"gorm.io/gorm"
 )
 
 type IDBFunction func(w http.ResponseWriter, r *http.Request, db *gorm.DB)
-type AuthFunction func(w http.ResponseWriter, r *http.Request, db *gorm.DB, user database.Account)
+type AuthFunction func(ctx *restapi.Context)
 
 func IncludeDB(function IDBFunction) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -42,6 +44,20 @@ func Authenticated(function AuthFunction) http.HandlerFunc {
 			return
 		}
 
-		function(w, r, db, account)
+		conns := websocket.Connections{
+			Queue:    queue,
+			Users:    onlineUsers,
+			Channels: channels,
+		}
+
+		ctx := restapi.Context{
+			Res:  w,
+			Req:  r,
+			Db:   db,
+			User: account,
+			Conn: &conns,
+		}
+
+		function(&ctx)
 	}
 }

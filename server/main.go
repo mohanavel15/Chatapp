@@ -93,7 +93,6 @@ func main() {
 	router.HandleFunc("/channels/{id}/invites", Authenticated(restapi.GetInvites)).Methods("GET")
 	router.HandleFunc("/channels/{id}/invites", Authenticated(restapi.CreateInvite)).Methods("POST")
 	router.HandleFunc("/channels/{id}/invites/{iid}", Authenticated(restapi.DeleteInvite)).Methods("DELETE")
-
 	// Users
 	router.HandleFunc("/users/@me", Authenticated(restapi.GetUser)).Methods("GET")
 	router.HandleFunc("/users/@me", Authenticated(restapi.EditUser)).Methods("PATCH")

@@ -10,10 +10,11 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
-	"gorm.io/gorm"
 )
 
-func GetMessages(w http.ResponseWriter, r *http.Request, db *gorm.DB, user database.Account) {
+func GetMessages(ctx *Context) {
+	r, w, db, user := ctx.Req, ctx.Res, ctx.Db, ctx.User
+
 	vars := mux.Vars(r)
 	channel_id := vars["id"]
 
@@ -82,7 +83,9 @@ func GetMessages(w http.ResponseWriter, r *http.Request, db *gorm.DB, user datab
 	w.Write(res)
 }
 
-func CreateMessage(w http.ResponseWriter, r *http.Request, db *gorm.DB, user database.Account) {
+func CreateMessage(ctx *Context) {
+	r, w, db, user := ctx.Req, ctx.Res, ctx.Db, ctx.User
+
 	vars := mux.Vars(r)
 	channel_id := vars["id"]
 
@@ -161,7 +164,9 @@ func CreateMessage(w http.ResponseWriter, r *http.Request, db *gorm.DB, user dat
 	w.Write(res)
 }
 
-func GetMessage(w http.ResponseWriter, r *http.Request, db *gorm.DB, user database.Account) {
+func GetMessage(ctx *Context) {
+	r, w, db, user := ctx.Req, ctx.Res, ctx.Db, ctx.User
+
 	vars := mux.Vars(r)
 	channel_id := vars["id"]
 	message_id := vars["mid"]
@@ -230,7 +235,9 @@ func GetMessage(w http.ResponseWriter, r *http.Request, db *gorm.DB, user databa
 	w.Write(res)
 }
 
-func EditMessage(w http.ResponseWriter, r *http.Request, db *gorm.DB, user database.Account) {
+func EditMessage(ctx *Context) {
+	r, w, db, user := ctx.Req, ctx.Res, ctx.Db, ctx.User
+
 	vars := mux.Vars(r)
 	channel_id := vars["id"]
 	message_id := vars["mid"]
@@ -317,7 +324,8 @@ func EditMessage(w http.ResponseWriter, r *http.Request, db *gorm.DB, user datab
 	w.Write(res)
 }
 
-func DeleteMessage(w http.ResponseWriter, r *http.Request, db *gorm.DB, user database.Account) {
+func DeleteMessage(ctx *Context) {
+	r, w, db, user := ctx.Req, ctx.Res, ctx.Db, ctx.User
 	vars := mux.Vars(r)
 	channel_id := vars["id"]
 	message_id := vars["mid"]

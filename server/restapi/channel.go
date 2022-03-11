@@ -10,10 +10,11 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
-	"gorm.io/gorm"
 )
 
-func CreateChannel(w http.ResponseWriter, r *http.Request, db *gorm.DB, user database.Account) {
+func CreateChannel(ctx *Context) {
+	r, w, db, user := ctx.Req, ctx.Res, ctx.Db, ctx.User
+
 	var request request.Channel
 	_ = json.NewDecoder(r.Body).Decode(&request)
 
@@ -61,7 +62,9 @@ func CreateChannel(w http.ResponseWriter, r *http.Request, db *gorm.DB, user dat
 	w.Write(res)
 }
 
-func GetChannels(w http.ResponseWriter, r *http.Request, db *gorm.DB, user database.Account) {
+func GetChannels(ctx *Context) {
+	_, w, db, user := ctx.Req, ctx.Res, ctx.Db, ctx.User
+
 	var channel database.Channel
 	var members []database.Member
 
@@ -99,7 +102,8 @@ func GetChannels(w http.ResponseWriter, r *http.Request, db *gorm.DB, user datab
 	w.Write(res)
 }
 
-func GetChannel(w http.ResponseWriter, r *http.Request, db *gorm.DB, user database.Account) {
+func GetChannel(ctx *Context) {
+	r, w, db, user := ctx.Req, ctx.Res, ctx.Db, ctx.User
 	url_vars := mux.Vars(r)
 	channel_id := url_vars["id"]
 
@@ -139,7 +143,9 @@ func GetChannel(w http.ResponseWriter, r *http.Request, db *gorm.DB, user databa
 	w.Write(res)
 }
 
-func EditChannel(w http.ResponseWriter, r *http.Request, db *gorm.DB, user database.Account) {
+func EditChannel(ctx *Context) {
+	r, w, db, user := ctx.Req, ctx.Res, ctx.Db, ctx.User
+
 	url_vars := mux.Vars(r)
 	channel_id := url_vars["id"]
 
@@ -193,7 +199,9 @@ func EditChannel(w http.ResponseWriter, r *http.Request, db *gorm.DB, user datab
 
 }
 
-func DeleteChannel(w http.ResponseWriter, r *http.Request, db *gorm.DB, user database.Account) {
+func DeleteChannel(ctx *Context) {
+	r, w, db, user := ctx.Req, ctx.Res, ctx.Db, ctx.User
+
 	url_vars := mux.Vars(r)
 	channel_id := url_vars["id"]
 

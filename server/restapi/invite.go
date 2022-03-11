@@ -9,10 +9,11 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
-	"gorm.io/gorm"
 )
 
-func JoinInvite(w http.ResponseWriter, r *http.Request, db *gorm.DB, user database.Account) {
+func JoinInvite(ctx *Context) {
+	r, w, db, user := ctx.Req, ctx.Res, ctx.Db, ctx.User
+
 	vars := mux.Vars(r)
 	invite_code := vars["id"]
 
@@ -43,7 +44,9 @@ func JoinInvite(w http.ResponseWriter, r *http.Request, db *gorm.DB, user databa
 	db.Create(&members)
 }
 
-func GetInvites(w http.ResponseWriter, r *http.Request, db *gorm.DB, user database.Account) {
+func GetInvites(ctx *Context) {
+	r, w, db, user := ctx.Req, ctx.Res, ctx.Db, ctx.User
+
 	vars := mux.Vars(r)
 	channel_id := vars["id"]
 
@@ -87,7 +90,9 @@ func GetInvites(w http.ResponseWriter, r *http.Request, db *gorm.DB, user databa
 	w.Write(res)
 }
 
-func CreateInvite(w http.ResponseWriter, r *http.Request, db *gorm.DB, user database.Account) {
+func CreateInvite(ctx *Context) {
+	r, w, db, user := ctx.Req, ctx.Res, ctx.Db, ctx.User
+
 	vars := mux.Vars(r)
 	channel_id := vars["id"]
 
@@ -125,7 +130,9 @@ func CreateInvite(w http.ResponseWriter, r *http.Request, db *gorm.DB, user data
 	w.Write(res)
 }
 
-func DeleteInvite(w http.ResponseWriter, r *http.Request, db *gorm.DB, user database.Account) {
+func DeleteInvite(ctx *Context) {
+	r, w, db, user := ctx.Req, ctx.Res, ctx.Db, ctx.User
+
 	vars := mux.Vars(r)
 	channel_id := vars["id"]
 	invite_code := vars["iid"]

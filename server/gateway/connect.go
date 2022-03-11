@@ -54,12 +54,19 @@ func Connect(ctx *websocket.Context) {
 	ctx.Ws.User = &get_user
 	log.Println(fmt.Sprintf("%s joined", ctx.Ws.User.Username))
 
+	ctx.Ws.Conns.Users[get_user.Uuid] = ctx.Ws
+
+	var channels []database.Channel
+	ctx.Db.Where("account_id = ?", get_user.ID).Find(&channels)
+	for _, channel := range channels {
+		ctx.Ws.Conns.Channels[channel.Uuid] = append(ctx.Ws.Conns.Channels[channel.Uuid], ctx.Ws)
+	}
+
 	ws_msg := websocket.WS_Message{
 		Event: "READY",
 		Data:  user,
 	}
 
 	ws_res, _ := json.Marshal(ws_msg)
-
 	ctx.Send(ws_res)
 }

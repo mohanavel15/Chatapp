@@ -1,16 +1,15 @@
 package restapi
 
 import (
-	"Chatapp/database"
 	"Chatapp/request"
 	"Chatapp/response"
 	"encoding/json"
 	"net/http"
-
-	"gorm.io/gorm"
 )
 
-func GetUser(w http.ResponseWriter, r *http.Request, db *gorm.DB, user database.Account) {
+func GetUser(ctx *Context) {
+	_, w, _, user := ctx.Req, ctx.Res, ctx.Db, ctx.User
+
 	user_res := response.User{
 		Uuid:      user.Uuid,
 		Username:  user.Username,
@@ -29,7 +28,9 @@ func GetUser(w http.ResponseWriter, r *http.Request, db *gorm.DB, user database.
 	w.Write(res)
 }
 
-func EditUser(w http.ResponseWriter, r *http.Request, db *gorm.DB, user database.Account) {
+func EditUser(ctx *Context) {
+	r, w, db, user := ctx.Req, ctx.Res, ctx.Db, ctx.User
+
 	var request request.User
 	_ = json.NewDecoder(r.Body).Decode(&request)
 

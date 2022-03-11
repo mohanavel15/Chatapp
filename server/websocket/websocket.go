@@ -85,6 +85,7 @@ func (ws *Ws) HandleQueue() {
 				case "MESSAGE_DELETE":
 					BroadcastMessage(ws, *ws_message)
 				}
+				ws.Conns.Queue = ws.Conns.Queue[1:]
 			}
 		}
 		time.Sleep(time.Millisecond)
