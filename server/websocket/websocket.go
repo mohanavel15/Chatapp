@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"Chatapp/database"
 
@@ -18,6 +19,7 @@ type Ws struct {
 	Handler *EventHandler
 	Db      *gorm.DB
 	User    *database.Account
+	Conns   *Connections
 }
 
 func (ws *Ws) Write(data []byte) error {
@@ -68,6 +70,24 @@ func (ws *Ws) HandleWSMessage(data []byte) {
 		}
 	} else {
 		ws.Handler.Handle(ctx)
+	}
+}
+
+func (ws *Ws) HandleQueue() {
+	for {
+		if len(ws.Conns.Queue) > 0 {
+			for _, ws_message := range ws.Conns.Queue {
+				switch ws_message.Event {
+				case "MESSAGE_CREATE":
+					BroadcastMessage(ws, *ws_message)
+				case "MESSAGE_MODIFY":
+					BroadcastMessage(ws, *ws_message)
+				case "MESSAGE_DELETE":
+					BroadcastMessage(ws, *ws_message)
+				}
+			}
+		}
+		time.Sleep(time.Millisecond)
 	}
 }
 

@@ -87,12 +87,7 @@ func MessageCreate(ctx *websocket.Context) {
 		Data:  message_res,
 	}
 
-	ws_msg_json, err := json.Marshal(ws_msg)
-	if err != nil {
-		return
-	}
-
-	ctx.Send(ws_msg_json)
+	ctx.Broadcast(ws_msg)
 }
 
 func MessageModify(ctx *websocket.Context) {
@@ -176,12 +171,7 @@ func MessageModify(ctx *websocket.Context) {
 		Data:  message_res,
 	}
 
-	ws_msg_json, err := json.Marshal(ws_msg)
-	if err != nil {
-		return
-	}
-
-	ctx.Send(ws_msg_json)
+	ctx.Broadcast(ws_msg)
 }
 
 func MessageDelete(ctx *websocket.Context) {
@@ -243,6 +233,5 @@ func MessageDelete(ctx *websocket.Context) {
 		Data:  response,
 	}
 
-	ws_msg_json, _ := json.Marshal(ws_msg)
-	ctx.Send(ws_msg_json)
+	ctx.Broadcast(ws_msg)
 }

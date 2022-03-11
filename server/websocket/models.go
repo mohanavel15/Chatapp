@@ -22,3 +22,9 @@ type MessageEdit struct {
 	Uuid    string `json:"uuid"`
 	Content string `json:"content"`
 }
+
+type Connections struct {
+	Queue    []*WS_Message
+	Users    map[string]*Ws
+	Channels map[string][]*Ws
+}

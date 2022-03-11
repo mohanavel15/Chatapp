@@ -23,11 +23,20 @@ func Gateway(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
+
+	conns := ws.Connections{
+		Queue:    queue,
+		Users:    onlineUsers,
+		Channels: channels,
+	}
+
 	ws := &ws.Ws{
 		Uuid:    uuid.New().String(),
 		Conn:    conn,
 		Handler: handler,
 		Db:      db,
+		Conns:   &conns,
 	}
 	go ws.ReadLoop()
+	go ws.HandleQueue()
 }

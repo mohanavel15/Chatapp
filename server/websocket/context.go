@@ -12,3 +12,5 @@ type Context struct {
 func (ctx *Context) Send(data []byte) error {
 	return ctx.Ws.Write(data)
 }
+
+func (ctx *Context) Broadcast(ws_msg WS_Message) {}
