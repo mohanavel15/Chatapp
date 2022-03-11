@@ -13,7 +13,7 @@ const gateway = new W3CWebSocket('ws://127.0.0.1:5000/ws');
 
 function Channel() {
 	const parameter  = useParams<string>();
-	const channel_id = parameter.channel_id || "";
+	const currentChannel = parameter.channel_id || "";
 
 	const [messages, setMessages] = useState<MessageOBJ[]>([
 		{
@@ -34,9 +34,9 @@ function Channel() {
 
 
 
-	const [channels, setChannels] = useState<Map<string, string>>(undefined!);
+	//const [channels, setChannels] = useState<Map<string, string>>(undefined!);
 
-	const currentChannel = channels.get(channel_id) || "";
+	//const currentChannel = channels.get(channel_id) || "";
 
 	const state_context: StateContext = useContext(ChannelContext);
   

@@ -40,6 +40,7 @@ go get -u gorm.io/driver/postgres
 go get -u github.com/google/uuid
 go get -u github.com/gorilla/mux
 go get -u github.com/gorilla/websocket
+go get -u github.com/gorilla/handlers
 go get -u golang.org/x/crypto/bcrypt
 go get -u github.com/golang-jwt/jwt
 ```

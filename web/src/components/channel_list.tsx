@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 
 interface ChannelHeaderProps {
     id: string;
+    icon: string;
+    name: string;
 }
 
 export default function ChannelList(props: ChannelHeaderProps) {
@@ -10,8 +12,8 @@ export default function ChannelList(props: ChannelHeaderProps) {
         <Link to={`/channels/${props.id}`} >
             <div className='channel_list'>
                 <div className='channel_name'>
-                    <img className='channel_avatar' src="/assets/default_avatar.jpeg" alt="Avatar" />
-                    <p>{props.id}</p>
+                    <img className='channel_avatar' src={props.icon} alt="Avatar" />
+                    <p>{props.name}</p>
                 </div>
             </div>
         </Link>

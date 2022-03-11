@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -73,6 +74,10 @@ func main() {
 	handler.Add("MESSAGE_DELETE", gateway.MessageDelete)
 
 	router := mux.NewRouter()
+	headers := handlers.AllowedHeaders([]string{"Content-Type", "Authorization"})
+	methods := handlers.AllowedMethods([]string{"GET", "POST", "PATCH", "DELETE"})
+	origins := handlers.AllowedOrigins([]string{"*"})
+
 	// Auth
 	router.HandleFunc("/signup", IncludeDB(restapi.Register)).Methods("POST")
 	router.HandleFunc("/signin", IncludeDB(restapi.Login)).Methods("POST")
@@ -110,5 +115,5 @@ func main() {
 
 	server_uri := fmt.Sprintf("%s:%s", HOST, PORT)
 	log.Println(fmt.Sprintf("Listening on %s", server_uri))
-	http.ListenAndServe(server_uri, router)
+	http.ListenAndServe(server_uri, handlers.CORS(headers, methods, origins)(router))
 }
