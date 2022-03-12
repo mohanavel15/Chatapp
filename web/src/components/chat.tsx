@@ -1,10 +1,10 @@
 import Picker, { IEmojiData } from 'emoji-picker-react';
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import Message from './message';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCirclePlus, faFaceLaugh } from '@fortawesome/free-solid-svg-icons'
 import ChannelHeader from './channel_header';
-import { MessageOBJ, ChannelOBJ } from '../models/models';
+import { MessageOBJ, ChannelOBJ, Msg_request } from '../models/models';
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 
 function Chat({ channel }: { channel: ChannelOBJ }) {
@@ -16,6 +16,7 @@ function Chat({ channel }: { channel: ChannelOBJ }) {
 
     const [Input_message, setInput_message] = useState('');
     const [showPicker, setShowPicker] = useState(false);
+	const [message_jsx, setMessage_jsx] = useState<JSX.Element[]>([]);
    
     const onEmojiClick = (_: React.MouseEvent<Element, MouseEvent>, data: IEmojiData) => {
 		setInput_message(prevInput => prevInput + data.emoji);
@@ -32,18 +33,35 @@ function Chat({ channel }: { channel: ChannelOBJ }) {
     function updateChat(event: React.KeyboardEvent<HTMLInputElement>) {
 		if (event.key === 'Enter') {
 			event.preventDefault();
+			console.log(Input_message)
+			if (Input_message.length > 0) {
+				const message: Msg_request = {
+					channel: channel.uuid,
+					content: Input_message
+				};
+				channel_context.gateway.send(
+					JSON.stringify({
+						event: "MESSAGE_CREATE",
+						data: message
+					})
+				);
+			}
+			setInput_message('');
 		}
     }
 
-	const new_msgs = channel_context.messages.map(message => 
-		<>{ message.channel.uuid === channel.uuid && <Message key={message.uuid} avatar={message.author.avatar} name={message.author.username} message={message.content} /> }</>
-	);
+	useEffect(() => {
+		console.log(":Thinking:");
+		channel_context.messages.forEach(message => 
+			setMessage_jsx(prevMessage =>  [...prevMessage, <>{ message.channel.uuid === channel.uuid && <Message key={message.uuid} avatar={message.author.avatar} name={message.author.username} message={message.content} /> }</>])
+		);
+	}, [channel_context.messages]);
 
     return (
         <div className="Chat">
 			<ChannelHeader name={channel.name} icon={channel.icon} />
 				<div className="chat-message">
-					{new_msgs}
+					{message_jsx}
 				</div>
 			<div className="chat-input">
 				<button id="chat-file">

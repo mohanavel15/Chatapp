@@ -56,9 +56,13 @@ func Connect(ctx *websocket.Context) {
 
 	ctx.Ws.Conns.Users[get_user.Uuid] = ctx.Ws
 
-	var channels []database.Channel
-	ctx.Db.Where("account_id = ?", get_user.ID).Find(&channels)
-	for _, channel := range channels {
+	var member_of []database.Member
+	ctx.Db.Where("account_id = ?", get_user.ID).Find(&member_of)
+	for _, channel_id := range member_of {
+		channel := database.Channel{
+			ID: channel_id.ChannelID,
+		}
+		ctx.Db.Where(&channel).First(&channel)
 		ctx.Ws.Conns.Channels[channel.Uuid] = append(ctx.Ws.Conns.Channels[channel.Uuid], ctx.Ws)
 	}
 

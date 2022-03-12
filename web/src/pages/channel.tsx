@@ -24,7 +24,6 @@ function Channel() {
 			if (typeof data === "string") {
 			const payload = JSON.parse(data);
 				if (payload.event === 'READY') {
-
 					localStorage.setItem('profile-uuid', payload.data.uuid);
 					localStorage.setItem('profile-username', payload.data.username);
 					localStorage.setItem('profile-avatar', payload.data.avatar);
@@ -33,6 +32,13 @@ function Channel() {
 				if (payload.event === 'INVAILD_SESSION') {
 					localStorage.removeItem('access_token');
 					window.location.href = '/';
+				}
+
+				if (payload.event === 'MESSAGE_CREATE') {
+					const message: MessageOBJ = payload.data;
+					channel_context.messages.push(message);
+					console.log("Printing messages");
+					console.log(channel_context.messages);
 				}
 			}
 		};
@@ -62,7 +68,7 @@ function Channel() {
 
 	let currentChannel = channel_context.channels.get(channel_id);
 	if (!currentChannel) {
-		currentChannel = { uuid: "@me", name: "@me",icon: "" }
+		currentChannel = { uuid: "@me", name: "@me",icon: "", created_at: "", updated_at: ""};
 	}
 
 	return (
