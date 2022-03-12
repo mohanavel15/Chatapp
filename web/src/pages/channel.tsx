@@ -1,66 +1,49 @@
 import SideBar from "../components/sidebar";
 import Chat from "../components/chat";
 import { useParams } from "react-router-dom";
-import React, { useState, useEffect, useContext } from "react";
-import { w3cwebsocket as W3CWebSocket, IMessageEvent } from "websocket";
-import ChannelHome from "../components/channel_home";
-import { ChannelContext, StateContext } from "../contexts/states";
+import React, { useState, useContext, useEffect } from "react";
+import { StatesContext, StateContext } from "../contexts/states";
+import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 import Settings from "./settings"; 
-import { MessageOBJ } from "../models/models";
-import { channel } from "diagnostics_channel";
+import { MessageOBJ, ChannelOBJ } from "../models/models";
+import { IMessageEvent } from "websocket";
+import axios from "axios";
 
-const gateway = new W3CWebSocket('ws://127.0.0.1:5000/ws');
 
 function Channel() {
 	const parameter  = useParams<string>();
-	const currentChannel = parameter.channel_id || "";
+	let channel_id = parameter.id || "@me";
 
-	const [messages, setMessages] = useState<MessageOBJ[]>([
-		{
-			uuid:    "12345",
-			content: "Hello, World!",
-			author: {
-				uuid:     "12345",
-				avatar:   "",
-				username: "Test User",
-			},
-			channel: {
-				uuid: "12345",
-				name: "Test Channel",
-				icon: "",
-			},
-		},	
-	]);
+	const state_context: StateContext = useContext(StatesContext);
+	const channel_context: ChannelContext = useContext(ChannelsContext);
 
-
-
-	//const [channels, setChannels] = useState<Map<string, string>>(undefined!);
-
-	//const currentChannel = channels.get(channel_id) || "";
-
-	const state_context: StateContext = useContext(ChannelContext);
-  
 	useEffect(() => {
 		const onMessage = (message: IMessageEvent) => {
-			console.log(message)
-			/*const payload = JSON.parse(message.data);
-			console.log(payload)
-			if (payload.event === 'READY') {
-				localStorage.setItem('profile-uuid', payload.data.uuid);
-				localStorage.setItem('profile-username', payload.data.username);
-				localStorage.setItem('profile-avatar', payload.data.avatar);
-			}*/
+			console.log(message);
+			const data = message.data;
+			if (typeof data === "string") {
+			const payload = JSON.parse(data);
+				if (payload.event === 'READY') {
+
+					localStorage.setItem('profile-uuid', payload.data.uuid);
+					localStorage.setItem('profile-username', payload.data.username);
+					localStorage.setItem('profile-avatar', payload.data.avatar);
+				}
+
+				if (payload.event === 'INVAILD_SESSION') {
+					localStorage.removeItem('access_token');
+					window.location.href = '/';
+				}
+			}
 		};
 	
 		const onOpen = () => {
-			console.log("Connected to server");
-			gateway.send(
-			JSON.stringify({
-				event: "CONNECT",
-				data: {
-				token: localStorage.getItem("access_token"),
-				}
-			})
+			console.log("Connecting to the server");
+			channel_context.gateway.send(
+				JSON.stringify({
+					event: "CONNECT",
+					data: { token: localStorage.getItem("access_token") }
+				})
 			);
 		};
 	
@@ -68,19 +51,24 @@ function Channel() {
 			console.log("Disconnected from server");
 		};
 	
-		gateway.onopen = onOpen;
-		gateway.onclose = onClose;
-	  	gateway.onmessage = onMessage;
+		channel_context.gateway.onopen = onOpen;
+		channel_context.gateway.onclose = onClose;
+	  	channel_context.gateway.onmessage = onMessage;
   
 		return () => {
-			gateway.close();
+			channel_context.gateway.close();
 		};
 	}, []);
-  
+
+	let currentChannel = channel_context.channels.get(channel_id);
+	if (!currentChannel) {
+		currentChannel = { uuid: "@me", name: "@me",icon: "" }
+	}
+
 	return (
 		<div className="Channel">
-		  	{ !state_context.Settings && <><SideBar /><Chat messages={messages} channel_id={currentChannel} /></> }
-		  	{ state_context.Settings && <Settings /> }
+			{ !state_context.Settings && <><SideBar /><Chat channel={currentChannel} /></> }
+			{ state_context.Settings && <Settings /> }
 		</div>
 	);
 }

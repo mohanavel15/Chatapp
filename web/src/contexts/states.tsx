@@ -9,7 +9,7 @@ export interface StateContext {
     setSettings: (settings: boolean) => void;
 }
 
-export const ChannelContext = createContext<StateContext>(undefined!);
+export const StatesContext = createContext<StateContext>(undefined!);
 
 export function States({ children }: {children: React.ReactChild}) {
     const [Mute, setMute] = useState(false)
@@ -25,10 +25,9 @@ export function States({ children }: {children: React.ReactChild}) {
         setSettings: setSettings
     }
 
-
     return (
-        <ChannelContext.Provider value={context_value} >
+        <StatesContext.Provider value={context_value} >
             {children}
-        </ChannelContext.Provider>
+        </StatesContext.Provider>
     )
 }

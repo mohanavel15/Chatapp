@@ -2,21 +2,17 @@
 export interface MessageOBJ {
     uuid: string
     content: string
-    author: {
-        uuid: string
-        avatar: string
-        username: string
-    };
-    channel: Channel
+    author: UserOBJ
+    channel: ChannelOBJ
 }
 
-export interface Channel {
+export interface ChannelOBJ {
     uuid: string
     name: string
     icon: string
 }
 
-export interface User {
+export interface UserOBJ {
     uuid: string
     username: string
     avatar: string

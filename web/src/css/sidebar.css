@@ -70,7 +70,7 @@
     width: 100%;
     background-color: #202020;
 }
-
+/*
 .profile-bar img {
     position: relative;
     margin: 0.5rem;
@@ -79,6 +79,7 @@
     border-radius: 50%;
     background-color: #ffffff;
 }
+*/
 
 .profile-bar h3 {
     position: relative;
@@ -157,4 +158,8 @@
 #STB_Button:active {
     cursor: pointer;
     opacity: 1.0;
+}
+
+.linktag {
+    text-decoration:none;
 }

@@ -1,3 +1,4 @@
+import { useEffect, useContext } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Channel from "./pages/channel";
 import Login from "./pages/login";
@@ -10,23 +11,28 @@ import './css/chat.css';
 import './css/login.css';
 import './css/message.css';
 import './css/sidebar.css';
+import { w3cwebsocket as W3CWebSocket, IMessageEvent } from "websocket";
+import ChannelCTX from "./contexts/channelctx";
 
+const gateway = new W3CWebSocket('ws://127.0.0.1:5000/ws');
 function App() {
-  return (
-    <div className="App">
-      	<BrowserRouter>
-			<Routes>
-			<Route path="/">
-				<Route index element={<Home />} />
-				<Route path="channels/:id" element={<States><Channel /></States>} />
-				<Route path="login" element={<Login />} />
-				<Route path="register" element={<Register />} />
-				<Route path="*" element={<NoPage />} />
-			</Route>
-			</Routes>
-		</BrowserRouter>
-    </div>
-  );
+  	return (
+		<div className="App">
+			<ChannelCTX gateway={gateway}>
+				<BrowserRouter>
+					<Routes>
+						<Route path="/">
+							<Route index element={<Home />} />
+							<Route path="channels/:id" element={<States><Channel /></States>} />
+							<Route path="login" element={<Login />} />
+							<Route path="register" element={<Register />} />
+							<Route path="*" element={<NoPage />} />
+						</Route>
+					</Routes>
+				</BrowserRouter>
+			</ChannelCTX>
+		</div>
+  	);
 }
 
 export default App;

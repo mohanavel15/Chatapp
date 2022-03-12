@@ -1,26 +1,22 @@
 import Picker, { IEmojiData } from 'emoji-picker-react';
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import Message from './message';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCirclePlus, faFaceLaugh } from '@fortawesome/free-solid-svg-icons'
 import ChannelHeader from './channel_header';
-import { MessageOBJ } from '../models/models';
+import { MessageOBJ, ChannelOBJ } from '../models/models';
+import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 
-interface ChatProps {
-	channel_id: string;
-	messages: MessageOBJ[];
-}
-
-
-function Chat(props: ChatProps) {
+function Chat({ channel }: { channel: ChannelOBJ }) {
     // Emoji picker https://www.cluemediator.com/how-to-add-emoji-picker-in-the-react
-    const messages = props.messages;
-	const channel_id = props.channel_id;
+    //const messages = props.messages;
+	//const channel = props.channel;
+
+	const channel_context: ChannelContext = useContext(ChannelsContext);
 
     const [Input_message, setInput_message] = useState('');
     const [showPicker, setShowPicker] = useState(false);
    
-    
     const onEmojiClick = (_: React.MouseEvent<Element, MouseEvent>, data: IEmojiData) => {
 		setInput_message(prevInput => prevInput + data.emoji);
 		setShowPicker(false);
@@ -39,15 +35,13 @@ function Chat(props: ChatProps) {
 		}
     }
 
-	const new_msgs = messages.map(message => 
-		<>{ message.channel.uuid === channel_id && <Message key={message.uuid} avatar={message.author.avatar} name={message.author.username} message={message.content} /> }</>
+	const new_msgs = channel_context.messages.map(message => 
+		<>{ message.channel.uuid === channel.uuid && <Message key={message.uuid} avatar={message.author.avatar} name={message.author.username} message={message.content} /> }</>
 	);
-
-	console.log(new_msgs);
 
     return (
         <div className="Chat">
-			<ChannelHeader id={props.channel_id} />
+			<ChannelHeader name={channel.name} icon={channel.icon} />
 				<div className="chat-message">
 					{new_msgs}
 				</div>

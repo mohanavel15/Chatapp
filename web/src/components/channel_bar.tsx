@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import ChannelList from './channel_list'
 import axios from 'axios'
-import { Channel } from '../models/models'
+import { ChannelOBJ } from '../models/models'
 
 export default function ChannelBar() {
 
-	let [channels, setChannels] = useState<Channel[]>([])
+	let [channels, setChannels] = useState<ChannelOBJ[]>([])
 
   	useEffect(() => {
-		axios.get<Channel[]>('http://127.0.0.1:5000/users/@me/channels', {
+		axios.get<ChannelOBJ[]>('http://127.0.0.1:5000/users/@me/channels', {
 			headers: {
 				Authorization: localStorage.getItem("access_token") || ""
 			}
@@ -17,14 +17,11 @@ export default function ChannelBar() {
 			res.data.forEach(channel => {
 				setChannels(prevChannels => [...prevChannels, channel])
 			})
-			//channels = res.data.map(channel => 
-			//	<ChannelList id={channel.uuid} icon={channel.icon} name={channel.name} />
-			//)
 		})
     }, [])
 
 	const channels_element = channels.map(channel =>
-		<ChannelList id={channel.uuid} icon={channel.icon} name={channel.name} />
+		<ChannelList key={channel.uuid} id={channel.uuid} icon={channel.icon} name={channel.name} />
 	)
 
 	return (

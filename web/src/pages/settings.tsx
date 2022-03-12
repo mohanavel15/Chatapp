@@ -1,9 +1,9 @@
 import React from 'react'
 import { useContext } from 'react';
-import { ChannelContext, StateContext } from "../contexts/states";
+import { StatesContext, StateContext } from "../contexts/states";
 
 function Settings() {
-    const state_context: StateContext = useContext(ChannelContext);
+    const state_context: StateContext = useContext(StatesContext);
 
     return (
         <>

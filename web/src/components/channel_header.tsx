@@ -1,14 +1,13 @@
-
-
 interface ChannelHeaderProps {
-    id: string;
+    name: string;
+    icon: string;
 }
 
 function ChannelHeader(props: ChannelHeaderProps) {
     return (
         <div className='channel-header'>
-            <img className='channel-avatar' src="/assets/default_avatar.jpeg" alt="Avatar" />
-            <h2>{props.id}</h2>
+            <img className='channel-avatar' src={props.icon} alt="Avatar" />
+            <h2>{props.name}</h2>
         </div>
     )
 }
