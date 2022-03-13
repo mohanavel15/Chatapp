@@ -36,7 +36,7 @@ function Channel() {
 
 				if (payload.event === 'MESSAGE_CREATE') {
 					const message: MessageOBJ = payload.data;
-					channel_context.messages.push(message);
+					channel_context.setMessages(prevMessages => [...prevMessages, message]);
 					console.log("Printing messages");
 					console.log(channel_context.messages);
 				}

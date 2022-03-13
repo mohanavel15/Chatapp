@@ -5,9 +5,9 @@ import axios from 'axios'
 
 export interface ChannelContext {
 	channels: Map<String,ChannelOBJ>;
-	setChannels: (channels: Map<String,ChannelOBJ>) => void;
+	setChannels: React.Dispatch<React.SetStateAction<Map<String, ChannelOBJ>>>
 	messages: MessageOBJ[];
-	setMessages: (message: MessageOBJ[]) => void;
+	setMessages: React.Dispatch<React.SetStateAction<MessageOBJ[]>>
 	gateway: W3CWebSocket;
 }
 

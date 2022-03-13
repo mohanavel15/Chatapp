@@ -9,9 +9,6 @@ import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 
 function Chat({ channel }: { channel: ChannelOBJ }) {
     // Emoji picker https://www.cluemediator.com/how-to-add-emoji-picker-in-the-react
-    //const messages = props.messages;
-	//const channel = props.channel;
-
 	const channel_context: ChannelContext = useContext(ChannelsContext);
 
     const [Input_message, setInput_message] = useState('');
@@ -28,34 +25,38 @@ function Chat({ channel }: { channel: ChannelOBJ }) {
 		const inputstr = event.target.value;
 		if (inputstr.length <= 150) {
 			setInput_message(inputstr);
+		} else {
+			alert("Message too long");
 		}
     }
     function updateChat(event: React.KeyboardEvent<HTMLInputElement>) {
 		if (event.key === 'Enter') {
 			event.preventDefault();
 			console.log(Input_message)
-			if (Input_message.length > 0) {
-				const message: Msg_request = {
-					channel: channel.uuid,
-					content: Input_message
-				};
-				channel_context.gateway.send(
-					JSON.stringify({
-						event: "MESSAGE_CREATE",
-						data: message
-					})
-				);
+			if (channel.uuid !== "@me") {
+				if (Input_message.length > 0) {
+					const message: Msg_request = {
+						channel: channel.uuid,
+						content: Input_message
+					};
+					channel_context.gateway.send(
+						JSON.stringify({
+							event: "MESSAGE_CREATE",
+							data: message
+						})
+					);
+				}
 			}
 			setInput_message('');
 		}
     }
-
+	
 	useEffect(() => {
-		console.log(":Thinking:");
+		setMessage_jsx([])
 		channel_context.messages.forEach(message => 
 			setMessage_jsx(prevMessage =>  [...prevMessage, <>{ message.channel.uuid === channel.uuid && <Message key={message.uuid} avatar={message.author.avatar} name={message.author.username} message={message.content} /> }</>])
 		);
-	}, [channel_context.messages]);
+	}, [channel_context.messages, channel]);
 
     return (
         <div className="Chat">
