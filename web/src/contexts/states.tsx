@@ -4,9 +4,9 @@ export interface StateContext {
     Mute: boolean;
     Deafen: boolean;
     Settings: boolean;
-    setMute: (mute: boolean) => void;
-    setDeafen: (deafen: boolean) => void;
-    setSettings: (settings: boolean) => void;
+    setMute: React.Dispatch<React.SetStateAction<boolean>>;
+    setDeafen: React.Dispatch<React.SetStateAction<boolean>>;
+    setSettings: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const StatesContext = createContext<StateContext>(undefined!);

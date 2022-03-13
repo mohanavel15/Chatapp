@@ -42,6 +42,25 @@ func JoinInvite(ctx *Context) {
 		UpdatedAt: time.Now(),
 	}
 	db.Create(&members)
+
+	res := response.Channel{
+		Uuid:           channel.Uuid,
+		Name:           channel.Name,
+		OwnerID:        channel.Owner,
+		Icon:           channel.Icon,
+		PrivateChannel: channel.PrivateChannel,
+		CreatedAt:      channel.CreatedAt.String(),
+		UpdatedAt:      channel.UpdatedAt.String(),
+	}
+
+	res_obj, err := json.Marshal(res)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(res_obj)
 }
 
 func GetInvites(ctx *Context) {
