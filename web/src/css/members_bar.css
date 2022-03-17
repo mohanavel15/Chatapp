@@ -1,0 +1,5 @@
+.member_bar {
+    display: flex;
+    background-color: black;
+    width: 16rem;
+}

@@ -15,6 +15,9 @@ body {
 }
 
 .Channel {
+  position: absolute;
   display: flex;
-  height: max-content;
+  flex-direction: row;
+  height: 100%;
+  width: 100%;
 }

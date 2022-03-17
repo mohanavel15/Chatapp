@@ -11,6 +11,7 @@ import './css/chat.css';
 import './css/login.css';
 import './css/message.css';
 import './css/sidebar.css';
+import './css/members_bar.css';
 import { w3cwebsocket as W3CWebSocket, IMessageEvent } from "websocket";
 import ChannelCTX from "./contexts/channelctx";
 

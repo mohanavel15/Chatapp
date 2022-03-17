@@ -8,8 +8,7 @@ import Settings from "./settings";
 import { MessageOBJ, ChannelOBJ } from "../models/models";
 import { IMessageEvent } from "websocket";
 import axios from "axios";
-
-
+import MembersBar from "../components/members_bar";
 function Channel() {
 	const parameter  = useParams<string>();
 	let channel_id = parameter.id || "@me";
@@ -73,7 +72,7 @@ function Channel() {
 
 	return (
 		<div className="Channel">
-			{ !state_context.Settings && <><SideBar /><Chat channel={currentChannel} /></> }
+			{ !state_context.Settings && <><SideBar /><Chat channel={currentChannel} /> <MembersBar /> </> }
 			{ state_context.Settings && <Settings /> }
 		</div>
 	);
