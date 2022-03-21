@@ -8,17 +8,19 @@ export default function ChannelBar() {
 	let [channels_element, setChannels_element] = useState<JSX.Element[]>([])
 	const channel_context: ChannelContext = useContext(ChannelsContext);
 
+	const [reload, setReload] = useState(false)
+
 	useEffect(() => {
 		setChannels_element([])
 		const channels =  Array.from(channel_context.channels.values())
-		console.log("In useEffect channels: ", channels)
 		channels.forEach(channel => {
 			setChannels_element(prevElement => [...prevElement, <ChannelList key={channel.uuid} id={channel.uuid} icon={channel.icon} name={channel.name} />])
 		})
-	}, [channel_context.channels])
+	}, [channel_context.channels, reload])
 
 	return (
 		<div className='ChannelBar'>
+			<button onClick={() => { setReload(!reload) }}>Reload</button>
 			{channels_element}
 		</div>
 	)

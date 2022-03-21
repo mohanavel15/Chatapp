@@ -1,5 +1,32 @@
 .member_bar {
     display: flex;
-    background-color: black;
+    flex-direction: column;
+    background-color: #202020;
     width: 16rem;
+}
+
+.member {
+    display: flex;
+    flex-direction: row;
+    margin: 0.5rem;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.member:hover {
+    cursor: pointer;
+    opacity: 0.8;
+    background-color: #ffffff27;
+    border-radius: 5px;
+}
+
+.member img {
+    position: relative;
+    margin: 0.5rem;
+    height: 2rem;
+    width: 2rem;
+    border-radius: 50%;
+    background-color: #ffffff;
+    margin-right: 1rem;
 }
