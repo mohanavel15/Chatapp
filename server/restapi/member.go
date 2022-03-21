@@ -81,7 +81,7 @@ func GetMember(ctx *Context) {
 	}
 
 	var member database.Account
-	db.Where("uuid = ?", member_id).First(&user)
+	db.Where("uuid = ?", member_id).First(&member)
 	if user.ID == 0 {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -148,6 +148,11 @@ func DeleteMember(ctx *Context) {
 	}
 
 	if user.Uuid != channel.Owner {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
+	if user.Uuid == member.Uuid {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
