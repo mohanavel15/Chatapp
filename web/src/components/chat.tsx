@@ -1,5 +1,5 @@
 import Picker, { IEmojiData } from 'emoji-picker-react';
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useRef } from 'react';
 import Message from './message';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCirclePlus, faFaceLaugh } from '@fortawesome/free-solid-svg-icons'
@@ -10,7 +10,7 @@ import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 function Chat({ channel }: { channel: ChannelOBJ }) {
     // Emoji picker https://www.cluemediator.com/how-to-add-emoji-picker-in-the-react
 	const channel_context: ChannelContext = useContext(ChannelsContext);
-
+	const bottom_ref = useRef<null | HTMLDivElement>(null);
     const [Input_message, setInput_message] = useState('');
     const [showPicker, setShowPicker] = useState(false);
 	const [message_jsx, setMessage_jsx] = useState<JSX.Element[]>([]);
@@ -66,11 +66,16 @@ function Chat({ channel }: { channel: ChannelOBJ }) {
 			});
 	}, [channel_context.messages, channel]);
 
+	if (bottom_ref.current !== null) {
+		bottom_ref.current.scrollIntoView({ behavior: 'smooth' });
+	}
+
     return (
         <div className="Chat">
 			<ChannelHeader name={channel.name} icon={channel.icon} />
 				<div className="chat-message">
 					{message_jsx}
+					<div ref={bottom_ref} />
 				</div>
 			<div className="chat-input">
 				<button id="chat-file">

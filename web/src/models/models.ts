@@ -33,3 +33,22 @@ export interface Msg_request {
     content: string
     channel: string
 }
+
+export interface UserOBJ {
+    uuid:       string
+    username:   string
+    avatar:     string
+    created_at: string
+    updated_at: string
+}
+
+export interface MemberOBJ {
+	uuid:       string
+	avatar:     string
+	username:   string
+	is_owner:   boolean
+	status:     number
+	channel_id:  string
+	joined_at:   string
+	created_at:  string
+}

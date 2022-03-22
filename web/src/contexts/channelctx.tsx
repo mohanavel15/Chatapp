@@ -1,5 +1,5 @@
 import React, { useState, createContext, useEffect } from 'react'
-import { ChannelOBJ, MessageOBJ, UserOBJ } from '../models/models'
+import { ChannelOBJ, MessageOBJ, UserOBJ, MemberOBJ } from '../models/models'
 import { w3cwebsocket as W3CWebSocket, IMessageEvent } from "websocket";
 import axios from 'axios'
 
@@ -8,8 +8,8 @@ export interface ChannelContext {
 	setChannels: React.Dispatch<React.SetStateAction<Map<String, ChannelOBJ>>>
 	messages: MessageOBJ[];
 	setMessages: React.Dispatch<React.SetStateAction<MessageOBJ[]>>
-	members: Map<String, UserOBJ[]>;
-	setMembers: React.Dispatch<React.SetStateAction<Map<String, UserOBJ[]>>>
+	members: Map<String, MemberOBJ[]>;
+	setMembers: React.Dispatch<React.SetStateAction<Map<String, MemberOBJ[]>>>
 	gateway: W3CWebSocket;
 }
 
@@ -18,7 +18,7 @@ export const ChannelsContext = createContext<ChannelContext>(undefined!);
 export default function ChannelCTX({ children, gateway }: {children: React.ReactChild, gateway: W3CWebSocket}) {
 	
 	let [channels, setChannels] = useState<Map<String,ChannelOBJ>>(new Map<String,ChannelOBJ>());
-	let [members, setMembers] = useState<Map<String, UserOBJ[]>>(new Map<String, UserOBJ[]>());
+	let [members, setMembers] = useState<Map<String, MemberOBJ[]>>(new Map<String, MemberOBJ[]>());
 	let [messages, setMessages] = useState<MessageOBJ[]>([])
 	let [channelsLoaded, setChannelsLoaded] = useState(false)
 
@@ -53,7 +53,7 @@ export default function ChannelCTX({ children, gateway }: {children: React.React
 	useEffect(() => {
 		const channel_keys: String[] =  Array.from(channels.keys())
 		channel_keys.forEach(channel => {
-			axios.get<UserOBJ[]>(`http://127.0.0.1:5000/channels/${channel}/members`, {
+			axios.get<MemberOBJ[]>(`http://127.0.0.1:5000/channels/${channel}/members`, {
 				headers: {
 					Authorization: localStorage.getItem("access_token") || ""
 				}
