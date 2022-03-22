@@ -18,7 +18,7 @@ export default function MembersBar() {
 	console.log("member objs ......", member_objs);
     if (member_objs) {
 		member_objs.forEach(member => {
-        	setMembers(prevMembers => [...prevMembers, <Member member_obj={member} />])
+        	setMembers(prevMembers => [...prevMembers, <Member key={member.uuid} member_obj={member} />])
       	})
 	}
     
@@ -26,9 +26,9 @@ export default function MembersBar() {
 
   return (
     <div className='member_bar'>
-      <button onClick={() => { setReload(!reload) }}>reload</button>
+      <button onClick={() => setReload(!reload) }>reload</button>
 	  <h3>Members—{members.length}</h3>
-	  {members}
-      </div>
+	    {members}
+    </div>
   )
 }

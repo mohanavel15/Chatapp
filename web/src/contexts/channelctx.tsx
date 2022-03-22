@@ -20,6 +20,7 @@ export default function ChannelCTX({ children, gateway }: {children: React.React
 	let [channels, setChannels] = useState<Map<String,ChannelOBJ>>(new Map<String,ChannelOBJ>());
 	let [members, setMembers] = useState<Map<String, UserOBJ[]>>(new Map<String, UserOBJ[]>());
 	let [messages, setMessages] = useState<MessageOBJ[]>([])
+	let [channelsLoaded, setChannelsLoaded] = useState(false)
 
 	useEffect(() => {
 		axios.get<ChannelOBJ[]>('http://127.0.0.1:5000/users/@me/channels', {
@@ -28,8 +29,9 @@ export default function ChannelCTX({ children, gateway }: {children: React.React
 			}
 		}).then(res => {
 			res.data.forEach(channel => {
-				setChannels(channels.set(channel.uuid, channel));
+				setChannels(prevChannels => prevChannels.set(channel.uuid, channel))
 			})
+			setChannelsLoaded(true)
 		})
     }, [])
 
@@ -42,13 +44,11 @@ export default function ChannelCTX({ children, gateway }: {children: React.React
 				}
 			}).then(res => {
 				console.log(res.data);
-				res.data.forEach(message => {
-					setMessages(prevMessages => [...prevMessages, message])
-				})
+				setMessages(prevMessages => [...prevMessages, ...res.data])
 			})
 			console.log("Printing messages", messages);
 		})
-	} , [channels])
+	} , [channelsLoaded])
 
 	useEffect(() => {
 		const channel_keys: String[] =  Array.from(channels.keys())
@@ -58,14 +58,11 @@ export default function ChannelCTX({ children, gateway }: {children: React.React
 					Authorization: localStorage.getItem("access_token") || ""
 				}
 			}).then(res => {
-				console.log(res.data);
-				res.data.forEach(member => {
-					setMembers(members.set(channel, res.data))
-				})
+				setMembers(prevMembers =>  prevMembers.set(channel, res.data))
 			})
 			console.log("Printing members.", members);
 		})
-	} , [channels])
+	} , [channelsLoaded])
 
 	const context_value: ChannelContext = {
 		channels: channels,

@@ -3,6 +3,7 @@
     flex-direction: column;
     background-color: #202020;
     width: 16rem;
+    overflow-y: scroll;
 }
 
 .member {

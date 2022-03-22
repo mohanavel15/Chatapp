@@ -54,8 +54,16 @@ function Chat({ channel }: { channel: ChannelOBJ }) {
 	useEffect(() => {
 		setMessage_jsx([])
 		channel_context.messages.forEach(message => 
-			setMessage_jsx(prevMessage =>  [...prevMessage, <>{ message.channel.uuid === channel.uuid && <Message key={message.uuid} avatar={message.author.avatar} name={message.author.username} message={message.content} /> }</>])
-		);
+			{
+				if (message.channel.uuid === channel.uuid) {
+					setMessage_jsx(prevMessage =>  [...prevMessage, 
+					<Message key={message.uuid} 
+					avatar={message.author.avatar} 
+					name={message.author.username} 
+					message={message.content} 
+					/>])
+				}
+			});
 	}, [channel_context.messages, channel]);
 
     return (
