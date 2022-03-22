@@ -30,7 +30,7 @@ func GetMembers(ctx *Context) {
 	}
 
 	var members []database.Member
-	var res_members []response.User
+	var res_members []response.Member
 
 	db.Where("channel_id = ?", channel.ID).Find(&members)
 	for _, member := range members {
@@ -40,13 +40,26 @@ func GetMembers(ctx *Context) {
 			continue
 		}
 
-		res_members = append(res_members, response.User{
+		var status int
+		isConnected := ctx.Conn.Users[user.Uuid]
+		if isConnected == nil {
+			status = 0
+		} else {
+			status = 1
+		}
+
+		res_member := response.Member{
 			Uuid:      user.Uuid,
 			Username:  user.Username,
 			Avatar:    user.Avatar,
-			CreatedAt: user.CreatedAt.String(),
-			UpdatedAt: user.UpdatedAt.String(),
-		})
+			Is_Owner:  channel.Owner == user.Uuid,
+			Status:    status,
+			ChannelID: channel.Uuid,
+			JoinedAt:  member.CreatedAt.String(),
+			CreatedAt: member.CreatedAt.String(),
+		}
+
+		res_members = append(res_members, res_member)
 	}
 
 	res_obj, err := json.Marshal(res_members)
@@ -94,12 +107,23 @@ func GetMember(ctx *Context) {
 		return
 	}
 
-	res_member := response.User{
+	var status int
+	isConnected := ctx.Conn.Users[member.Uuid]
+	if isConnected == nil {
+		status = 0
+	} else {
+		status = 1
+	}
+
+	res_member := response.Member{
 		Uuid:      member.Uuid,
 		Username:  member.Username,
 		Avatar:    member.Avatar,
+		Is_Owner:  channel.Owner == member.Uuid,
+		Status:    status,
+		ChannelID: channel.Uuid,
+		JoinedAt:  is_member.CreatedAt.String(),
 		CreatedAt: member.CreatedAt.String(),
-		UpdatedAt: member.UpdatedAt.String(),
 	}
 
 	res, err := json.Marshal(res_member)
