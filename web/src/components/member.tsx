@@ -1,5 +1,7 @@
 import React from 'react'
 import { MemberOBJ } from '../models/models';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCrown } from '@fortawesome/free-solid-svg-icons'
 
 function Member({ member_obj }: {member_obj: MemberOBJ}) {
     function setDefaultAvatar(event : React.SyntheticEvent<HTMLImageElement, Event>) {
@@ -29,7 +31,7 @@ function Member({ member_obj }: {member_obj: MemberOBJ}) {
         <div className='member'>
             <img src={member_obj.avatar} style={style} />
             <p>{member_obj.username}</p>
-            {member_obj.is_owner && <p>owner</p>}
+            {member_obj.is_owner && <div className='owner-icon'><FontAwesomeIcon icon={faCrown} /></div>}
         </div>
     )
 }
