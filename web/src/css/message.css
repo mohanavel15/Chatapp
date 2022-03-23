@@ -6,9 +6,6 @@
 }
 
 #Message-button {
-    position: relative;
-    right: 0;
-    margin-right: 1.5rem;
     height: 1.5rem;
     width: 1.5rem;
     color: #ffffff;
@@ -30,8 +27,9 @@
 }
 
 #Message-text {
-    position: absolute;
+    position: relative;
     top: 0;
     font-weight: bold;
-    margin-left: 1rem;
+    margin-left: 0.5rem;
+    width: 90%;
 }

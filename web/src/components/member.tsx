@@ -29,7 +29,7 @@ function Member({ member_obj }: {member_obj: MemberOBJ}) {
 
     return (
         <div className='member'>
-            <img src={member_obj.avatar} style={style} />
+            <img src={member_obj.avatar} style={style} onError={setDefaultAvatar} alt={"Icon"} />
             <p>{member_obj.username}</p>
             {member_obj.is_owner && <div className='owner-icon'><FontAwesomeIcon icon={faCrown} /></div>}
         </div>

@@ -20,7 +20,7 @@ function Message(props: MessageProps) {
     return (
     <div className="Message">
         <img id="Message-avatar" src={props.avatar} alt="Avatar" onError={setDefaultAvatar} />
-        <div id="Messahe-text"> 
+        <div id="Message-text"> 
             <p> {props.name} </p>
             <p> {props.message} </p> 
         </div>

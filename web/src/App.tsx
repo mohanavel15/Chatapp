@@ -1,4 +1,3 @@
-import { useEffect, useContext } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Channel from "./pages/channel";
 import Login from "./pages/login";
@@ -12,7 +11,8 @@ import './css/login.css';
 import './css/message.css';
 import './css/sidebar.css';
 import './css/members_bar.css';
-import { w3cwebsocket as W3CWebSocket, IMessageEvent } from "websocket";
+import './css/channel.css';
+import { w3cwebsocket as W3CWebSocket } from "websocket";
 import ChannelCTX from "./contexts/channelctx";
 
 const gateway = new W3CWebSocket('ws://127.0.0.1:5000/ws');

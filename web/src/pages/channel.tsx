@@ -1,14 +1,14 @@
 import SideBar from "../components/sidebar";
 import Chat from "../components/chat";
 import { useParams } from "react-router-dom";
-import React, { useState, useContext, useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { StatesContext, StateContext } from "../contexts/states";
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 import Settings from "./settings"; 
 import { MessageOBJ, ChannelOBJ } from "../models/models";
 import { IMessageEvent } from "websocket";
-import axios from "axios";
 import MembersBar from "../components/members_bar";
+import CreateChannel from "../components/createchannel";
 function Channel() {
 	const parameter  = useParams<string>();
 	let channel_id = parameter.id || "@me";
@@ -38,6 +38,12 @@ function Channel() {
 					channel_context.setMessages(prevMessages => [...prevMessages, message]);
 					console.log("Printing messages");
 					console.log(channel_context.messages);
+				}
+
+				if (payload.event === 'CHANNEL_CREATE') {
+					const channel: ChannelOBJ = payload.data;
+					channel_context.setChannels(prevChannels => prevChannels.set(channel.uuid, channel));
+					channel_context.setChannelsLoaded(!channel_context.channelsLoaded);
 				}
 			}
 		};
@@ -72,7 +78,14 @@ function Channel() {
 
 	return (
 		<div className="Channel">
-			{ !state_context.Settings && <><SideBar /><Chat channel={currentChannel} /> <MembersBar channel={currentChannel} /> </> }
+			{ !state_context.Settings && 
+				<>
+					<SideBar />
+					<Chat channel={currentChannel} />
+					{ state_context.createChannel && <CreateChannel /> }
+					<MembersBar channel={currentChannel} /> 
+				</> 
+			}
 			{ state_context.Settings && <Settings /> }
 		</div>
 	);

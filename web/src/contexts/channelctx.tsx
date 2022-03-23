@@ -61,7 +61,7 @@ export default function ChannelCTX({ children, gateway }: {children: React.React
 			}).then(res => {
 				console.log(res.data);
 				setMessages(prevMessages => [...prevMessages, ...res.data])
-				setMessagesLoaded(!membersLoaded)
+				setMessagesLoaded(!messagesLoaded)
 			})
 		})
 	} , [channelsLoaded])

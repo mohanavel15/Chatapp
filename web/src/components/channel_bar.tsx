@@ -12,7 +12,7 @@ export default function ChannelBar() {
 		channels.forEach(channel => {
 			setChannels_element(prevElement => [...prevElement, <ChannelList key={channel.uuid} id={channel.uuid} icon={channel.icon} name={channel.name} />])
 		})
-	}, [channel_context.channelsLoaded])
+	}, [channel_context.channels, channel_context.channelsLoaded])
 
 	return (
 		<div className='ChannelBar'>
