@@ -64,7 +64,7 @@ function Chat({ channel }: { channel: ChannelOBJ }) {
 					/>])
 				}
 			});
-	}, [channel_context.messages, channel]);
+	}, [channel_context.messagesLoaded, channel]);
 
 	if (bottom_ref.current !== null) {
 		bottom_ref.current.scrollIntoView({ behavior: 'smooth' });

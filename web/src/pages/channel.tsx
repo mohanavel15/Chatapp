@@ -72,7 +72,7 @@ function Channel() {
 
 	return (
 		<div className="Channel">
-			{ !state_context.Settings && <><SideBar /><Chat channel={currentChannel} /> <MembersBar /> </> }
+			{ !state_context.Settings && <><SideBar /><Chat channel={currentChannel} /> <MembersBar channel={currentChannel} /> </> }
 			{ state_context.Settings && <Settings /> }
 		</div>
 	);

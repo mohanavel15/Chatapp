@@ -1,14 +1,12 @@
 import React, { useContext, useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom';
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 import Member from './member';
-export default function MembersBar() {
+import { ChannelOBJ } from '../models/models';
+
+export default function MembersBar({ channel }: { channel: ChannelOBJ }) {
   const channel_context: ChannelContext = useContext(ChannelsContext);
 
-  const parameter  = useParams<string>();
-	let channel_id = parameter.id || "@me";
-
-  const [reload, setReload] = useState(false)
+	let channel_id = channel.uuid;
   const [members, setMembers] = useState<JSX.Element[]>([]);
 
   useEffect(() => {
@@ -22,11 +20,10 @@ export default function MembersBar() {
       	})
 	}
     
-  }, [channel_context.members, reload])
+  }, [channel_context.membersLoaded, channel])
 
   return (
     <div className='member_bar'>
-      <button onClick={() => setReload(!reload) }>reload</button>
 	  <h3>Members—{members.length}</h3>
 	    {members}
     </div>

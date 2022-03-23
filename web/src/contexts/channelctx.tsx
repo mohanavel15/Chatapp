@@ -6,10 +6,22 @@ import axios from 'axios'
 export interface ChannelContext {
 	channels: Map<String,ChannelOBJ>;
 	setChannels: React.Dispatch<React.SetStateAction<Map<String, ChannelOBJ>>>
+	
 	messages: MessageOBJ[];
 	setMessages: React.Dispatch<React.SetStateAction<MessageOBJ[]>>
+	
 	members: Map<String, MemberOBJ[]>;
 	setMembers: React.Dispatch<React.SetStateAction<Map<String, MemberOBJ[]>>>
+	
+	channelsLoaded: boolean
+	setChannelsLoaded: React.Dispatch<React.SetStateAction<boolean>>
+
+	messagesLoaded: boolean
+	setMessagesLoaded: React.Dispatch<React.SetStateAction<boolean>>
+
+	membersLoaded: boolean
+	setMembersLoaded: React.Dispatch<React.SetStateAction<boolean>>
+
 	gateway: W3CWebSocket;
 }
 
@@ -20,7 +32,11 @@ export default function ChannelCTX({ children, gateway }: {children: React.React
 	let [channels, setChannels] = useState<Map<String,ChannelOBJ>>(new Map<String,ChannelOBJ>());
 	let [members, setMembers] = useState<Map<String, MemberOBJ[]>>(new Map<String, MemberOBJ[]>());
 	let [messages, setMessages] = useState<MessageOBJ[]>([])
+
 	let [channelsLoaded, setChannelsLoaded] = useState(false)
+	let [membersLoaded, setMembersLoaded] = useState(false)
+	let [messagesLoaded, setMessagesLoaded] = useState(false)
+
 
 	useEffect(() => {
 		axios.get<ChannelOBJ[]>('http://127.0.0.1:5000/users/@me/channels', {
@@ -45,8 +61,8 @@ export default function ChannelCTX({ children, gateway }: {children: React.React
 			}).then(res => {
 				console.log(res.data);
 				setMessages(prevMessages => [...prevMessages, ...res.data])
+				setMessagesLoaded(!membersLoaded)
 			})
-			console.log("Printing messages", messages);
 		})
 	} , [channelsLoaded])
 
@@ -59,6 +75,7 @@ export default function ChannelCTX({ children, gateway }: {children: React.React
 				}
 			}).then(res => {
 				setMembers(prevMembers =>  prevMembers.set(channel, res.data))
+				setMembersLoaded(!membersLoaded)
 			})
 			console.log("Printing members.", members);
 		})
@@ -71,6 +88,12 @@ export default function ChannelCTX({ children, gateway }: {children: React.React
 		setMessages: setMessages,
 		members: members,
 		setMembers: setMembers,
+		channelsLoaded: channelsLoaded,
+		setChannelsLoaded: setChannelsLoaded,
+		messagesLoaded: messagesLoaded,
+		setMessagesLoaded: setMessagesLoaded,
+		membersLoaded: membersLoaded,
+		setMembersLoaded: setMembersLoaded,
 		gateway: gateway
 	}
 
