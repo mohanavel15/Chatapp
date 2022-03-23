@@ -6,6 +6,7 @@ import { faCirclePlus, faFaceLaugh } from '@fortawesome/free-solid-svg-icons'
 import ChannelHeader from './channel_header';
 import { MessageOBJ, ChannelOBJ, Msg_request } from '../models/models';
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
+import MessageContextMenu from '../contextmenu/message_context_menu';
 
 function Chat({ channel }: { channel: ChannelOBJ }) {
     // Emoji picker https://www.cluemediator.com/how-to-add-emoji-picker-in-the-react
@@ -14,6 +15,9 @@ function Chat({ channel }: { channel: ChannelOBJ }) {
     const [Input_message, setInput_message] = useState('');
     const [showPicker, setShowPicker] = useState(false);
 	const [message_jsx, setMessage_jsx] = useState<JSX.Element[]>([]);
+
+	const [showCtxMenu, setShowCtxMenu] = useState(false);
+	const [ctxMenuLocation, setCtxMenuLocation] = useState<{x: number, y: number, message:MessageOBJ}>(undefined!);
    
     const onEmojiClick = (_: React.MouseEvent<Element, MouseEvent>, data: IEmojiData) => {
 		setInput_message(prevInput => prevInput + data.emoji);
@@ -50,6 +54,12 @@ function Chat({ channel }: { channel: ChannelOBJ }) {
 			setInput_message('');
 		}
     }
+
+	useEffect(() => {
+		const handleClick = () => setShowCtxMenu(false);
+		window.addEventListener('click', handleClick);
+		return () => window.removeEventListener('click', handleClick);
+	  }, []);
 	
 	useEffect(() => {
 		setMessage_jsx([])
@@ -57,24 +67,34 @@ function Chat({ channel }: { channel: ChannelOBJ }) {
 			{
 				if (message.channel.uuid === channel.uuid) {
 					setMessage_jsx(prevMessage =>  [...prevMessage, 
+					<div onContextMenu={
+						(event) => {
+							event.preventDefault();
+							setCtxMenuLocation({x: event.clientX, y: event.clientY, message: message});
+							setShowCtxMenu(true);
+						}
+					}>
 					<Message key={message.uuid} 
 					avatar={message.author.avatar} 
 					name={message.author.username} 
 					message={message.content} 
-					/>])
+					/>
+					</div>
+					])
+				}
+
+				if (bottom_ref.current !== null) {
+					bottom_ref.current.scrollIntoView({ behavior: 'smooth' });
 				}
 			});
 	}, [channel_context.messagesLoaded, channel_context.messages, channel]);
-
-	if (bottom_ref.current !== null) {
-		bottom_ref.current.scrollIntoView({ behavior: 'smooth' });
-	}
 
     return (
         <div className="Chat">
 			<ChannelHeader name={channel.name} icon={channel.icon} />
 				<div className="chat-message">
 					{message_jsx}
+					{ showCtxMenu && <MessageContextMenu location={ctxMenuLocation} /> }
 					<div ref={bottom_ref} />
 				</div>
 			<div className="chat-input">

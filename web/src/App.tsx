@@ -12,6 +12,7 @@ import './css/message.css';
 import './css/sidebar.css';
 import './css/members_bar.css';
 import './css/channel.css';
+import './css/contextmenu.css';
 import { w3cwebsocket as W3CWebSocket } from "websocket";
 import ChannelCTX from "./contexts/channelctx";
 

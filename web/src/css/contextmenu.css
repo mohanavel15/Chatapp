@@ -1,0 +1,39 @@
+.MessageContextMenu {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    background-color: #202020;
+    padding: 0.3rem;
+    border-radius: 10px;
+    box-shadow: 0 0 2px 2px #181818;
+}
+
+.MessageContextMenu button {
+    height: 2rem;
+    width: 8rem;
+    margin: 0.5rem;
+    background: none;
+    border: none;
+}
+
+.MsgCtxBtn {
+    color: beige;
+}
+
+.MsgCtxBtn:hover {
+    border-radius: 10px;
+    background-color: green;
+    color: beige;
+}
+
+.MsgCtxDelBtn {
+    color: brown;
+}
+
+.MsgCtxDelBtn:hover {
+    border-radius: 10px;
+    background-color: brown;
+    color: beige;
+}
