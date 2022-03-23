@@ -39,7 +39,9 @@ func (ws *Ws) ReadLoop() {
 		data, err := ws.Read()
 		if err != nil {
 			log.Println(err)
-			delete(ws.Conns.Users, ws.User.Uuid)
+			if ws.User != nil {
+				delete(ws.Conns.Users, ws.User.Uuid)
+			}
 			return
 		}
 		ws.HandleWSMessage(data)
