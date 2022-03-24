@@ -51,6 +51,14 @@ func Connect(ctx *websocket.Context) {
 		UpdatedAt: get_user.UpdatedAt.String(),
 	}
 
+	member := response.Member{
+		Uuid:      get_user.Uuid,
+		Avatar:    get_user.Avatar,
+		Username:  get_user.Username,
+		Status:    1,
+		CreatedAt: get_user.CreatedAt.String(),
+	}
+
 	ctx.Ws.User = &get_user
 	log.Println(fmt.Sprintf("%s joined", ctx.Ws.User.Username))
 
@@ -64,6 +72,26 @@ func Connect(ctx *websocket.Context) {
 		}
 		ctx.Db.Where(&channel).First(&channel)
 		ctx.Ws.Conns.Channels[channel.Uuid] = append(ctx.Ws.Conns.Channels[channel.Uuid], ctx.Ws)
+
+		member.ChannelID = channel.Uuid
+		member.Is_Owner = channel.Owner == get_user.Uuid
+		member.JoinedAt = channel_id.CreatedAt.String()
+
+		ws_msg := websocket.WS_Message{
+			Event: "MEMBER_UPDATE",
+			Data:  member,
+		}
+
+		res_member, err := json.Marshal(ws_msg)
+		if err != nil {
+			return
+		}
+
+		if members, ok := ctx.Ws.Conns.Channels[channel.Uuid]; ok {
+			for _, member := range members {
+				member.Write(res_member)
+			}
+		}
 	}
 
 	ws_msg := websocket.WS_Message{

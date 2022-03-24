@@ -1,7 +1,7 @@
 import React from 'react'
 import { MemberOBJ } from '../models/models';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCrown } from '@fortawesome/free-solid-svg-icons'
+import { faCrown, faCircle } from '@fortawesome/free-solid-svg-icons'
 
 function Member({ member_obj }: {member_obj: MemberOBJ}) {
     function setDefaultAvatar(event : React.SyntheticEvent<HTMLImageElement, Event>) {
@@ -11,17 +11,19 @@ function Member({ member_obj }: {member_obj: MemberOBJ}) {
     if (!member_obj.avatar) {
         member_obj.avatar = "/assets/default_avatar.jpeg";
     }
-    let style: React.CSSProperties
 
+    let style: React.CSSProperties
     if (member_obj.status === 1) {
         style = {
-            border: "2px solid green",
-            padding: "3px"
+            color: "lime"
+        }
+    } else if (member_obj.status === 2) {
+        style = {
+            color: "red"
         }
     } else {
         style = {
-            border: "2px solid red",
-            padding: "3px"
+            color: "grey"
         }
     }
 
@@ -29,7 +31,10 @@ function Member({ member_obj }: {member_obj: MemberOBJ}) {
 
     return (
         <div className='member'>
-            <img src={member_obj.avatar} style={style} onError={setDefaultAvatar} alt={"Icon"} />
+            <div className='avatar-container'>
+            <img src={member_obj.avatar} onError={setDefaultAvatar} alt={"Icon"} />
+            <FontAwesomeIcon className='status_icon' style={style} icon={faCircle} />
+            </div>
             <p>{member_obj.username}</p>
             {member_obj.is_owner && <div className='owner-icon'><FontAwesomeIcon icon={faCrown} /></div>}
         </div>
