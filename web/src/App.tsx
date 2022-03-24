@@ -15,6 +15,7 @@ import './css/channel.css';
 import './css/contextmenu.css';
 import { w3cwebsocket as W3CWebSocket } from "websocket";
 import ChannelCTX from "./contexts/channelctx";
+import { CtxMenuCtx } from "./contexts/context_menu_ctx";
 
 const gateway = new W3CWebSocket('ws://127.0.0.1:5000/ws');
 function App() {
@@ -25,7 +26,7 @@ function App() {
 					<Routes>
 						<Route path="/">
 							<Route index element={<Home />} />
-							<Route path="channels/:id" element={<States><Channel /></States>} />
+							<Route path="channels/:id" element={<States><CtxMenuCtx><Channel /></CtxMenuCtx></States>} />
 							<Route path="login" element={<Login />} />
 							<Route path="register" element={<Register />} />
 							<Route path="*" element={<NoPage />} />

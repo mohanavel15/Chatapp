@@ -16,11 +16,11 @@ export default function MessageContextMenu(props:propsMsgCtxProps) {
     console.log("message:", props.location.message.content);
 
     return (
-        <div className='MessageContextMenu' style={style}>
-            <button className='MsgCtxBtn' onClick={() => {navigator.clipboard.writeText(props.location.message.content)}}>Copy Text</button>
-            <button className='MsgCtxBtn'>Edit Message</button>
-            <button className='MsgCtxDelBtn'>Delete Message</button>
-            <button className='MsgCtxBtn' onClick={() => {navigator.clipboard.writeText(props.location.message.uuid)}}>Copy ID</button>
+        <div className='ContextMenu' style={style}>
+            <button className='CtxBtn' onClick={() => {navigator.clipboard.writeText(props.location.message.content)}}>Copy Text</button>
+            <button className='CtxBtn'>Edit Message</button>
+            <button className='CtxDelBtn'>Delete Message</button>
+            <button className='CtxBtn' onClick={() => {navigator.clipboard.writeText(props.location.message.uuid)}}>Copy ID</button>
         </div>
     )
 }

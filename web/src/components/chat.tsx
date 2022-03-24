@@ -4,9 +4,9 @@ import Message from './message';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCirclePlus, faFaceLaugh } from '@fortawesome/free-solid-svg-icons'
 import ChannelHeader from './channel_header';
-import { MessageOBJ, ChannelOBJ, Msg_request } from '../models/models';
+import { ChannelOBJ, Msg_request } from '../models/models';
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
-import MessageContextMenu from '../contextmenu/message_context_menu';
+import { ContextMenuCtx, ContextMenu } from "../contexts/context_menu_ctx";
 
 function Chat({ channel }: { channel: ChannelOBJ }) {
     // Emoji picker https://www.cluemediator.com/how-to-add-emoji-picker-in-the-react
@@ -15,10 +15,9 @@ function Chat({ channel }: { channel: ChannelOBJ }) {
     const [Input_message, setInput_message] = useState('');
     const [showPicker, setShowPicker] = useState(false);
 	const [message_jsx, setMessage_jsx] = useState<JSX.Element[]>([]);
-
-	const [showCtxMenu, setShowCtxMenu] = useState(false);
-	const [ctxMenuLocation, setCtxMenuLocation] = useState<{x: number, y: number, message:MessageOBJ}>(undefined!);
    
+	const ctx_menu_context: ContextMenuCtx = useContext(ContextMenu);
+
     const onEmojiClick = (_: React.MouseEvent<Element, MouseEvent>, data: IEmojiData) => {
 		setInput_message(prevInput => prevInput + data.emoji);
 		setShowPicker(false);
@@ -54,12 +53,6 @@ function Chat({ channel }: { channel: ChannelOBJ }) {
 			setInput_message('');
 		}
     }
-
-	useEffect(() => {
-		const handleClick = () => setShowCtxMenu(false);
-		window.addEventListener('click', handleClick);
-		return () => window.removeEventListener('click', handleClick);
-	  }, []);
 	
 	useEffect(() => {
 		setMessage_jsx([])
@@ -70,8 +63,8 @@ function Chat({ channel }: { channel: ChannelOBJ }) {
 					<div onContextMenu={
 						(event) => {
 							event.preventDefault();
-							setCtxMenuLocation({x: event.clientX, y: event.clientY, message: message});
-							setShowCtxMenu(true);
+							ctx_menu_context.setMsgCtxMenuLocation({x: event.clientX, y: event.clientY, message: message});
+							ctx_menu_context.setShowMsgCtxMenu(true);
 						}
 					}>
 					<Message key={message.uuid} 
@@ -94,7 +87,6 @@ function Chat({ channel }: { channel: ChannelOBJ }) {
 			<ChannelHeader name={channel.name} icon={channel.icon} />
 				<div className="chat-message">
 					{message_jsx}
-					{ showCtxMenu && <MessageContextMenu location={ctxMenuLocation} /> }
 					<div ref={bottom_ref} />
 				</div>
 			<div className="chat-input">
