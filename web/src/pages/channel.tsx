@@ -12,6 +12,7 @@ import CreateChannel from "../components/createchannel";
 import { ContextMenuCtx, ContextMenu } from "../contexts/context_menu_ctx";
 import MessageContextMenu from '../contextmenu/message_context_menu';
 import ChannelContextMenu from "../contextmenu/channel_context_menu";
+import MemberContextMenu from "../contextmenu/member_context_menu";
 
 function Channel() {
 	const parameter  = useParams<string>();
@@ -82,7 +83,11 @@ function Channel() {
 	}
 
 	useEffect(() => {
-		const handleClick = () => { ctx_menu_context.setShowMsgCtxMenu(false); ctx_menu_context.setShowChannelCtxMenu(false); };
+		const handleClick = () => { 
+			ctx_menu_context.setShowMsgCtxMenu(false);
+			ctx_menu_context.setShowChannelCtxMenu(false);
+			ctx_menu_context.setShowMemberCtxMenu(false);
+		};
 		window.addEventListener('click', handleClick);
 		return () => window.removeEventListener('click', handleClick);
 	}, []);
@@ -93,10 +98,11 @@ function Channel() {
 					<>
 						<SideBar />
 						<Chat channel={currentChannel} />
-						{ state_context.createChannel && <CreateChannel /> }
 						<MembersBar channel={currentChannel} />
+						{ state_context.createChannel && <CreateChannel /> }
 						{ ctx_menu_context.showMsgCtxMenu && <MessageContextMenu location={ctx_menu_context.ctxMsgMenuLocation} /> }
 						{ ctx_menu_context.showChannelCtxMenu && <ChannelContextMenu location={ctx_menu_context.ctxChannelMenuLocation} /> }
+						{ ctx_menu_context.showMemberCtxMenu && <MemberContextMenu location={ctx_menu_context.ctxMemberMenuLocation} /> }
 					</>
 			}
 			{ state_context.Settings && <Settings /> }

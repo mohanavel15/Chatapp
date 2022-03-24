@@ -1,5 +1,5 @@
 import React, { useState, createContext } from 'react'
-import { MessageOBJ, ChannelOBJ } from '../models/models';
+import { MessageOBJ, ChannelOBJ, MemberOBJ } from '../models/models';
 
 export interface ContextMenuCtx {
     showMsgCtxMenu: boolean;
@@ -12,6 +12,11 @@ export interface ContextMenuCtx {
     setShowChannelCtxMenu: React.Dispatch<React.SetStateAction<boolean>>;
     setChannelCtxMenuLocation: React.Dispatch<React.SetStateAction<{x: number, y: number, channel: ChannelOBJ}>>;
 
+    showMemberCtxMenu: boolean;
+    ctxMemberMenuLocation: {event: React.MouseEvent<HTMLDivElement, MouseEvent>, member:MemberOBJ};
+    setShowMemberCtxMenu: React.Dispatch<React.SetStateAction<boolean>>;
+    setMemberCtxMenuLocation: React.Dispatch<React.SetStateAction<{event: React.MouseEvent<HTMLDivElement, MouseEvent>, member: MemberOBJ}>>;
+
 }
 
 export const ContextMenu = createContext<ContextMenuCtx>(undefined!);
@@ -23,6 +28,9 @@ export function CtxMenuCtx({ children }: {children: React.ReactChild}) {
     const [showChannelCtxMenu, setShowChannelCtxMenu] = useState(false);
     const [ctxChannelMenuLocation, setChannelCtxMenuLocation] = useState<{x: number, y: number, channel:ChannelOBJ}>(undefined!);
 
+    const [showMemberCtxMenu, setShowMemberCtxMenu] = useState(false);
+	const [ctxMemberMenuLocation, setMemberCtxMenuLocation] = useState<{event: React.MouseEvent<HTMLDivElement, MouseEvent>, member:MemberOBJ}>(undefined!);
+
     const context_value: ContextMenuCtx = {
 		showMsgCtxMenu: showMsgCtxMenu,
 		ctxMsgMenuLocation: ctxMsgMenuLocation,
@@ -32,7 +40,12 @@ export function CtxMenuCtx({ children }: {children: React.ReactChild}) {
         showChannelCtxMenu: showChannelCtxMenu,
         ctxChannelMenuLocation: ctxChannelMenuLocation,
         setShowChannelCtxMenu: setShowChannelCtxMenu,
-        setChannelCtxMenuLocation: setChannelCtxMenuLocation
+        setChannelCtxMenuLocation: setChannelCtxMenuLocation,
+
+        showMemberCtxMenu: showMemberCtxMenu,
+        ctxMemberMenuLocation: ctxMemberMenuLocation,
+        setShowMemberCtxMenu: setShowMemberCtxMenu,
+        setMemberCtxMenuLocation: setMemberCtxMenuLocation
     }
 
     return (

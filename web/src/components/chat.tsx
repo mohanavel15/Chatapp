@@ -63,6 +63,9 @@ function Chat({ channel }: { channel: ChannelOBJ }) {
 					<div onContextMenu={
 						(event) => {
 							event.preventDefault();
+							ctx_menu_context.setShowMsgCtxMenu(false);
+							ctx_menu_context.setShowChannelCtxMenu(false);
+							ctx_menu_context.setShowMemberCtxMenu(false);
 							ctx_menu_context.setMsgCtxMenuLocation({x: event.clientX, y: event.clientY, message: message});
 							ctx_menu_context.setShowMsgCtxMenu(true);
 						}

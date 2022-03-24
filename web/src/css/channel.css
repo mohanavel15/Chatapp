@@ -4,9 +4,8 @@
     left: 25%;
     height: 50%;
     width: 50%;
-    background-color: azure;
+    background-color: white;
     border-radius: 15px;
-    box-shadow: black 15px 15px;
 }
 
 .create-channel-close-button {
@@ -57,4 +56,14 @@
 .create-channel-create-button:hover {
     cursor: pointer;
     opacity: 1.0;
+}
+
+.create-channel-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background-color: black;
+    opacity: 0.8;
 }

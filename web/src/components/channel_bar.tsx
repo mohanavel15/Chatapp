@@ -16,6 +16,9 @@ export default function ChannelBar() {
 			setChannels_element(prevElement => [...prevElement, 
 				<div onContextMenu={(event) => {
 					event.preventDefault();
+					ctx_menu_context.setShowMsgCtxMenu(false);
+					ctx_menu_context.setShowChannelCtxMenu(false);
+					ctx_menu_context.setShowMemberCtxMenu(false);
 					ctx_menu_context.setChannelCtxMenuLocation({x: event.clientX, y: event.clientY, channel: channel})
 					ctx_menu_context.setShowChannelCtxMenu(true);
 				}}>
