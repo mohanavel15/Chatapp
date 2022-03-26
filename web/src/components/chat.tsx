@@ -93,9 +93,6 @@ function Chat({ channel }: { channel: ChannelOBJ }) {
 					<div ref={bottom_ref} />
 				</div>
 			<div className="chat-input">
-				<button id="chat-file">
-					<FontAwesomeIcon icon={faCirclePlus} />
-				</button>
 				<button id="chat-emoji-picker" onClick={() => setShowPicker(val => !val)}>
 					<FontAwesomeIcon icon={faFaceLaugh} />
 				</button>

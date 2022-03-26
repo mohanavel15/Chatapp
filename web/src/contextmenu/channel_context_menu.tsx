@@ -18,10 +18,14 @@ export default function ChannelContextMenu(props: propsChannelCtxProps) {
   return (
     <div className='ContextMenu' style={style}>
         <button className='CtxBtn' onClick={() =>{
-            state_context.setEditChannelOBJ(props.location.channel);
+            state_context.setChannelOBJ(props.location.channel);
             state_context.setEditChannel(true);
         }}>Edit Channel</button>
-        <button className='CtxDelBtn'>Leave Channel</button>
+        <button className='CtxDelBtn' onClick={ () => {
+            state_context.setChannelOBJ(props.location.channel);
+            state_context.setDeleteChannel(true);
+        }
+        }>Leave Channel</button>
         <button className='CtxBtn' onClick={() => {navigator.clipboard.writeText(props.location.channel.uuid)}}>Copy ID</button>
     </div>
   )

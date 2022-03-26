@@ -20,7 +20,7 @@ function SideTopBar() {
 			}
         }).then(res => {
             if (res.status === 200) {
-                channel_context.setChannels(channel_context.channels.set(res.data.uuid, res.data))
+                channel_context.setChannels(prevChannels => new Map(prevChannels.set(res.data.uuid, res.data)));
                 navegate(`/channels/${res.data.uuid}`)
             }
         })

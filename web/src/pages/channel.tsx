@@ -10,6 +10,7 @@ import { IMessageEvent } from "websocket";
 import MembersBar from "../components/members_bar";
 import CreateChannel from "../components/createchannel";
 import EditChannel from '../components/editchannel';
+import DeleteChannel from "../components/deletechannel";
 import { ContextMenuCtx, ContextMenu } from "../contexts/context_menu_ctx";
 import MessageContextMenu from '../contextmenu/message_context_menu';
 import ChannelContextMenu from "../contextmenu/channel_context_menu";
@@ -55,6 +56,15 @@ function Channel() {
 				if (payload.event === 'CHANNEL_MODIFY') {
 					const channel: ChannelOBJ = payload.data;
 					channel_context.setChannels(prevChannels => new Map(prevChannels.set(channel.uuid, channel)));
+				}
+
+				if (payload.event === 'CHANNEL_DELETE') {
+					const deleted_channel = (prevChannels: Map<String, ChannelOBJ>) => {
+						const new_channels = new Map(prevChannels);
+						new_channels.delete(payload.data.uuid);
+						return new_channels;
+					}
+					channel_context.setChannels(prevChannels => deleted_channel(prevChannels));
 				}
 			}
 		};
@@ -106,6 +116,7 @@ function Channel() {
 						<MembersBar channel={currentChannel} />
 						{ state_context.createChannel && <CreateChannel /> }
 						{ state_context.editChannel && <EditChannel /> }
+						{ state_context.deleteChannel && <DeleteChannel /> }
 						{ ctx_menu_context.showMsgCtxMenu && <MessageContextMenu location={ctx_menu_context.ctxMsgMenuLocation} /> }
 						{ ctx_menu_context.showChannelCtxMenu && <ChannelContextMenu location={ctx_menu_context.ctxChannelMenuLocation} /> }
 						{ ctx_menu_context.showMemberCtxMenu && <MemberContextMenu location={ctx_menu_context.ctxMemberMenuLocation} /> }

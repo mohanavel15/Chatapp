@@ -58,11 +58,48 @@
     opacity: 1.0;
 }
 
-.create-channel-container {
+.channel-container {
     position: absolute;
     top: 0;
     left: 0;
     height: 100%;
     width: 100%;
     background-color: rgba(0, 0, 0, 0.746);
+}
+
+.delete-channel {
+    position: absolute;
+    top: 40%;
+    left: 40%;
+    height: 20%;
+    width: 20%;
+    background-color: #202020;
+    border-radius: 15px;
+}
+
+.popupbox-btn {
+    margin: 1rem;
+    height: 2.5rem;
+    width: 6.0rem;
+    font-size: larger;
+    background-color: grey;
+    padding: 0;
+    border: none;
+    color: #fff;
+    border-radius: 3px;
+}
+
+.popupbox-btn:hover {
+    cursor: pointer;
+    opacity: 0.5;
+}
+
+.popupbox-btn-red {
+    background-color: brown;
+}
+
+.delete-channel p {
+    margin: 1rem;
+    font-size: medium;
+    color: white;
 }

@@ -17,6 +17,7 @@ export default function EditChannel() {
                 JSON.stringify({
                     event: "CHANNEL_MODIFY",
                     data: {
+                        uuid: state_context.ChannelOBJ.uuid,
                         name: channel_name_value,
                         icon: channel_icon_value
                     }
@@ -26,12 +27,12 @@ export default function EditChannel() {
         state_context.setEditChannel(false);
     }
     return (
-        <div className="create-channel-container">
+        <div className="channel-container">
             <div className='create-channel'>
                 <button className="create-channel-close-button" onClick={(e) => {e.preventDefault(); state_context.setEditChannel(false) }}>X</button>
                 <div className="create-channel-input-container">
-                    <input className="create-channel-input" ref={channel_name} type="text" placeholder="Channel Name" defaultValue={state_context.editChannelOBJ.name}/>
-                    <input className="create-channel-input" ref={channel_icon} type="text" placeholder="Url For Channel Icon" defaultValue={state_context.editChannelOBJ.icon}/>
+                    <input className="create-channel-input" ref={channel_name} type="text" placeholder="Channel Name" defaultValue={state_context.ChannelOBJ.name}/>
+                    <input className="create-channel-input" ref={channel_icon} type="text" placeholder="Url For Channel Icon" defaultValue={state_context.ChannelOBJ.icon}/>
                 </div>
                 <button className="create-channel-create-button" onClick={HandleCreateChannel}>Save</button>
             </div>
