@@ -62,9 +62,11 @@ func main() {
 
 	handler.Add("CREATE_INVITE", gateway.CreateInvite)
 	handler.Add("REMOVE_INVITE", gateway.RemoveInvite)
-	handler.Add("CHANNEL_JOIN", gateway.ChannelJoin)
-	handler.Add("CHANNEL_REMOVE", gateway.ChannelRemove)
 
+	handler.Add("MEMBER_JOIN", gateway.MemberJoin)
+	handler.Add("MEMBER_REMOVE", gateway.MemberRemove)
+
+	handler.Add("CHANNEL_JOIN", gateway.ChannelJoin)
 	handler.Add("CHANNEL_CREATE", gateway.ChannelCreate)
 	handler.Add("CHANNEL_MODIFY", gateway.ChannelModify)
 	handler.Add("CHANNEL_DELETE", gateway.ChannelDelete)

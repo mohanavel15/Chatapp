@@ -108,7 +108,48 @@ func ChannelModify(ctx *websocket.Context) {
 	ctx.Broadcast(ws_msg)
 }
 
-func ChannelDelete(ctx *websocket.Context) {}
+func ChannelDelete(ctx *websocket.Context) {
+	var channel_req websocket.Channel
+	json.Unmarshal(ctx.Data, &channel_req)
 
-func ChannelJoin(ctx *websocket.Context)   {}
-func ChannelRemove(ctx *websocket.Context) {}
+	if channel_req.Uuid == "" {
+		return
+	}
+
+	var channel database.Channel
+	ctx.Db.Where("uuid = ?", channel_req.Uuid).First(&channel)
+
+	if channel.ID == 0 {
+		return
+	}
+
+	var member database.Member
+	ctx.Db.Where("channel_id = ? AND account_id = ?", channel.ID, ctx.Ws.User.ID).First(&member)
+
+	if member.ID == 0 {
+		return
+	}
+
+	ctx.Db.Delete(&member)
+
+	res_channel := response.Channel{
+		Uuid:           channel.Uuid,
+		Name:           channel.Name,
+		Icon:           channel.Icon,
+		OwnerID:        channel.Owner,
+		PrivateChannel: channel.PrivateChannel,
+		CreatedAt:      channel.CreatedAt.String(),
+		UpdatedAt:      channel.UpdatedAt.String(),
+	}
+
+	ws_msg_user := websocket.WS_Message{
+		Event: "CHANNEL_DELETE",
+		Data:  res_channel,
+	}
+
+	res, _ := json.Marshal(ws_msg_user)
+
+	ctx.Send(res)
+}
+
+func ChannelJoin(ctx *websocket.Context) {}
