@@ -9,6 +9,7 @@ import { MessageOBJ, ChannelOBJ } from "../models/models";
 import { IMessageEvent } from "websocket";
 import MembersBar from "../components/members_bar";
 import CreateChannel from "../components/createchannel";
+import EditChannel from '../components/editchannel';
 import { ContextMenuCtx, ContextMenu } from "../contexts/context_menu_ctx";
 import MessageContextMenu from '../contextmenu/message_context_menu';
 import ChannelContextMenu from "../contextmenu/channel_context_menu";
@@ -100,6 +101,7 @@ function Channel() {
 						<Chat channel={currentChannel} />
 						<MembersBar channel={currentChannel} />
 						{ state_context.createChannel && <CreateChannel /> }
+						{ state_context.editChannel && <EditChannel /> }
 						{ ctx_menu_context.showMsgCtxMenu && <MessageContextMenu location={ctx_menu_context.ctxMsgMenuLocation} /> }
 						{ ctx_menu_context.showChannelCtxMenu && <ChannelContextMenu location={ctx_menu_context.ctxChannelMenuLocation} /> }
 						{ ctx_menu_context.showMemberCtxMenu && <MemberContextMenu location={ctx_menu_context.ctxMemberMenuLocation} /> }
