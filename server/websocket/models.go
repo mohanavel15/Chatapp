@@ -28,3 +28,9 @@ type Connections struct {
 	Users    map[string]*Ws
 	Channels map[string][]*Ws
 }
+
+type Channel struct {
+	Uuid string `json:"uuid"`
+	Name string `json:"name"`
+	Icon string `json:"icon"`
+}

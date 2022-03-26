@@ -87,6 +87,8 @@ func (ws *Ws) HandleQueue() {
 					BroadcastMessage(ws, *ws_message)
 				case "MESSAGE_DELETE":
 					BroadcastMessage(ws, *ws_message)
+				case "CHANNEL_MODIFY":
+					BroadcastChannel(ws, *ws_message)
 				}
 				ws.Conns.Queue = ws.Conns.Queue[1:]
 			}

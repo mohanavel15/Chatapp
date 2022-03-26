@@ -62,7 +62,52 @@ func ChannelCreate(ctx *websocket.Context) {
 	ctx.Send(res)
 }
 
-func ChannelModify(ctx *websocket.Context) {}
+func ChannelModify(ctx *websocket.Context) {
+	var channel_req websocket.Channel
+	json.Unmarshal(ctx.Data, &channel_req)
+
+	if channel_req.Name == "" && channel_req.Icon == "" {
+		return
+	}
+
+	var channel database.Channel
+	ctx.Db.Where("uuid = ?", channel_req.Uuid).First(&channel)
+
+	if channel.ID == 0 {
+		return
+	}
+
+	if channel.Owner != ctx.Ws.User.Uuid {
+		return
+	}
+
+	if channel_req.Name != "" {
+		channel.Name = channel_req.Name
+	}
+	if channel_req.Icon != "" {
+		channel.Icon = channel_req.Icon
+	}
+	channel.UpdatedAt = time.Now()
+	ctx.Db.Save(&channel)
+
+	res_channel := response.Channel{
+		Uuid:           channel.Uuid,
+		Name:           channel.Name,
+		Icon:           channel.Icon,
+		OwnerID:        channel.Owner,
+		PrivateChannel: channel.PrivateChannel,
+		CreatedAt:      channel.CreatedAt.String(),
+		UpdatedAt:      channel.UpdatedAt.String(),
+	}
+
+	ws_msg := websocket.WS_Message{
+		Event: "CHANNEL_MODIFY",
+		Data:  res_channel,
+	}
+
+	ctx.Broadcast(ws_msg)
+}
+
 func ChannelDelete(ctx *websocket.Context) {}
 
 func ChannelJoin(ctx *websocket.Context)   {}
