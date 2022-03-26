@@ -49,8 +49,12 @@ function Channel() {
 
 				if (payload.event === 'CHANNEL_CREATE') {
 					const channel: ChannelOBJ = payload.data;
-					channel_context.setChannels(prevChannels => prevChannels.set(channel.uuid, channel));
-					channel_context.setChannelsLoaded(!channel_context.channelsLoaded);
+					channel_context.setChannels(prevChannels => new Map(prevChannels.set(channel.uuid, channel)));
+				}
+
+				if (payload.event === 'CHANNEL_MODIFY') {
+					const channel: ChannelOBJ = payload.data;
+					channel_context.setChannels(prevChannels => new Map(prevChannels.set(channel.uuid, channel)));
 				}
 			}
 		};

@@ -45,7 +45,7 @@ export default function ChannelCTX({ children, gateway }: {children: React.React
 			}
 		}).then(res => {
 			res.data.forEach(channel => {
-				setChannels(prevChannels => prevChannels.set(channel.uuid, channel))
+				setChannels(prevChannels => new Map(prevChannels.set(channel.uuid, channel)))
 			})
 			setChannelsLoaded(true)
 		})
@@ -74,7 +74,7 @@ export default function ChannelCTX({ children, gateway }: {children: React.React
 					Authorization: localStorage.getItem("access_token") || ""
 				}
 			}).then(res => {
-				setMembers(prevMembers =>  prevMembers.set(channel, res.data))
+				setMembers(prevMembers =>  new Map(prevMembers.set(channel, res.data)))
 				setMembersLoaded(!membersLoaded)
 			})
 			console.log("Printing members.", members);
