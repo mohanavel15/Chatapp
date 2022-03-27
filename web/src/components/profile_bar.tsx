@@ -2,20 +2,18 @@
 //import { faMicrophone, faMicrophoneSlash, faVolumeHigh, faVolumeMute, faGear } from '@fortawesome/free-solid-svg-icons'
 import { useContext, useEffect } from "react";
 import { StatesContext, StateContext } from "../contexts/states";
+import { UserContextOBJ, UserContext } from "../contexts/usercontext";
 
 function ProfileBar() {
-    const username = localStorage.getItem('profile-username');
-    const avatar_ls = localStorage.getItem('profile-avatar');
-    let avatar: string | undefined = avatar_ls ? avatar_ls : undefined;
+    const user:UserContextOBJ = useContext(UserContext);
+
+    const username = user.username;
+    const avatar = user.avatar;
 
     const state_context: StateContext = useContext(StatesContext);
 
     function setDefaultAvatar(event : React.SyntheticEvent<HTMLImageElement, Event>) {
         event.currentTarget.src = "/assets/default_avatar.jpeg";
-    }
-
-    if (!avatar) {
-        avatar = "/assets/default_avatar.jpeg";
     }
 
     return (

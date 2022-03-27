@@ -2,7 +2,7 @@ import Picker, { IEmojiData } from 'emoji-picker-react';
 import React, { useState, useContext, useEffect, useRef } from 'react';
 import Message from './message';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCirclePlus, faFaceLaugh } from '@fortawesome/free-solid-svg-icons'
+import { faFaceLaugh } from '@fortawesome/free-solid-svg-icons'
 import ChannelHeader from './channel_header';
 import { ChannelOBJ, Msg_request } from '../models/models';
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
@@ -66,7 +66,7 @@ function Chat({ channel }: { channel: ChannelOBJ }) {
 							ctx_menu_context.setShowMsgCtxMenu(false);
 							ctx_menu_context.setShowChannelCtxMenu(false);
 							ctx_menu_context.setShowMemberCtxMenu(false);
-							ctx_menu_context.setMsgCtxMenuLocation({x: event.clientX, y: event.clientY, message: message});
+							ctx_menu_context.setMsgCtxMenuLocation({x: event.clientX, y: event.clientY, message: message, channel: channel});
 							ctx_menu_context.setShowMsgCtxMenu(true);
 						}
 					}>

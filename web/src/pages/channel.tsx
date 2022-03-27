@@ -94,7 +94,7 @@ function Channel() {
 
 	let currentChannel = channel_context.channels.get(channel_id);
 	if (!currentChannel) {
-		currentChannel = { uuid: "@me", name: "@me",icon: "", created_at: "", updated_at: ""};
+		currentChannel = { uuid: "@me", name: "@me",icon: "", owner_id: "", created_at: "", updated_at: ""};
 	}
 
 	useEffect(() => {

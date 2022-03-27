@@ -25,7 +25,7 @@ export default function MembersBar({ channel }: { channel: ChannelOBJ }) {
 					ctx_menu_context.setShowMsgCtxMenu(false);
 					ctx_menu_context.setShowChannelCtxMenu(false);
 					ctx_menu_context.setShowMemberCtxMenu(false);
-              		ctx_menu_context.setMemberCtxMenuLocation({event: event, member: member});
+              		ctx_menu_context.setMemberCtxMenuLocation({event: event, member: member, channel: channel});
 					ctx_menu_context.setShowMemberCtxMenu(true);
         	}
           }>
