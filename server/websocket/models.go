@@ -15,7 +15,7 @@ type Message struct {
 }
 
 type MessageDelete struct {
-	Uuid string `json:"content"`
+	Uuid string `json:"uuid"`
 }
 
 type MessageEdit struct {

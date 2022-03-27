@@ -218,14 +218,26 @@ func MessageDelete(ctx *websocket.Context) {
 		return
 	}
 
-	if get_message.AccountID != ctx.Ws.User.ID || get_channel.Owner != ctx.Ws.User.Uuid {
+	if get_message.AccountID != ctx.Ws.User.ID && get_channel.Owner != ctx.Ws.User.Uuid {
 		return
 	}
 
 	ctx.Db.Delete(get_message)
 
-	response := websocket.MessageDelete{
-		Uuid: get_message.Uuid,
+	response := response.Message{
+		Uuid:    get_message.Uuid,
+		Content: get_message.Content,
+		Channel: response.Channel{
+			Uuid:           get_channel.Uuid,
+			Name:           get_channel.Name,
+			Icon:           get_channel.Icon,
+			OwnerID:        get_channel.Owner,
+			PrivateChannel: get_channel.PrivateChannel,
+			CreatedAt:      get_channel.CreatedAt.String(),
+			UpdatedAt:      get_channel.UpdatedAt.String(),
+		},
+		CreatedAt: get_message.CreatedAt.String(),
+		EditedAt:  get_message.UpdatedAt.String(),
 	}
 
 	ws_msg := websocket.WS_Message{
