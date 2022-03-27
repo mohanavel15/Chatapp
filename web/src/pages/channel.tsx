@@ -11,6 +11,7 @@ import MembersBar from "../components/members_bar";
 import CreateChannel from "../components/createchannel";
 import EditChannel from '../components/editchannel';
 import DeleteChannel from "../components/deletechannel";
+import DeleteMessage from "../components/deletemessage";
 import { ContextMenuCtx, ContextMenu } from "../contexts/context_menu_ctx";
 import MessageContextMenu from '../contextmenu/message_context_menu';
 import ChannelContextMenu from "../contextmenu/channel_context_menu";
@@ -44,16 +45,31 @@ function Channel() {
 				if (payload.event === 'MESSAGE_CREATE') {
 					const message: MessageOBJ = payload.data;
 					const update_message = (prevMessages: Map<String, Map<String, MessageOBJ>>) => {
-						let channel_messages = prevMessages.get(channel_id);
+						let channel_messages = prevMessages.get(message.channel.uuid);
 						if (!channel_messages) {
 							channel_messages = new Map<String, MessageOBJ>();
 						}
 						channel_messages.set(message.uuid, message);
-						prevMessages.set(channel_id, new Map(channel_messages));
+						prevMessages.set(message.channel.uuid, new Map(channel_messages));
 						return prevMessages;
 					}
 					channel_context.setMessages(prevMessages => new Map(update_message(prevMessages)));
 				}
+
+				if (payload.event === 'MESSAGE_DELETE') {
+					const message: MessageOBJ = payload.data;
+					const update_message = (prevMessages: Map<String, Map<String, MessageOBJ>>) => {
+						let channel_messages = prevMessages.get(message.channel.uuid);
+						if (!channel_messages) {
+							channel_messages = new Map<String, MessageOBJ>();
+						}
+						channel_messages.delete(message.uuid);
+						prevMessages.set(message.channel.uuid, new Map(channel_messages));
+						return prevMessages;
+					}
+					channel_context.setMessages(prevMessages => new Map(update_message(prevMessages)));
+				}
+
 
 				if (payload.event === 'CHANNEL_CREATE') {
 					const channel: ChannelOBJ = payload.data;
@@ -139,6 +155,7 @@ function Channel() {
 						{ state_context.createChannel && <CreateChannel /> }
 						{ state_context.editChannel && <EditChannel /> }
 						{ state_context.deleteChannel && <DeleteChannel /> }
+						{ state_context.deleteMessage && <DeleteMessage /> }
 						{ ctx_menu_context.showMsgCtxMenu && <MessageContextMenu location={ctx_menu_context.ctxMsgMenuLocation} /> }
 						{ ctx_menu_context.showChannelCtxMenu && <ChannelContextMenu location={ctx_menu_context.ctxChannelMenuLocation} /> }
 						{ ctx_menu_context.showMemberCtxMenu && <MemberContextMenu location={ctx_menu_context.ctxMemberMenuLocation} /> }

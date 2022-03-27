@@ -1,5 +1,5 @@
 import React, { useState, createContext } from 'react'
-import { ChannelOBJ } from '../models/models';
+import { ChannelOBJ, MessageOBJ } from '../models/models';
 
 export interface StateContext {
     Mute: boolean;
@@ -9,6 +9,8 @@ export interface StateContext {
     editChannel: boolean;
     deleteChannel: boolean;
     ChannelOBJ: ChannelOBJ;
+    deleteMessage: boolean;
+    messageOBJ: MessageOBJ;
     setMute: React.Dispatch<React.SetStateAction<boolean>>;
     setDeafen: React.Dispatch<React.SetStateAction<boolean>>;
     setSettings: React.Dispatch<React.SetStateAction<boolean>>;
@@ -16,6 +18,8 @@ export interface StateContext {
     setEditChannel: React.Dispatch<React.SetStateAction<boolean>>;
     setDeleteChannel: React.Dispatch<React.SetStateAction<boolean>>;
     setChannelOBJ: React.Dispatch<React.SetStateAction<ChannelOBJ>>;
+    setDeleteMessage: React.Dispatch<React.SetStateAction<boolean>>;
+    setMessageOBJ: React.Dispatch<React.SetStateAction<MessageOBJ>>;
 }
 
 export const StatesContext = createContext<StateContext>(undefined!);
@@ -30,6 +34,9 @@ export function States({ children }: {children: React.ReactChild}) {
     const [deleteChannel, setDeleteChannel] = useState(false)
     const [ChannelOBJ, setChannelOBJ] = useState<ChannelOBJ>(undefined!)
 
+    const [deleteMessage, setDeleteMessage] = useState(false)
+    const [messageOBJ, setMessageOBJ] = useState<MessageOBJ>(undefined!)
+
     const context_value: StateContext = {
         Mute: Mute,
         Deafen: Deafen,
@@ -38,13 +45,17 @@ export function States({ children }: {children: React.ReactChild}) {
         editChannel: editChannel,
         deleteChannel: deleteChannel,
         ChannelOBJ: ChannelOBJ,
+        deleteMessage: deleteMessage,
+        messageOBJ: messageOBJ,
         setMute: setMute,
         setDeafen: setDeafen,
         setSettings: setSettings,
         setCreateChannel: setCreateChannel,
         setEditChannel: setEditChannel,
         setDeleteChannel: setDeleteChannel,
-        setChannelOBJ: setChannelOBJ
+        setChannelOBJ: setChannelOBJ,
+        setDeleteMessage: setDeleteMessage,
+        setMessageOBJ: setMessageOBJ
     }
 
     return (
