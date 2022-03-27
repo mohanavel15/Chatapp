@@ -13,9 +13,7 @@ export default function MembersBar({ channel }: { channel: ChannelOBJ }) {
 
   useEffect(() => {
     setMembers([])
-	console.log("channel id ......", channel_id);
     const member_objs = channel_context.members.get(channel_id);
-	console.log("member objs ......", member_objs);
     if (member_objs) {
 		member_objs.forEach(member => {
         	setMembers(prevMembers => [...prevMembers, 
@@ -25,7 +23,7 @@ export default function MembersBar({ channel }: { channel: ChannelOBJ }) {
 					ctx_menu_context.setShowMsgCtxMenu(false);
 					ctx_menu_context.setShowChannelCtxMenu(false);
 					ctx_menu_context.setShowMemberCtxMenu(false);
-              		ctx_menu_context.setMemberCtxMenuLocation({event: event, member: member, channel: channel});
+          ctx_menu_context.setMemberCtxMenuLocation({event: event, member: member, channel: channel});
 					ctx_menu_context.setShowMemberCtxMenu(true);
         	}
           }>
@@ -35,7 +33,7 @@ export default function MembersBar({ channel }: { channel: ChannelOBJ }) {
       	})
 	}
     
-  }, [channel_context.membersLoaded, channel])
+  }, [channel_context.members, channel])
 
   return (
     <div className='member_bar'>

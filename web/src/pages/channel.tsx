@@ -5,7 +5,7 @@ import { useContext, useEffect } from "react";
 import { StatesContext, StateContext } from "../contexts/states";
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 import Settings from "./settings"; 
-import { MessageOBJ, ChannelOBJ } from "../models/models";
+import { MessageOBJ, ChannelOBJ, MemberOBJ } from "../models/models";
 import { IMessageEvent } from "websocket";
 import MembersBar from "../components/members_bar";
 import CreateChannel from "../components/createchannel";
@@ -65,6 +65,24 @@ function Channel() {
 						return new_channels;
 					}
 					channel_context.setChannels(prevChannels => deleted_channel(prevChannels));
+				}
+
+				if (payload.event === 'MEMBER_UPDATE') {
+					const member: MemberOBJ = payload.data;
+					const update_member = (prevMembers: Map<String, Map<String, MemberOBJ>>) => {
+						let channel = prevMembers.get(member.channel_id);
+						if (channel === undefined) {
+							prevMembers.set(member.channel_id, new Map<String, MemberOBJ>());
+							channel = prevMembers.get(member.channel_id);
+						}
+
+						if (channel !== undefined) {
+							channel.set(member.uuid, member);
+							const members = prevMembers.set(member.channel_id, new Map(channel));
+							return members;
+						}
+					}
+					channel_context.setMembers(prevMembers => new Map(update_member(prevMembers)));
 				}
 			}
 		};

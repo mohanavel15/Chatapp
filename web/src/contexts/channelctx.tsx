@@ -10,8 +10,8 @@ export interface ChannelContext {
 	messages: MessageOBJ[];
 	setMessages: React.Dispatch<React.SetStateAction<MessageOBJ[]>>
 	
-	members: Map<String, MemberOBJ[]>;
-	setMembers: React.Dispatch<React.SetStateAction<Map<String, MemberOBJ[]>>>
+	members: Map<String, Map<String, MemberOBJ>>;
+	setMembers: React.Dispatch<React.SetStateAction<Map<String, Map<String, MemberOBJ>>>>
 	
 	channelsLoaded: boolean
 	setChannelsLoaded: React.Dispatch<React.SetStateAction<boolean>>
@@ -30,7 +30,8 @@ export const ChannelsContext = createContext<ChannelContext>(undefined!);
 export default function ChannelCTX({ children, gateway }: {children: React.ReactChild, gateway: W3CWebSocket}) {
 	
 	let [channels, setChannels] = useState<Map<String,ChannelOBJ>>(new Map<String,ChannelOBJ>());
-	let [members, setMembers] = useState<Map<String, MemberOBJ[]>>(new Map<String, MemberOBJ[]>());
+	//let [members, setMembers] = useState<Map<String, MemberOBJ[]>>(new Map<String, MemberOBJ[]>());
+	let [members, setMembers] = useState<Map<String, Map<String, MemberOBJ>>>(new Map<String, Map<String, MemberOBJ>>());
 	let [messages, setMessages] = useState<MessageOBJ[]>([])
 
 	let [channelsLoaded, setChannelsLoaded] = useState(false)
@@ -74,7 +75,9 @@ export default function ChannelCTX({ children, gateway }: {children: React.React
 					Authorization: localStorage.getItem("access_token") || ""
 				}
 			}).then(res => {
-				setMembers(prevMembers =>  new Map(prevMembers.set(channel, res.data)))
+				//setMembers(prevMembers =>  new Map(prevMembers.set(channel, res.data)))
+				setMembers(prevMembers =>  new Map(prevMembers.set(channel, new Map(res.data.map(member => [member.uuid, member])))))
+
 				setMembersLoaded(!membersLoaded)
 			})
 			console.log("Printing members.", members);
