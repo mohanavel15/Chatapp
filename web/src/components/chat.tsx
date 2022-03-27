@@ -4,7 +4,7 @@ import Message from './message';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFaceLaugh } from '@fortawesome/free-solid-svg-icons'
 import ChannelHeader from './channel_header';
-import { ChannelOBJ, Msg_request } from '../models/models';
+import { ChannelOBJ, Msg_request, MessageOBJ } from '../models/models';
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 import { ContextMenuCtx, ContextMenu } from "../contexts/context_menu_ctx";
 
@@ -22,8 +22,8 @@ function Chat({ channel }: { channel: ChannelOBJ }) {
 		setInput_message(prevInput => prevInput + data.emoji);
 		setShowPicker(false);
     };
-    
 
+	
     function onInputChange(event: React.ChangeEvent<HTMLInputElement>) {
 		const inputstr = event.target.value;
 		if (inputstr.length <= 150) {
@@ -56,11 +56,14 @@ function Chat({ channel }: { channel: ChannelOBJ }) {
 	
 	useEffect(() => {
 		setMessage_jsx([])
-		channel_context.messages.forEach(message => 
-			{
+		let msg_channel = channel_context.messages.get(channel.uuid);
+		if (!msg_channel) {
+			msg_channel = new Map<String, MessageOBJ>()
+		}
+		msg_channel.forEach((message, key) => {
 				if (message.channel.uuid === channel.uuid) {
 					setMessage_jsx(prevMessage =>  [...prevMessage, 
-					<div onContextMenu={
+					<div key={message.uuid} onContextMenu={
 						(event) => {
 							event.preventDefault();
 							ctx_menu_context.setShowMsgCtxMenu(false);
@@ -70,7 +73,7 @@ function Chat({ channel }: { channel: ChannelOBJ }) {
 							ctx_menu_context.setShowMsgCtxMenu(true);
 						}
 					}>
-					<Message key={message.uuid} 
+					<Message 
 					avatar={message.author.avatar} 
 					name={message.author.username} 
 					message={message.content} 
@@ -83,7 +86,7 @@ function Chat({ channel }: { channel: ChannelOBJ }) {
 					bottom_ref.current.scrollIntoView({ behavior: 'smooth' });
 				}
 			});
-	}, [channel_context.messagesLoaded, channel_context.messages, channel]);
+	}, [channel_context.messages, channel]);
 
     return (
         <div className="Chat">

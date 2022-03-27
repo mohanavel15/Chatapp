@@ -43,9 +43,16 @@ function Channel() {
 
 				if (payload.event === 'MESSAGE_CREATE') {
 					const message: MessageOBJ = payload.data;
-					channel_context.setMessages(prevMessages => [...prevMessages, message]);
-					console.log("Printing messages");
-					console.log(channel_context.messages);
+					const update_message = (prevMessages: Map<String, Map<String, MessageOBJ>>) => {
+						let channel_messages = prevMessages.get(channel_id);
+						if (!channel_messages) {
+							channel_messages = new Map<String, MessageOBJ>();
+						}
+						channel_messages.set(message.uuid, message);
+						prevMessages.set(channel_id, new Map(channel_messages));
+						return prevMessages;
+					}
+					channel_context.setMessages(prevMessages => new Map(update_message(prevMessages)));
 				}
 
 				if (payload.event === 'CHANNEL_CREATE') {
@@ -71,17 +78,14 @@ function Channel() {
 					const member: MemberOBJ = payload.data;
 					const update_member = (prevMembers: Map<String, Map<String, MemberOBJ>>) => {
 						let channel = prevMembers.get(member.channel_id);
-						if (channel === undefined) {
-							prevMembers.set(member.channel_id, new Map<String, MemberOBJ>());
-							channel = prevMembers.get(member.channel_id);
+						if (!channel) {
+							channel = new Map<String, MemberOBJ>();
 						}
-
-						if (channel !== undefined) {
-							channel.set(member.uuid, member);
-							const members = prevMembers.set(member.channel_id, new Map(channel));
-							return members;
-						}
+						channel.set(member.uuid, member);
+						const members = prevMembers.set(member.channel_id, new Map(channel));
+						return members;
 					}
+
 					channel_context.setMembers(prevMembers => new Map(update_member(prevMembers)));
 				}
 			}

@@ -14,7 +14,7 @@ export default function ChannelBar() {
 		const channels =  Array.from(channel_context.channels.values())
 		channels.forEach(channel => {
 			setChannels_element(prevElement => [...prevElement, 
-				<div onContextMenu={(event) => {
+				<div key={channel.uuid} onContextMenu={(event) => {
 					event.preventDefault();
 					ctx_menu_context.setShowMsgCtxMenu(false);
 					ctx_menu_context.setShowChannelCtxMenu(false);
@@ -22,7 +22,7 @@ export default function ChannelBar() {
 					ctx_menu_context.setChannelCtxMenuLocation({x: event.clientX, y: event.clientY, channel: channel})
 					ctx_menu_context.setShowChannelCtxMenu(true);
 				}}>
-				<ChannelList key={channel.uuid} id={channel.uuid} icon={channel.icon} name={channel.name} />
+				<ChannelList id={channel.uuid} icon={channel.icon} name={channel.name} />
 				</div>
 		])
 		})

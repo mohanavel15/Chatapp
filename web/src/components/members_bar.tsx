@@ -17,7 +17,7 @@ export default function MembersBar({ channel }: { channel: ChannelOBJ }) {
     if (member_objs) {
 		member_objs.forEach(member => {
         	setMembers(prevMembers => [...prevMembers, 
-          <div onContextMenu={
+          <div key={member.uuid} onContextMenu={
             (event) => {
               		event.preventDefault();
 					ctx_menu_context.setShowMsgCtxMenu(false);
@@ -27,7 +27,7 @@ export default function MembersBar({ channel }: { channel: ChannelOBJ }) {
 					ctx_menu_context.setShowMemberCtxMenu(true);
         	}
           }>
-          <Member key={member.uuid} member_obj={member} />
+          <Member member_obj={member} />
           </div>
         ])
       	})

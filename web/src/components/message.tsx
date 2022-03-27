@@ -1,7 +1,6 @@
 import React from "react";
 
 interface MessageProps {
-    key: string;
     message: string;
     avatar: string;
     name: string;

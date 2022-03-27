@@ -27,8 +27,6 @@ function Member({ member_obj }: {member_obj: MemberOBJ}) {
         }
     }
 
-    console.log("username:", member_obj.username, "owner:", member_obj.is_owner);
-
     return (
         <div className='member'>
             <div className='avatar-container'>
