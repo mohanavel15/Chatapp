@@ -94,3 +94,13 @@
   opacity: 0.5;
   cursor: pointer;
 }
+
+.EmojiPicker {
+  position: absolute;
+  bottom: 7rem;
+  right: 13rem;
+  height: 20rem;
+  width: 20rem;
+  background: none;
+  overflow: hidden;
+}

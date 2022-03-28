@@ -101,7 +101,7 @@ function Chat({ channel }: { channel: ChannelOBJ }) {
 				</button>
 				<input id="chat-text" type="text" placeholder="Type a message..." onKeyPress={updateChat} value={Input_message} onChange={onInputChange}/>
 			</div>
-			{showPicker && <Picker onEmojiClick={onEmojiClick} />}
+			{showPicker && <div className="EmojiPicker"><Picker onEmojiClick={onEmojiClick} /></div>}
         </div>
     );
   }

@@ -1,26 +1,34 @@
-import SideBar from "../components/sidebar";
-import Chat from "../components/chat";
 import { useParams } from "react-router-dom";
 import { useContext, useEffect } from "react";
-import { StatesContext, StateContext } from "../contexts/states";
-import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
-import Settings from "./settings"; 
-import { MessageOBJ, ChannelOBJ, MemberOBJ } from "../models/models";
 import { IMessageEvent } from "websocket";
+
+import { MessageOBJ, ChannelOBJ, MemberOBJ } from "../models/models";
+import Settings from "./settings"; 
+
+import SideBar from "../components/sidebar";
+import Chat from "../components/chat";
 import MembersBar from "../components/members_bar";
+
 import CreateChannel from "../components/createchannel";
 import EditChannel from '../components/editchannel';
 import DeleteChannel from "../components/deletechannel";
+
 import DeleteMessage from "../components/deletemessage";
-import { ContextMenuCtx, ContextMenu } from "../contexts/context_menu_ctx";
+
 import MessageContextMenu from '../contextmenu/message_context_menu';
 import ChannelContextMenu from "../contextmenu/channel_context_menu";
 import MemberContextMenu from "../contextmenu/member_context_menu";
+
+import { UserContextOBJ, UserContext } from "../contexts/usercontext";
+import { ContextMenuCtx, ContextMenu } from "../contexts/context_menu_ctx";
+import { StatesContext, StateContext } from "../contexts/states";
+import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 
 function Channel() {
 	const parameter  = useParams<string>();
 	let channel_id = parameter.id || "@me";
 
+    const user_ctx:UserContextOBJ = useContext(UserContext);
 	const state_context: StateContext = useContext(StatesContext);
 	const channel_context: ChannelContext = useContext(ChannelsContext);
 	const ctx_menu_context: ContextMenuCtx = useContext(ContextMenu);
@@ -32,9 +40,9 @@ function Channel() {
 			if (typeof data === "string") {
 			const payload = JSON.parse(data);
 				if (payload.event === 'READY') {
-					localStorage.setItem('profile-uuid', payload.data.uuid);
-					localStorage.setItem('profile-username', payload.data.username);
-					localStorage.setItem('profile-avatar', payload.data.avatar);
+					user_ctx.setUuid(payload.data.user.uuid);
+					user_ctx.setUsername(payload.data.username);
+					user_ctx.setAvatar(payload.data.avatar);
 				}
 
 				if (payload.event === 'INVAILD_SESSION') {

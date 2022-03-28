@@ -24,8 +24,8 @@ export default function MemberContextMenu(props:propsMsgCtxProps) {
         <div className='ContextMenu' style={style}>
             <button className='CtxBtn'>Profile</button>
             <button className='CtxBtn'>Metion</button>
-            { channel.owner_id == user_ctx.uuid && <button className='CtxDelBtn'>Kick {props.location.member.username}</button> }
-            { channel.owner_id == user_ctx.uuid && <button className='CtxDelBtn'>Ban {props.location.member.username}</button> }
+            { channel.owner_id == user_ctx.uuid && props.location.member.uuid !== user_ctx.uuid && <button className='CtxDelBtn'>Kick {props.location.member.username}</button> }
+            { channel.owner_id == user_ctx.uuid && props.location.member.uuid !== user_ctx.uuid && <button className='CtxDelBtn'>Ban {props.location.member.username}</button> }
             <button className='CtxBtn' onClick={() => {navigator.clipboard.writeText(props.location.member.uuid)}}>Copy ID</button>
         </div>
     )
