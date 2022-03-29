@@ -11,7 +11,7 @@ function Login() {
   useEffect(() => {
     const access_token = localStorage.getItem("access_token");
     if (access_token !== null && access_token !== "" && access_token !== "undefined" && access_token !== undefined) {
-      navigate("/channels/123");
+      navigate("/channels/@me");
     }
   });
 

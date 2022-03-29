@@ -67,9 +67,7 @@ export default function ChannelCTX({ children, gateway }: {children: React.React
 					Authorization: localStorage.getItem("access_token") || ""
 				}
 			}).then(res => {
-				//setMembers(prevMembers =>  new Map(prevMembers.set(channel, res.data)))
 				setMembers(prevMembers =>  new Map(prevMembers.set(channel, new Map(res.data.map(member => [member.uuid, member])))))
-
 				setMembersLoaded(!membersLoaded)
 			})
 		})

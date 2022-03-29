@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { useContext, useEffect } from "react";
 import { IMessageEvent } from "websocket";
 
-import { MessageOBJ, ChannelOBJ, MemberOBJ } from "../models/models";
+import { MessageOBJ, ChannelOBJ, MemberOBJ, UserOBJ } from "../models/models";
 import Settings from "./settings"; 
 
 import SideBar from "../components/sidebar";
@@ -24,6 +24,51 @@ import { ContextMenuCtx, ContextMenu } from "../contexts/context_menu_ctx";
 import { StatesContext, StateContext } from "../contexts/states";
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 
+const add_or_update_message = (messages: Map<String, Map<String, MessageOBJ>>, message: MessageOBJ) => {
+	let channel = messages.get(message.channel.uuid);
+	if (!channel) {
+		channel = new Map<String, MessageOBJ>();
+	}
+	channel.set(message.uuid, message);
+	messages.set(message.channel.uuid, new Map(channel));
+	return messages;
+}
+
+const delete_message = (messages: Map<String, Map<String, MessageOBJ>>, message: MessageOBJ) => {
+	let channel = messages.get(message.channel.uuid);
+	if (!channel) {
+		channel = new Map<String, MessageOBJ>();
+	}
+	channel.delete(message.uuid);
+	messages.set(message.channel.uuid, new Map(channel));
+	return messages;
+}
+
+const delete_channel = (channels: Map<String, ChannelOBJ>, channel: ChannelOBJ) => {
+	channels.delete(channel.uuid);
+	return channels;
+}
+
+const add_or_update_member = (members: Map<String, Map<String, MemberOBJ>>, member: MemberOBJ) => {
+	let channel = members.get(member.channel_id);
+	if (!channel) {
+		channel = new Map<String, MemberOBJ>();
+	}
+	channel.set(member.uuid, member);
+	members.set(member.channel_id, new Map(channel));
+	return members;
+}
+
+const delete_member = (members: Map<String, Map<String, MemberOBJ>>, member: MemberOBJ) => {
+	let channel = members.get(member.channel_id);
+	if (!channel) {
+		channel = new Map<String, MemberOBJ>();
+	}
+	channel.delete(member.uuid);
+	members.set(member.channel_id, new Map(channel));
+	return members;
+}
+
 function Channel() {
 	const parameter  = useParams<string>();
 	let channel_id = parameter.id || "@me";
@@ -38,11 +83,12 @@ function Channel() {
 			console.log(message);
 			const data = message.data;
 			if (typeof data === "string") {
-			const payload = JSON.parse(data);
+				const payload = JSON.parse(data);
 				if (payload.event === 'READY') {
-					user_ctx.setUuid(payload.data.user.uuid);
-					user_ctx.setUsername(payload.data.username);
-					user_ctx.setAvatar(payload.data.avatar);
+					const user: UserOBJ = payload.data;
+					user_ctx.setUuid(user.uuid);
+					user_ctx.setUsername(user.username);
+					user_ctx.setAvatar(user.avatar);
 				}
 
 				if (payload.event === 'INVAILD_SESSION') {
@@ -50,67 +96,29 @@ function Channel() {
 					window.location.href = '/';
 				}
 
-				if (payload.event === 'MESSAGE_CREATE') {
+				if (payload.event === 'MESSAGE_CREATE' || payload.event === 'MESSAGE_MODIFY') {
 					const message: MessageOBJ = payload.data;
-					const update_message = (prevMessages: Map<String, Map<String, MessageOBJ>>) => {
-						let channel_messages = prevMessages.get(message.channel.uuid);
-						if (!channel_messages) {
-							channel_messages = new Map<String, MessageOBJ>();
-						}
-						channel_messages.set(message.uuid, message);
-						prevMessages.set(message.channel.uuid, new Map(channel_messages));
-						return prevMessages;
-					}
-					channel_context.setMessages(prevMessages => new Map(update_message(prevMessages)));
+					channel_context.setMessages(prevMessages => new Map(add_or_update_message(prevMessages, message)));
 				}
 
 				if (payload.event === 'MESSAGE_DELETE') {
 					const message: MessageOBJ = payload.data;
-					const update_message = (prevMessages: Map<String, Map<String, MessageOBJ>>) => {
-						let channel_messages = prevMessages.get(message.channel.uuid);
-						if (!channel_messages) {
-							channel_messages = new Map<String, MessageOBJ>();
-						}
-						channel_messages.delete(message.uuid);
-						prevMessages.set(message.channel.uuid, new Map(channel_messages));
-						return prevMessages;
-					}
-					channel_context.setMessages(prevMessages => new Map(update_message(prevMessages)));
+					channel_context.setMessages(prevMessages => new Map(delete_message(prevMessages, message)));
 				}
 
-
-				if (payload.event === 'CHANNEL_CREATE') {
-					const channel: ChannelOBJ = payload.data;
-					channel_context.setChannels(prevChannels => new Map(prevChannels.set(channel.uuid, channel)));
-				}
-
-				if (payload.event === 'CHANNEL_MODIFY') {
+				if (payload.event === 'CHANNEL_CREATE' || payload.event === 'CHANNEL_MODIFY') {
 					const channel: ChannelOBJ = payload.data;
 					channel_context.setChannels(prevChannels => new Map(prevChannels.set(channel.uuid, channel)));
 				}
 
 				if (payload.event === 'CHANNEL_DELETE') {
-					const deleted_channel = (prevChannels: Map<String, ChannelOBJ>) => {
-						const new_channels = new Map(prevChannels);
-						new_channels.delete(payload.data.uuid);
-						return new_channels;
-					}
-					channel_context.setChannels(prevChannels => deleted_channel(prevChannels));
+					const channel: ChannelOBJ = payload.data;
+					channel_context.setChannels(prevChannels => delete_channel(prevChannels, channel));
 				}
 
-				if (payload.event === 'MEMBER_UPDATE') {
+				if (payload.event === 'MEMBER_JOIN' || payload.event === 'MEMBER_UPDATE') {
 					const member: MemberOBJ = payload.data;
-					const update_member = (prevMembers: Map<String, Map<String, MemberOBJ>>) => {
-						let channel = prevMembers.get(member.channel_id);
-						if (!channel) {
-							channel = new Map<String, MemberOBJ>();
-						}
-						channel.set(member.uuid, member);
-						const members = prevMembers.set(member.channel_id, new Map(channel));
-						return members;
-					}
-
-					channel_context.setMembers(prevMembers => new Map(update_member(prevMembers)));
+					channel_context.setMembers(prevMembers => new Map(add_or_update_member(prevMembers, member)));
 				}
 			}
 		};
@@ -145,9 +153,7 @@ function Channel() {
 
 	useEffect(() => {
 		const handleClick = () => { 
-			ctx_menu_context.setShowMsgCtxMenu(false);
-			ctx_menu_context.setShowChannelCtxMenu(false);
-			ctx_menu_context.setShowMemberCtxMenu(false);
+			ctx_menu_context.closeAll();
 		};
 		window.addEventListener('click', handleClick);
 		return () => window.removeEventListener('click', handleClick);
@@ -158,8 +164,12 @@ function Channel() {
 			{ !state_context.Settings && 
 					<>
 						<SideBar />
-						<Chat channel={currentChannel} />
-						<MembersBar channel={currentChannel} />
+						{ currentChannel.uuid !== "@me" &&
+							<>
+								<Chat channel={currentChannel} />
+								<MembersBar channel={currentChannel} />
+							</>
+						}
 						{ state_context.createChannel && <CreateChannel /> }
 						{ state_context.editChannel && <EditChannel /> }
 						{ state_context.deleteChannel && <DeleteChannel /> }

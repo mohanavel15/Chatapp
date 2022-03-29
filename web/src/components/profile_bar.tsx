@@ -1,5 +1,3 @@
-//import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-//import { faMicrophone, faMicrophoneSlash, faVolumeHigh, faVolumeMute, faGear } from '@fortawesome/free-solid-svg-icons'
 import { useContext, useEffect } from "react";
 import { StatesContext, StateContext } from "../contexts/states";
 import { UserContextOBJ, UserContext } from "../contexts/usercontext";

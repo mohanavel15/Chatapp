@@ -17,6 +17,7 @@ export interface ContextMenuCtx {
     setShowMemberCtxMenu: React.Dispatch<React.SetStateAction<boolean>>;
     setMemberCtxMenuLocation: React.Dispatch<React.SetStateAction<{event: React.MouseEvent<HTMLDivElement, MouseEvent>, member: MemberOBJ, channel:ChannelOBJ}>>;
 
+    closeAll: () => void;
 }
 
 export const ContextMenu = createContext<ContextMenuCtx>(undefined!);
@@ -30,6 +31,12 @@ export function CtxMenuCtx({ children }: {children: React.ReactChild}) {
 
     const [showMemberCtxMenu, setShowMemberCtxMenu] = useState(false);
 	const [ctxMemberMenuLocation, setMemberCtxMenuLocation] = useState<{event: React.MouseEvent<HTMLDivElement, MouseEvent>, member:MemberOBJ, channel:ChannelOBJ}>(undefined!);
+
+    function closeAll() {
+        setShowMsgCtxMenu(false);
+        setShowChannelCtxMenu(false);
+        setShowMemberCtxMenu(false);
+    }
 
     const context_value: ContextMenuCtx = {
 		showMsgCtxMenu: showMsgCtxMenu,
@@ -45,7 +52,9 @@ export function CtxMenuCtx({ children }: {children: React.ReactChild}) {
         showMemberCtxMenu: showMemberCtxMenu,
         ctxMemberMenuLocation: ctxMemberMenuLocation,
         setShowMemberCtxMenu: setShowMemberCtxMenu,
-        setMemberCtxMenuLocation: setMemberCtxMenuLocation
+        setMemberCtxMenuLocation: setMemberCtxMenuLocation,
+
+        closeAll: closeAll
     }
 
     return (
