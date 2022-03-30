@@ -71,7 +71,12 @@ func Connect(ctx *websocket.Context) {
 			ID: channel_id.ChannelID,
 		}
 		ctx.Db.Where(&channel).First(&channel)
-		ctx.Ws.Conns.Channels[channel.Uuid] = append(ctx.Ws.Conns.Channels[channel.Uuid], ctx.Ws)
+
+		_, ok := ctx.Ws.Conns.Channels[channel.Uuid]
+		if !ok {
+			ctx.Ws.Conns.Channels[channel.Uuid] = make(map[string]*websocket.Ws)
+		}
+		ctx.Ws.Conns.Channels[channel.Uuid][get_user.Uuid] = ctx.Ws
 
 		member.ChannelID = channel.Uuid
 		member.Is_Owner = channel.Owner == get_user.Uuid

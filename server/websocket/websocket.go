@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"Chatapp/database"
+	"Chatapp/response"
 
 	"github.com/gorilla/websocket"
 	"gorm.io/gorm"
@@ -40,6 +41,49 @@ func (ws *Ws) ReadLoop() {
 		if err != nil {
 			log.Println(err)
 			if ws.User != nil {
+				member := response.Member{
+					Uuid:      ws.User.Uuid,
+					Avatar:    ws.User.Avatar,
+					Username:  ws.User.Username,
+					Status:    0,
+					CreatedAt: ws.User.CreatedAt.String(),
+				}
+				var member_of []database.Member
+				ws.Db.Where("account_id = ?", ws.User.ID).Find(&member_of)
+				for _, channel_id := range member_of {
+
+					channel := database.Channel{
+						ID: channel_id.ChannelID,
+					}
+
+					ws.Db.Where(&channel).First(&channel)
+					fmt.Println(channel.Name)
+
+					members, ok := ws.Conns.Channels[channel.Uuid]
+					if !ok {
+						continue
+					}
+
+					member.ChannelID = channel.Uuid
+					member.Is_Owner = channel.Owner == ws.User.Uuid
+					member.JoinedAt = channel_id.CreatedAt.String()
+
+					ws_msg := WS_Message{
+						Event: "MEMBER_UPDATE",
+						Data:  member,
+					}
+
+					res_member, err := json.Marshal(ws_msg)
+					if err != nil {
+						return
+					}
+
+					for _, member := range members {
+						member.Write(res_member)
+					}
+
+					delete(members, ws.User.Uuid)
+				}
 				delete(ws.Conns.Users, ws.User.Uuid)
 			}
 			return

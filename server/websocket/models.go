@@ -26,7 +26,7 @@ type MessageEdit struct {
 type Connections struct {
 	Queue    []*WS_Message
 	Users    map[string]*Ws
-	Channels map[string][]*Ws
+	Channels map[string]map[string]*Ws
 }
 
 type Channel struct {

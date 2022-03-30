@@ -22,7 +22,7 @@ var handler *websocket.EventHandler
 
 var queue = []*websocket.WS_Message{}
 var onlineUsers = make(map[string]*websocket.Ws)
-var channels = make(map[string][]*websocket.Ws)
+var channels = make(map[string]map[string]*websocket.Ws)
 
 // Environment Variables
 var (
