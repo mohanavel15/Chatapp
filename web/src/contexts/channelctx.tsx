@@ -1,6 +1,6 @@
 import React, { useState, createContext, useEffect } from 'react'
-import { ChannelOBJ, MessageOBJ, UserOBJ, MemberOBJ } from '../models/models'
-import { w3cwebsocket as W3CWebSocket, IMessageEvent } from "websocket";
+import { ChannelOBJ, MessageOBJ, MemberOBJ } from '../models/models'
+import { w3cwebsocket as W3CWebSocket } from "websocket";
 import axios from 'axios'
 
 export interface ChannelContext {
@@ -28,9 +28,6 @@ export default function ChannelCTX({ children, gateway }: {children: React.React
 	let [messages, setMessages] = useState<Map<String, Map<String, MessageOBJ>>>(new Map<String, Map<String, MessageOBJ>>())
 
 	let [channelsLoaded, setChannelsLoaded] = useState(false)
-	let [membersLoaded, setMembersLoaded] = useState(false)
-	let [messagesLoaded, setMessagesLoaded] = useState(false)
-
 
 	useEffect(() => {
 		axios.get<ChannelOBJ[]>('http://127.0.0.1:5000/users/@me/channels', {
@@ -54,7 +51,6 @@ export default function ChannelCTX({ children, gateway }: {children: React.React
 				}
 			}).then(res => {
 				setMessages(prevMsgs =>  new Map(prevMsgs.set(channel, new Map(res.data.map(msgs => [msgs.uuid, msgs])))))
-				setMessagesLoaded(!messagesLoaded)
 			})
 		})
 	} , [channelsLoaded])
@@ -68,7 +64,6 @@ export default function ChannelCTX({ children, gateway }: {children: React.React
 				}
 			}).then(res => {
 				setMembers(prevMembers =>  new Map(prevMembers.set(channel, new Map(res.data.map(member => [member.uuid, member])))))
-				setMembersLoaded(!membersLoaded)
 			})
 		})
 	} , [channelsLoaded])

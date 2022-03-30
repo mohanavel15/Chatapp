@@ -7,13 +7,11 @@ import { ContextMenuCtx, ContextMenu } from "../contexts/context_menu_ctx";
 export default function MembersBar({ channel }: { channel: ChannelOBJ }) {
 	const channel_context: ChannelContext = useContext(ChannelsContext);
 	const ctx_menu_context: ContextMenuCtx = useContext(ContextMenu);
-
-	let channel_id = channel.uuid;
 	const [members, setMembers] = useState<JSX.Element[]>([]);
 
   	useEffect(() => {
     	setMembers([])
-    	const member_objs = channel_context.members.get(channel_id);
+    	const member_objs = channel_context.members.get(channel.uuid);
     	if (member_objs) {
 			member_objs.forEach(member => {
         		setMembers(prevMembers => [...prevMembers, 

@@ -24,7 +24,7 @@ export default function ChannelBar() {
 				</div>
 		])
 		})
-	}, [channel_context.channels, channel_context.channelsLoaded])
+	}, [channel_context.channels])
 
 	return (
 		<div className='ChannelBar'>

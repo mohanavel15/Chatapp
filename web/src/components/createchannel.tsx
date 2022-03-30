@@ -1,9 +1,11 @@
 import { useContext, useRef } from "react";
 import { StatesContext, StateContext } from "../contexts/states";
 import { ChannelsContext, ChannelContext } from '../contexts/channelctx';
+import { UserContextOBJ, UserContext } from "../contexts/usercontext";
 
 export default function CreateChannel() {
-    const username = localStorage.getItem('profile-username')?.toString();
+    const user:UserContextOBJ = useContext(UserContext);
+
     const state_context: StateContext = useContext(StatesContext);
     const channel_context: ChannelContext = useContext(ChannelsContext);
 
@@ -31,7 +33,7 @@ export default function CreateChannel() {
             <div className='create-channel'>
                 <button className="create-channel-close-button" onClick={(e) => {e.preventDefault(); state_context.setCreateChannel(false) }}>X</button>
                 <div className="create-channel-input-container">
-                    <input className="create-channel-input" ref={channel_name} type="text" placeholder="Channel Name" defaultValue={`${username}'s channel`}/>
+                    <input className="create-channel-input" ref={channel_name} type="text" placeholder="Channel Name" defaultValue={`${user.username}'s channel`}/>
                     <input className="create-channel-input" ref={channel_icon} type="text" placeholder="Url For Channel Icon"/>
                 </div>
                 <button className="create-channel-create-button" onClick={HandleCreateChannel}>Create</button>

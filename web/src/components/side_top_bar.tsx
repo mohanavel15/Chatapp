@@ -32,7 +32,7 @@ function SideTopBar() {
             <input id="InviteCode" type="text" placeholder="Invite Code" ref={InviteCode} />
             <button id="STB_Button" onClick={JoinChannel}>Join Channel</button>
             <button id="STB_Button" onClick={(e) => {e.preventDefault(); state_context.setCreateChannel(true) }}>Create Channel</button>
-            <button id="STB_Button" onClick={(e) => {e.preventDefault(); navegate("/channels/friends") }}>Friends</button>
+            <button id="STB_Button" onClick={(e) => {e.preventDefault(); navegate("/channels/@me") }}>Friends</button>
         </div>
   )
 }

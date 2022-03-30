@@ -113,12 +113,17 @@ function Channel() {
 
 				if (payload.event === 'CHANNEL_DELETE') {
 					const channel: ChannelOBJ = payload.data;
-					channel_context.setChannels(prevChannels => delete_channel(prevChannels, channel));
+					channel_context.setChannels(prevChannels => new Map(delete_channel(prevChannels, channel)));
 				}
 
 				if (payload.event === 'MEMBER_JOIN' || payload.event === 'MEMBER_UPDATE') {
 					const member: MemberOBJ = payload.data;
 					channel_context.setMembers(prevMembers => new Map(add_or_update_member(prevMembers, member)));
+				}
+
+				if (payload.event === 'MEMBER_REMOVE') {
+					const member: MemberOBJ = payload.data;
+					channel_context.setMembers(prevMembers => new Map(delete_member(prevMembers, member)));
 				}
 			}
 		};
