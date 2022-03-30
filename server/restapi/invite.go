@@ -3,6 +3,7 @@ package restapi
 import (
 	"Chatapp/database"
 	"Chatapp/response"
+	"Chatapp/websocket"
 	"encoding/json"
 	"net/http"
 	"time"
@@ -35,13 +36,13 @@ func JoinInvite(ctx *Context) {
 		return
 	}
 
-	members := database.Member{
+	member := database.Member{
 		ChannelID: channel.ID,
 		AccountID: user.ID,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
-	db.Create(&members)
+	db.Create(&member)
 
 	res := response.Channel{
 		Uuid:           channel.Uuid,
@@ -61,6 +62,30 @@ func JoinInvite(ctx *Context) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(res_obj)
+
+	res_member := response.Member{
+		Uuid:      user.Uuid,
+		Username:  user.Username,
+		Avatar:    user.Avatar,
+		Is_Owner:  channel.Owner == user.Uuid,
+		Status:    1,
+		ChannelID: channel.Uuid,
+		CreatedAt: user.CreatedAt.String(),
+		JoinedAt:  member.CreatedAt.String(),
+	}
+
+	ws_msg := websocket.WS_Message{
+		Event: "MEMBER_JOIN",
+		Data:  res_member,
+	}
+
+	ws_res, _ := json.Marshal(ws_msg)
+
+	if members, ok := ctx.Conn.Channels[channel.Uuid]; ok {
+		for _, member := range members {
+			member.Write(ws_res)
+		}
+	}
 }
 
 func GetInvites(ctx *Context) {

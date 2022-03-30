@@ -150,6 +150,29 @@ func ChannelDelete(ctx *websocket.Context) {
 	res, _ := json.Marshal(ws_msg_user)
 
 	ctx.Send(res)
+
+	res_member := response.Member{
+		Uuid:      ctx.Ws.User.Uuid,
+		Username:  ctx.Ws.User.Username,
+		Avatar:    ctx.Ws.User.Avatar,
+		Is_Owner:  channel.Owner == ctx.Ws.User.Uuid,
+		Status:    1,
+		ChannelID: channel.Uuid,
+		CreatedAt: ctx.Ws.User.CreatedAt.String(),
+		JoinedAt:  member.CreatedAt.String(),
+	}
+
+	ws_msg := websocket.WS_Message{
+		Event: "MEMBER_REMOVE",
+		Data:  res_member,
+	}
+
+	ws_res, _ := json.Marshal(ws_msg)
+	if members, ok := ctx.Ws.Conns.Channels[channel.Uuid]; ok {
+		for _, member := range members {
+			member.Write(ws_res)
+		}
+	}
 }
 
 func ChannelJoin(ctx *websocket.Context) {}

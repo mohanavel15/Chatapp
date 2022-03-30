@@ -57,7 +57,6 @@ func (ws *Ws) ReadLoop() {
 					}
 
 					ws.Db.Where(&channel).First(&channel)
-					fmt.Println(channel.Name)
 
 					members, ok := ws.Conns.Channels[channel.Uuid]
 					if !ok {
