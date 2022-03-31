@@ -3,11 +3,13 @@ import React, { useRef, useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChannelsContext, ChannelContext } from '../contexts/channelctx';
 import { StatesContext, StateContext } from "../contexts/states";
+import { UserContextOBJ, UserContext } from "../contexts/usercontext";
 
 function SideTopBar() {
     const navegate = useNavigate();
     const InviteCode = useRef<HTMLInputElement>(undefined!);
 
+    const user_ctx:UserContextOBJ = useContext(UserContext);
     const state_context: StateContext = useContext(StatesContext);
     const channel_context: ChannelContext = useContext(ChannelsContext);
 
@@ -16,7 +18,7 @@ function SideTopBar() {
         const inv_code = InviteCode.current.value
         axios.get(`http://127.0.0.1:5000/invites/${inv_code}`, {
             headers: {
-				Authorization: localStorage.getItem("access_token") || ""
+				Authorization: user_ctx.accessToken
 			}
         }).then(res => {
             if (res.status === 200) {
