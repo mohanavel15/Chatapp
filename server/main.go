@@ -113,8 +113,8 @@ func main() {
 	// Friends
 	router.HandleFunc("/users/@me/friends", Authenticated(restapi.GetFriends)).Methods("GET")
 	router.HandleFunc("/users/@me/friends", Authenticated(restapi.AddOrAcceptFriend)).Methods("POST")
-	// router.HandleFunc("/users/@me/friends/{fid}", Authenticated(restapi.GetFriend)).Methods("GET")
-	// router.HandleFunc("/users/@me/friends/{fid}", Authenticated(restapi.DeleteFriend)).Methods("DELETE")
+	router.HandleFunc("/users/@me/friends/{fid}", Authenticated(restapi.GetFriend)).Methods("GET")
+	router.HandleFunc("/users/@me/friends/{fid}", Authenticated(restapi.RemoveOrDeclineFriend)).Methods("DELETE")
 
 	// Gateway
 	router.HandleFunc("/ws", Gateway)

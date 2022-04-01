@@ -6,6 +6,8 @@ import (
 	"Chatapp/response"
 	"encoding/json"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 func GetFriends(ctx *Context) {
@@ -127,4 +129,109 @@ func AddOrAcceptFriend(ctx *Context) {
 
 	db.Create(&friend)
 	w.WriteHeader(http.StatusOK)
+}
+
+func GetFriend(ctx *Context) {
+	url_vars := mux.Vars(ctx.Req)
+	friend_id := url_vars["fid"]
+
+	friend_user := database.Account{
+		Uuid: friend_id,
+	}
+
+	ctx.Db.Where(&friend_user).First(&friend_user)
+	if friend_user.ID == 0 {
+		ctx.Res.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	friend_check := database.Friend{
+		FromUser: ctx.User.ID,
+		ToUser:   friend_user.ID,
+	}
+	ctx.Db.Where(&friend_check).First(&friend_check)
+
+	friend_check2 := database.Friend{
+		FromUser: friend_user.ID,
+		ToUser:   ctx.User.ID,
+	}
+
+	ctx.Db.Where(&friend_check2).First(&friend_check2)
+
+	if friend_check.ID == 0 && friend_check2.ID == 0 {
+		ctx.Res.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	res_friend := response.Friend{
+		User: response.User{
+			Uuid:      friend_user.Uuid,
+			Username:  friend_user.Username,
+			Avatar:    friend_user.Avatar,
+			CreatedAt: friend_user.CreatedAt.String(),
+			UpdatedAt: friend_user.UpdatedAt.String(),
+		},
+		Pending:  false,
+		Incoming: false,
+	}
+
+	if friend_check.ID == 0 || friend_check2.ID == 0 {
+		res_friend.Pending = true
+	}
+
+	if friend_check.ID == 0 && friend_check2.ID != 0 {
+		res_friend.Incoming = true
+	}
+
+	res, err := json.Marshal(res_friend)
+	if err != nil {
+		ctx.Res.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	ctx.Res.Header().Set("Content-Type", "application/json")
+	ctx.Res.Write(res)
+}
+
+func RemoveOrDeclineFriend(ctx *Context) {
+	url_vars := mux.Vars(ctx.Req)
+	friend_id := url_vars["fid"]
+
+	friend_user := database.Account{
+		Uuid: friend_id,
+	}
+
+	ctx.Db.Where(&friend_user).First(&friend_user)
+	if friend_user.ID == 0 {
+		ctx.Res.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	friend_check := database.Friend{
+		FromUser: ctx.User.ID,
+		ToUser:   friend_user.ID,
+	}
+	ctx.Db.Where(&friend_check).First(&friend_check)
+
+	friend_check2 := database.Friend{
+		FromUser: friend_user.ID,
+		ToUser:   ctx.User.ID,
+	}
+
+	ctx.Db.Where(&friend_check2).First(&friend_check2)
+
+	if friend_check.ID == 0 && friend_check2.ID == 0 {
+		ctx.Res.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	if friend_check.ID != 0 {
+		ctx.Db.Delete(&friend_check)
+	}
+
+	if friend_check2.ID != 0 {
+		ctx.Db.Delete(&friend_check2)
+	}
+
+	ctx.Res.WriteHeader(http.StatusOK)
 }
