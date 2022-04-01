@@ -60,3 +60,11 @@ type Invites struct {
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 }
+
+type Friend struct {
+	ID        uint `gorm:"primarykey"`
+	FromUser  uint `gorm:"type:int;not null"`
+	ToUser    uint `gorm:"type:int;not null"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}

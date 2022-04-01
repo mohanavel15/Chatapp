@@ -56,6 +56,7 @@ func main() {
 	db.AutoMigrate(&database.Channel{})
 	db.AutoMigrate(&database.Member{})
 	db.AutoMigrate(&database.Invites{})
+	db.AutoMigrate(&database.Friend{})
 
 	handler = &websocket.EventHandler{}
 	handler.Add("CONNECT", gateway.Connect)
@@ -109,10 +110,9 @@ func main() {
 	router.HandleFunc("/users/@me", Authenticated(restapi.EditUser)).Methods("PATCH")
 	router.HandleFunc("/users/@me/channels", Authenticated(restapi.GetChannels)).Methods("GET")
 	router.HandleFunc("/users/@me/channels", Authenticated(restapi.CreateChannel)).Methods("POST")
-
 	// Friends
-	// router.HandleFunc("/users/@me/friends", Authenticated(restapi.GetFriends)).Methods("GET")
-	// router.HandleFunc("/users/@me/friends", Authenticated(restapi.AddFriend)).Methods("POST")
+	router.HandleFunc("/users/@me/friends", Authenticated(restapi.GetFriends)).Methods("GET")
+	router.HandleFunc("/users/@me/friends", Authenticated(restapi.AddOrAcceptFriend)).Methods("POST")
 	// router.HandleFunc("/users/@me/friends/{fid}", Authenticated(restapi.GetFriend)).Methods("GET")
 	// router.HandleFunc("/users/@me/friends/{fid}", Authenticated(restapi.DeleteFriend)).Methods("DELETE")
 
