@@ -1,6 +1,6 @@
 import { createContext, useEffect, useState } from "react";
 import axios from "axios";
-import { UserOBJ } from "../models/models";
+import { UserOBJ, FriendOBJ } from "../models/models";
 export interface UserContextOBJ {
     uuid: string;
     username: string;
@@ -10,6 +10,9 @@ export interface UserContextOBJ {
     setUsername:React.Dispatch<React.SetStateAction<string>>;
     setAvatar:React.Dispatch<React.SetStateAction<string>>;
     setAccessToken:React.Dispatch<React.SetStateAction<string>>;
+
+    friends: Map<String,FriendOBJ>;
+	setFriends: React.Dispatch<React.SetStateAction<Map<String, FriendOBJ>>>
 }
 
 export const UserContext = createContext<UserContextOBJ>(undefined!);
@@ -20,6 +23,7 @@ function UserCTX({ children }: { children: React.ReactChild }) {
     const [username, setUsername] = useState<string>("");
     const [avatar, setAvatar] = useState<string>("");
     const [accessToken, setAccessToken] = useState<string>("");
+	let [friends, setFriends] = useState<Map<String,FriendOBJ>>(new Map<String,FriendOBJ>());
 
     useEffect(() => {
         const token = localStorage.getItem("access_token") || "";
@@ -48,6 +52,18 @@ function UserCTX({ children }: { children: React.ReactChild }) {
         }
     }, []);
 
+    useEffect(() => {
+		axios.get<FriendOBJ[]>('http://127.0.0.1:5000/users/@me/friends', {
+			headers: {
+				Authorization: localStorage.getItem("access_token") || ""
+			}
+		}).then(res => {
+			res.data.forEach(friend => {
+				setFriends(prevFriends => new Map(prevFriends.set(friend.user.uuid, friend)))
+			})
+		})
+    }, [])
+
     const context_value: UserContextOBJ = {
         uuid: uuid,
         username: username,
@@ -56,7 +72,9 @@ function UserCTX({ children }: { children: React.ReactChild }) {
         setUuid: setUuid,
         setUsername: setUsername,
         setAvatar: setAvatar,
-        setAccessToken: setAccessToken
+        setAccessToken: setAccessToken,
+        friends: friends,
+        setFriends: setFriends
     }
     
     

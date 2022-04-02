@@ -23,6 +23,7 @@ import { UserContextOBJ, UserContext } from "../contexts/usercontext";
 import { ContextMenuCtx, ContextMenu } from "../contexts/context_menu_ctx";
 import { StatesContext, StateContext } from "../contexts/states";
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
+import ChannelHome from "../components/channel_home";
 
 const add_or_update_message = (messages: Map<String, Map<String, MessageOBJ>>, message: MessageOBJ) => {
 	let channel = messages.get(message.channel.uuid);
@@ -175,6 +176,7 @@ function Channel() {
 								<MembersBar channel={currentChannel} />
 							</>
 						}
+						{ currentChannel.uuid === "@me" && <ChannelHome /> }
 						{ state_context.createChannel && <CreateChannel /> }
 						{ state_context.editChannel && <EditChannel /> }
 						{ state_context.deleteChannel && <DeleteChannel /> }

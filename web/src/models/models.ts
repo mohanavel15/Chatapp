@@ -53,3 +53,9 @@ export interface MemberOBJ {
 	joined_at:   string
 	created_at:  string
 }
+
+export interface FriendOBJ {
+    user: UserOBJ
+    incoming: boolean
+    pending: boolean
+}
