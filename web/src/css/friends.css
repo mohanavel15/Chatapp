@@ -37,3 +37,69 @@
     margin-left: 1rem;
     text-align: left;
 }
+
+.Friends-List {
+    height: 100%;
+    width: 100%;
+    overflow-y: scroll;
+}
+
+.Friend {
+    height: 3rem;
+    width: 80%;
+    margin-left: 10%;
+    line-height: 3rem;
+    align-self: center;
+    border-top: 1px solid gray;
+    text-align: left;
+    display: flex;
+}
+.Friend-User {
+    display: flex;
+    width: 50%;
+}
+
+.Friend-Avatar {
+    height: 2.5rem;
+    width: 2.5rem;
+    border-radius: 50%;
+    margin: 0.5rem;
+}
+
+.Friend-Name {
+    align-self: center;
+    font-size: larger;
+    color: darkgrey;
+    margin-left: 0.5rem;
+}
+
+.Friend-Actions-Container {
+    display: flex;
+    width: 50%;
+    justify-content: flex-end;
+}
+
+.Friend-Actions {
+    height: 2.5rem;
+    width: 2.5rem;
+    border-radius: 50%;
+    margin: 0.5rem;
+    cursor: pointer;
+    border: none;
+    padding: 0;
+    background-color: #202020;
+    opacity: 0.5;
+    color: lightgray;
+}
+
+.Friend:hover .Friend-Actions {
+    opacity: 1;
+}
+
+.Friend-Actions-Accept {
+    color: limegreen;
+}
+
+.Friend-Actions-Decline {
+    color: red;
+}
