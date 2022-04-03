@@ -13,13 +13,13 @@ function ChannelHome() {
 			console.log(friendOBJ)
 			if (friendOBJ.pending === true && TopBarSelected === 2) {
 				setFriends(prevFriends => [...prevFriends, 
-					<Friend key={friendOBJ.user.uuid} friend_obj={friendOBJ} />
+					<Friend key={friendOBJ.uuid} friend_obj={friendOBJ} />
 				])
 			}
 
 			if (TopBarSelected !== 2 && friendOBJ.pending === false) {
 				setFriends(prevFriends => [...prevFriends, 
-					<Friend key={friendOBJ.user.uuid} friend_obj={friendOBJ} />
+					<Friend key={friendOBJ.uuid} friend_obj={friendOBJ} />
 				])
 			}
 		})

@@ -1,7 +1,7 @@
 package response
 
 type Friend struct {
-	User     User `json:"user"`
+	User
 	Pending  bool `json:"pending"`
 	Incoming bool `json:"incoming"`
 }

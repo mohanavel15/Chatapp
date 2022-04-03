@@ -59,7 +59,7 @@ function UserCTX({ children }: { children: React.ReactChild }) {
 			}
 		}).then(res => {
 			res.data.forEach(friend => {
-				setFriends(prevFriends => new Map(prevFriends.set(friend.user.uuid, friend)))
+				setFriends(prevFriends => new Map(prevFriends.set(friend.uuid, friend)))
 			})
 		})
     }, [])
