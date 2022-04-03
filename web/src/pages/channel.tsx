@@ -18,6 +18,7 @@ import DeleteMessage from "../components/deletemessage";
 import MessageContextMenu from '../contextmenu/message_context_menu';
 import ChannelContextMenu from "../contextmenu/channel_context_menu";
 import MemberContextMenu from "../contextmenu/member_context_menu";
+import FriendContextMenu from "../contextmenu/friend_context_menu";
 
 import { UserContextOBJ, UserContext } from "../contexts/usercontext";
 import { ContextMenuCtx, ContextMenu } from "../contexts/context_menu_ctx";
@@ -199,6 +200,7 @@ function Channel() {
 						{ ctx_menu_context.showMsgCtxMenu && <MessageContextMenu location={ctx_menu_context.ctxMsgMenuLocation} /> }
 						{ ctx_menu_context.showChannelCtxMenu && <ChannelContextMenu location={ctx_menu_context.ctxChannelMenuLocation} /> }
 						{ ctx_menu_context.showMemberCtxMenu && <MemberContextMenu location={ctx_menu_context.ctxMemberMenuLocation} /> }
+						{ ctx_menu_context.showFriendCtxMenu && <FriendContextMenu value={ctx_menu_context.ctxFriendMenuLocation} /> }
 					</>
 			}
 			{ state_context.Settings && <Settings /> }

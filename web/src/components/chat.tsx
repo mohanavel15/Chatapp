@@ -2,7 +2,7 @@ import Picker, { IEmojiData } from 'emoji-picker-react';
 import React, { useState, useContext, useEffect, useRef } from 'react';
 import Message from './message';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFaceLaugh } from '@fortawesome/free-solid-svg-icons'
+import { faFaceLaughBeam } from '@fortawesome/free-solid-svg-icons'
 import ChannelHeader from './channel_header';
 import { ChannelOBJ, Msg_request, MessageOBJ } from '../models/models';
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
@@ -95,7 +95,7 @@ function Chat({ channel }: { channel: ChannelOBJ }) {
 				</div>
 			<div className="chat-input">
 				<button id="chat-emoji-picker" onClick={() => setShowPicker(val => !val)}>
-					<FontAwesomeIcon icon={faFaceLaugh} />
+					<FontAwesomeIcon icon={faFaceLaughBeam} />
 				</button>
 				<input id="chat-text" type="text" placeholder="Type a message..." onKeyPress={updateChat} value={Input_message} onChange={onInputChange}/>
 			</div>

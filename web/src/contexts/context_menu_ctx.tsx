@@ -1,5 +1,5 @@
 import React, { useState, createContext } from 'react'
-import { MessageOBJ, ChannelOBJ, MemberOBJ } from '../models/models';
+import { MessageOBJ, ChannelOBJ, MemberOBJ, FriendOBJ } from '../models/models';
 
 export interface ContextMenuCtx {
     showMsgCtxMenu: boolean;
@@ -17,6 +17,11 @@ export interface ContextMenuCtx {
     setShowMemberCtxMenu: React.Dispatch<React.SetStateAction<boolean>>;
     setMemberCtxMenuLocation: React.Dispatch<React.SetStateAction<{event: React.MouseEvent<HTMLDivElement, MouseEvent>, member: MemberOBJ, channel:ChannelOBJ}>>;
 
+    showFriendCtxMenu: boolean;
+    ctxFriendMenuLocation: {x: number, y: number, friend_obj: FriendOBJ};
+    setShowFriendCtxMenu: React.Dispatch<React.SetStateAction<boolean>>;
+    setFriendCtxMenuLocation: React.Dispatch<React.SetStateAction<{x: number, y: number, friend_obj: FriendOBJ}>>;
+
     closeAll: () => void;
 }
 
@@ -32,10 +37,14 @@ export function CtxMenuCtx({ children }: {children: React.ReactChild}) {
     const [showMemberCtxMenu, setShowMemberCtxMenu] = useState(false);
 	const [ctxMemberMenuLocation, setMemberCtxMenuLocation] = useState<{event: React.MouseEvent<HTMLDivElement, MouseEvent>, member:MemberOBJ, channel:ChannelOBJ}>(undefined!);
 
+    const [showFriendCtxMenu, setShowFriendCtxMenu] = useState(false);
+    const [ctxFriendMenuLocation, setFriendCtxMenuLocation] = useState<{x: number, y: number, friend_obj:FriendOBJ}>(undefined!);
+
     function closeAll() {
         setShowMsgCtxMenu(false);
         setShowChannelCtxMenu(false);
         setShowMemberCtxMenu(false);
+        setShowFriendCtxMenu(false);
     }
 
     const context_value: ContextMenuCtx = {
@@ -53,6 +62,11 @@ export function CtxMenuCtx({ children }: {children: React.ReactChild}) {
         ctxMemberMenuLocation: ctxMemberMenuLocation,
         setShowMemberCtxMenu: setShowMemberCtxMenu,
         setMemberCtxMenuLocation: setMemberCtxMenuLocation,
+
+        showFriendCtxMenu: showFriendCtxMenu,
+        ctxFriendMenuLocation: ctxFriendMenuLocation,
+        setShowFriendCtxMenu: setShowFriendCtxMenu,
+        setFriendCtxMenuLocation: setFriendCtxMenuLocation,
 
         closeAll: closeAll
     }
