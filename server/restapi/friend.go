@@ -4,6 +4,7 @@ import (
 	"Chatapp/database"
 	"Chatapp/request"
 	"Chatapp/response"
+	"Chatapp/websocket"
 	"encoding/json"
 	"net/http"
 
@@ -31,6 +32,12 @@ func GetFriends(ctx *Context) {
 			continue
 		}
 
+		_, ok := ctx.Conn.Users[friend_user.Uuid]
+		status := 0
+		if ok {
+			status = 1
+		}
+
 		res_friend := response.Friend{
 			User: response.User{
 				Uuid:      friend_user.Uuid,
@@ -39,6 +46,7 @@ func GetFriends(ctx *Context) {
 				CreatedAt: friend_user.CreatedAt.String(),
 				UpdatedAt: friend_user.UpdatedAt.String(),
 			},
+			Status:   status,
 			Pending:  false,
 			Incoming: false,
 		}
@@ -100,6 +108,9 @@ func GetFriends(ctx *Context) {
 func AddOrAcceptFriend(ctx *Context) {
 	w, db, user := ctx.Res, ctx.Db, ctx.User
 
+	var pending bool = true
+	var incoming bool = true
+
 	var req request.AddFriend
 	err := json.NewDecoder(ctx.Req.Body).Decode(&req)
 	if err != nil {
@@ -128,7 +139,62 @@ func AddOrAcceptFriend(ctx *Context) {
 	}
 
 	db.Create(&friend)
+
+	friend_check := database.Friend{
+		FromUser: friend_user.ID,
+		ToUser:   user.ID,
+	}
+	db.Where(&friend_check).First(&friend_check)
+	if friend_check.ID != 0 {
+		pending = false
+		incoming = false
+	}
+
 	w.WriteHeader(http.StatusOK)
+
+	if ws, ok := ctx.Conn.Users[friend_user.Uuid]; ok {
+		res_user := response.Friend{
+			User: response.User{
+				Uuid:      user.Uuid,
+				Username:  user.Username,
+				Avatar:    user.Avatar,
+				CreatedAt: user.CreatedAt.String(),
+				UpdatedAt: user.UpdatedAt.String(),
+			},
+			Pending:  pending,
+			Incoming: incoming,
+		}
+
+		ws_msg := websocket.WS_Message{
+			Event: "FRIEND_MODIFY",
+			Data:  res_user,
+		}
+
+		ws_res, _ := json.Marshal(ws_msg)
+		ws.Write(ws_res)
+	}
+
+	if ws, ok := ctx.Conn.Users[user.Uuid]; ok {
+		res_user := response.Friend{
+			User: response.User{
+				Uuid:      friend_user.Uuid,
+				Username:  friend_user.Username,
+				Avatar:    friend_user.Avatar,
+				CreatedAt: friend_user.CreatedAt.String(),
+				UpdatedAt: friend_user.UpdatedAt.String(),
+			},
+			Pending:  pending,
+			Incoming: false,
+		}
+
+		ws_msg := websocket.WS_Message{
+			Event: "FRIEND_MODIFY",
+			Data:  res_user,
+		}
+
+		ws_res, _ := json.Marshal(ws_msg)
+		ws.Write(ws_res)
+	}
 }
 
 func GetFriend(ctx *Context) {
@@ -163,6 +229,12 @@ func GetFriend(ctx *Context) {
 		return
 	}
 
+	_, ok := ctx.Conn.Users[friend_user.Uuid]
+	status := 0
+	if ok {
+		status = 1
+	}
+
 	res_friend := response.Friend{
 		User: response.User{
 			Uuid:      friend_user.Uuid,
@@ -171,6 +243,7 @@ func GetFriend(ctx *Context) {
 			CreatedAt: friend_user.CreatedAt.String(),
 			UpdatedAt: friend_user.UpdatedAt.String(),
 		},
+		Status:   status,
 		Pending:  false,
 		Incoming: false,
 	}
@@ -234,4 +307,61 @@ func RemoveOrDeclineFriend(ctx *Context) {
 	}
 
 	ctx.Res.WriteHeader(http.StatusOK)
+
+	UserWs, UserConnected := ctx.Conn.Users[ctx.User.Uuid]
+	friendUserWs, friendUserConnected := ctx.Conn.Users[friend_user.Uuid]
+
+	if friendUserConnected {
+		status := 0
+		if UserConnected {
+			status = 1
+		}
+		res_user := response.Friend{
+			User: response.User{
+				Uuid:      ctx.User.Uuid,
+				Username:  ctx.User.Username,
+				Avatar:    ctx.User.Avatar,
+				CreatedAt: ctx.User.CreatedAt.String(),
+				UpdatedAt: ctx.User.UpdatedAt.String(),
+			},
+			Status:   status,
+			Pending:  false,
+			Incoming: false,
+		}
+
+		ws_msg := websocket.WS_Message{
+			Event: "FRIEND_DELETE",
+			Data:  res_user,
+		}
+
+		ws_res, _ := json.Marshal(ws_msg)
+		friendUserWs.Write(ws_res)
+	}
+
+	if UserConnected {
+		status := 0
+		if friendUserConnected {
+			status = 1
+		}
+		res_user := response.Friend{
+			User: response.User{
+				Uuid:      friend_user.Uuid,
+				Username:  friend_user.Username,
+				Avatar:    friend_user.Avatar,
+				CreatedAt: friend_user.CreatedAt.String(),
+				UpdatedAt: friend_user.UpdatedAt.String(),
+			},
+			Status:   status,
+			Pending:  false,
+			Incoming: false,
+		}
+
+		ws_msg := websocket.WS_Message{
+			Event: "FRIEND_DELETE",
+			Data:  res_user,
+		}
+
+		ws_res, _ := json.Marshal(ws_msg)
+		UserWs.Write(ws_res)
+	}
 }

@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { useContext, useEffect } from "react";
 import { IMessageEvent } from "websocket";
 
-import { MessageOBJ, ChannelOBJ, MemberOBJ, UserOBJ } from "../models/models";
+import { MessageOBJ, ChannelOBJ, MemberOBJ, UserOBJ, FriendOBJ } from "../models/models";
 import Settings from "./settings"; 
 
 import SideBar from "../components/sidebar";
@@ -70,6 +70,11 @@ const delete_member = (members: Map<String, Map<String, MemberOBJ>>, member: Mem
 	return members;
 }
 
+const deleteFriend = (prevFriends: Map<String, FriendOBJ>, friend: FriendOBJ) => {
+	prevFriends.delete(friend.uuid);
+	return prevFriends;
+}
+
 function Channel() {
 	const parameter  = useParams<string>();
 	let channel_id = parameter.id || "@me";
@@ -125,6 +130,16 @@ function Channel() {
 				if (payload.event === 'MEMBER_REMOVE') {
 					const member: MemberOBJ = payload.data;
 					channel_context.setMembers(prevMembers => new Map(delete_member(prevMembers, member)));
+				}
+
+				if (payload.event === 'FRIEND_CREATE' || payload.event === 'FRIEND_MODIFY') {
+					const friend: FriendOBJ = payload.data;
+					user_ctx.setFriends(prevFriends => new Map(prevFriends.set(friend.uuid, friend)));
+				}
+				
+				if (payload.event === 'FRIEND_DELETE') {
+					const friend: FriendOBJ = payload.data;
+					user_ctx.setFriends(prevFriends => new Map(deleteFriend(prevFriends, friend)));
 				}
 			}
 		};

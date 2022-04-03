@@ -11,13 +11,18 @@ function ChannelHome() {
 		setFriends([])
 		user_ctx.friends.forEach(friendOBJ => {
 			console.log(friendOBJ)
-			if (friendOBJ.pending === true && TopBarSelected === 2) {
+			if (TopBarSelected === 0 && friendOBJ.pending === false && friendOBJ.status > 0) {
+				setFriends(prevFriends => [...prevFriends, 
+					<Friend key={friendOBJ.uuid} friend_obj={friendOBJ} />
+				])
+			}
+			if (TopBarSelected === 1 && friendOBJ.pending === false) {
 				setFriends(prevFriends => [...prevFriends, 
 					<Friend key={friendOBJ.uuid} friend_obj={friendOBJ} />
 				])
 			}
 
-			if (TopBarSelected !== 2 && friendOBJ.pending === false) {
+			if (friendOBJ.pending === true && TopBarSelected === 2) {
 				setFriends(prevFriends => [...prevFriends, 
 					<Friend key={friendOBJ.uuid} friend_obj={friendOBJ} />
 				])

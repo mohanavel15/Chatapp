@@ -55,6 +55,7 @@ export interface MemberOBJ {
 }
 
 export interface FriendOBJ extends UserOBJ {
+    status: number
     incoming: boolean
     pending: boolean
 }
