@@ -4,13 +4,10 @@ import { FriendOBJ } from '../models/models';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck, faX } from '@fortawesome/free-solid-svg-icons'
 import { UserContextOBJ, UserContext } from "../contexts/usercontext";
+import { setDefaultAvatar } from '../utils/errorhandle';
 
 function Friend({ friend_obj }: { friend_obj: FriendOBJ }) {
 	const user_ctx:UserContextOBJ = useContext(UserContext);
-
-    function setDefaultAvatar(event : React.SyntheticEvent<HTMLImageElement, Event>) {
-        event.currentTarget.src = "/assets/default_avatar.jpeg";
-    }
 
     function Accept() {
         const updateFriend = (prevFriends: Map<String, FriendOBJ>) => {

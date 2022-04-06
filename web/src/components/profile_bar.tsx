@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { StatesContext, StateContext } from "../contexts/states";
 import { UserContextOBJ, UserContext } from "../contexts/usercontext";
+import { setDefaultAvatar } from '../utils/errorhandle';
 
 function ProfileBar() {
     const user:UserContextOBJ = useContext(UserContext);
@@ -9,10 +10,6 @@ function ProfileBar() {
     const avatar = user.avatar;
 
     const state_context: StateContext = useContext(StatesContext);
-
-    function setDefaultAvatar(event : React.SyntheticEvent<HTMLImageElement, Event>) {
-        event.currentTarget.src = "/assets/default_avatar.jpeg";
-    }
 
     return (
         <div className="profile-bar">

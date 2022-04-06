@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react'
+import { useEffect, useState, useContext } from 'react'
 import ChannelList from './channel_list'
 import { ChannelsContext, ChannelContext } from '../contexts/channelctx';
 import { ContextMenuCtx, ContextMenu } from "../contexts/context_menu_ctx";

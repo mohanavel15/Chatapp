@@ -2,7 +2,6 @@ import { useState, useContext, useEffect } from 'react'
 import { UserContextOBJ, UserContext } from "../contexts/usercontext";
 import { ContextMenuCtx, ContextMenu } from "../contexts/context_menu_ctx";
 import Friend from './friend';
-import { FriendOBJ } from '../models/models';
 
 function ChannelHome() {
 	const user_ctx:UserContextOBJ = useContext(UserContext);

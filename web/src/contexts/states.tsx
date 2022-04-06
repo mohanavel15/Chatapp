@@ -1,5 +1,5 @@
 import React, { useState, createContext } from 'react'
-import { ChannelOBJ, MessageOBJ } from '../models/models';
+import { ChannelOBJ, MemberOBJ, MessageOBJ } from '../models/models';
 
 export interface StateContext {
     Mute: boolean;
@@ -11,6 +11,8 @@ export interface StateContext {
     ChannelOBJ: ChannelOBJ;
     deleteMessage: boolean;
     messageOBJ: MessageOBJ;
+    showProfile: boolean;
+    ProfileOBJ: MemberOBJ;
     setMute: React.Dispatch<React.SetStateAction<boolean>>;
     setDeafen: React.Dispatch<React.SetStateAction<boolean>>;
     setSettings: React.Dispatch<React.SetStateAction<boolean>>;
@@ -20,6 +22,8 @@ export interface StateContext {
     setChannelOBJ: React.Dispatch<React.SetStateAction<ChannelOBJ>>;
     setDeleteMessage: React.Dispatch<React.SetStateAction<boolean>>;
     setMessageOBJ: React.Dispatch<React.SetStateAction<MessageOBJ>>;
+    setShowProfile: React.Dispatch<React.SetStateAction<boolean>>;
+    setProfileOBJ: React.Dispatch<React.SetStateAction<MemberOBJ>>;
 }
 
 export const StatesContext = createContext<StateContext>(undefined!);
@@ -37,6 +41,9 @@ export function States({ children }: {children: React.ReactChild}) {
     const [deleteMessage, setDeleteMessage] = useState(false)
     const [messageOBJ, setMessageOBJ] = useState<MessageOBJ>(undefined!)
 
+    const [showProfile, setShowProfile] = useState(false)
+    const [ProfileOBJ, setProfileOBJ] = useState<MemberOBJ>(undefined!)
+
     const context_value: StateContext = {
         Mute: Mute,
         Deafen: Deafen,
@@ -47,6 +54,8 @@ export function States({ children }: {children: React.ReactChild}) {
         ChannelOBJ: ChannelOBJ,
         deleteMessage: deleteMessage,
         messageOBJ: messageOBJ,
+        showProfile: showProfile,
+        ProfileOBJ: ProfileOBJ,
         setMute: setMute,
         setDeafen: setDeafen,
         setSettings: setSettings,
@@ -55,7 +64,9 @@ export function States({ children }: {children: React.ReactChild}) {
         setDeleteChannel: setDeleteChannel,
         setChannelOBJ: setChannelOBJ,
         setDeleteMessage: setDeleteMessage,
-        setMessageOBJ: setMessageOBJ
+        setMessageOBJ: setMessageOBJ,
+        setShowProfile: setShowProfile,
+        setProfileOBJ: setProfileOBJ
     }
 
     return (

@@ -1,5 +1,5 @@
 import React from "react";
-
+import { setDefaultAvatar } from '../utils/errorhandle';
 interface MessageProps {
     message: string;
     avatar: string;
@@ -7,11 +7,6 @@ interface MessageProps {
 }
 
 function Message(props: MessageProps) {
-
-    function setDefaultAvatar(event : React.SyntheticEvent<HTMLImageElement, Event>) {
-        event.currentTarget.src = "/assets/default_avatar.jpeg";
-    }
-
     function HandleClick(ev: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
         alert("<h1> TEST </h1>");
     }

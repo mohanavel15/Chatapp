@@ -3,6 +3,8 @@ import axios from 'axios';
 import { MemberOBJ, ChannelOBJ } from '../models/models';
 import { UserContextOBJ, UserContext } from "../contexts/usercontext";
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
+import { StatesContext, StateContext } from "../contexts/states";
+
 interface propsMsgCtxProps {
     location: {event: React.MouseEvent<HTMLDivElement, MouseEvent>, member: MemberOBJ, channel: ChannelOBJ},
 }
@@ -10,6 +12,7 @@ interface propsMsgCtxProps {
 export default function MemberContextMenu(props:propsMsgCtxProps) {
     const user_ctx:UserContextOBJ = useContext(UserContext);    
 	const channel_context: ChannelContext = useContext(ChannelsContext);
+    const state_context: StateContext = useContext(StatesContext);
     const channel = props.location.channel;
 
     let style: React.CSSProperties
@@ -41,7 +44,7 @@ export default function MemberContextMenu(props:propsMsgCtxProps) {
 
     return (
         <div className='ContextMenu' style={style}>
-            <button className='CtxBtn'>Profile</button>
+            <button className='CtxBtn' onClick={() => { state_context.setProfileOBJ(props.location.member);state_context.setShowProfile(true) }}>Profile</button>
             <button className='CtxBtn'>Metion</button>
             { channel.owner_id === user_ctx.uuid && props.location.member.uuid !== user_ctx.uuid && <button className='CtxDelBtn' onClick={() =>{ handleKickOrBan(false) }}>Kick {props.location.member.username}</button> }
             { channel.owner_id === user_ctx.uuid && props.location.member.uuid !== user_ctx.uuid && <button className='CtxDelBtn' onClick={() =>{ handleKickOrBan(true) }}>Ban {props.location.member.username}</button> }
