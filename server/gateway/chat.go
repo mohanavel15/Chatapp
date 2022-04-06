@@ -106,6 +106,7 @@ func MessageModify(ctx *websocket.Context) {
 	get_message := database.Message{
 		Uuid: message.Uuid,
 	}
+	ctx.Db.Where(&get_message).First(&get_message)
 
 	if get_message.ID == 0 {
 		return

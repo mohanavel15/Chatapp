@@ -25,6 +25,7 @@ import { ContextMenuCtx, ContextMenu } from "../contexts/context_menu_ctx";
 import { StatesContext, StateContext } from "../contexts/states";
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 import ChannelHome from "../components/channel_home";
+import MessageCTX from '../contexts/messagectx';
 
 const add_or_update_message = (messages: Map<String, Map<String, MessageOBJ>>, message: MessageOBJ) => {
 	let channel = messages.get(message.channel.uuid);
@@ -184,6 +185,7 @@ function Channel() {
 	return (
 		<div className="Channel">
 			{ !state_context.Settings && 
+					<MessageCTX>
 					<>
 						<SideBar />
 						{ currentChannel.uuid !== "@me" &&
@@ -203,6 +205,7 @@ function Channel() {
 						{ ctx_menu_context.showMemberCtxMenu && <MemberContextMenu location={ctx_menu_context.ctxMemberMenuLocation} /> }
 						{ ctx_menu_context.showFriendCtxMenu && <FriendContextMenu value={ctx_menu_context.ctxFriendMenuLocation} /> }
 					</>
+					</MessageCTX>
 			}
 			{ state_context.Settings && <Settings /> }
 
