@@ -56,8 +56,7 @@ func GetMessages(ctx *Context) {
 			Uuid:      author.Uuid,
 			Avatar:    author.Avatar,
 			Username:  author.Username,
-			CreatedAt: author.CreatedAt.String(),
-			UpdatedAt: author.UpdatedAt.String(),
+			CreatedAt: author.CreatedAt.Unix(),
 		}
 
 		message_res := response.Message{
@@ -131,8 +130,7 @@ func CreateMessage(ctx *Context) {
 		Uuid:      user.Uuid,
 		Avatar:    user.Avatar,
 		Username:  user.Username,
-		CreatedAt: user.CreatedAt.String(),
-		UpdatedAt: user.UpdatedAt.String(),
+		CreatedAt: user.CreatedAt.Unix(),
 	}
 
 	channel_res := response.Channel{
@@ -202,8 +200,7 @@ func GetMessage(ctx *Context) {
 		Uuid:      author.Uuid,
 		Avatar:    author.Avatar,
 		Username:  author.Username,
-		CreatedAt: author.CreatedAt.String(),
-		UpdatedAt: author.UpdatedAt.String(),
+		CreatedAt: author.CreatedAt.Unix(),
 	}
 
 	channel_res := response.Channel{
@@ -291,8 +288,7 @@ func EditMessage(ctx *Context) {
 		Uuid:      user.Uuid,
 		Avatar:    user.Avatar,
 		Username:  user.Username,
-		CreatedAt: user.CreatedAt.String(),
-		UpdatedAt: user.UpdatedAt.String(),
+		CreatedAt: user.CreatedAt.Unix(),
 	}
 
 	channel_res := response.Channel{

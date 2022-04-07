@@ -59,8 +59,7 @@ func MessageCreate(ctx *websocket.Context) {
 		Uuid:      ctx.Ws.User.Uuid,
 		Avatar:    ctx.Ws.User.Avatar,
 		Username:  ctx.Ws.User.Username,
-		CreatedAt: ctx.Ws.User.CreatedAt.String(),
-		UpdatedAt: ctx.Ws.User.UpdatedAt.String(),
+		CreatedAt: ctx.Ws.User.CreatedAt.Unix(),
 	}
 
 	channel_res := response.Channel{
@@ -144,8 +143,7 @@ func MessageModify(ctx *websocket.Context) {
 		Uuid:      ctx.Ws.User.Uuid,
 		Avatar:    ctx.Ws.User.Avatar,
 		Username:  ctx.Ws.User.Username,
-		CreatedAt: ctx.Ws.User.CreatedAt.String(),
-		UpdatedAt: ctx.Ws.User.UpdatedAt.String(),
+		CreatedAt: ctx.Ws.User.CreatedAt.Unix(),
 	}
 
 	channel_res := response.Channel{

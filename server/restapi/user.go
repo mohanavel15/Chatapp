@@ -14,8 +14,7 @@ func GetUser(ctx *Context) {
 		Uuid:      user.Uuid,
 		Username:  user.Username,
 		Avatar:    user.Avatar,
-		CreatedAt: user.CreatedAt.String(),
-		UpdatedAt: user.UpdatedAt.String(),
+		CreatedAt: user.CreatedAt.Unix(),
 	}
 
 	res, err := json.Marshal(user_res)
@@ -46,8 +45,7 @@ func EditUser(ctx *Context) {
 		Uuid:      user.Uuid,
 		Username:  user.Username,
 		Avatar:    user.Avatar,
-		CreatedAt: user.CreatedAt.String(),
-		UpdatedAt: user.UpdatedAt.String(),
+		CreatedAt: user.CreatedAt.Unix(),
 	}
 
 	res, err := json.Marshal(user_res)

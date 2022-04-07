@@ -47,8 +47,7 @@ func Connect(ctx *websocket.Context) {
 		Uuid:      get_user.Uuid,
 		Avatar:    get_user.Avatar,
 		Username:  get_user.Username,
-		CreatedAt: get_user.CreatedAt.String(),
-		UpdatedAt: get_user.UpdatedAt.String(),
+		CreatedAt: get_user.CreatedAt.Unix(),
 	}
 
 	member := response.Member{
