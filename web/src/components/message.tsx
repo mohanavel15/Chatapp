@@ -27,6 +27,15 @@ function Message({ message }: {message: MessageOBJ}) {
         }
     }, [msgctx.messageEdit, msgctx.message]);
 
+    useEffect(() => {
+        if (messageElement.current !== null) {
+            messageElement.current.scrollIntoView({
+                behavior: "smooth",
+                block: "end"
+            });
+        }
+    }, [])
+
     function handleEditBtn() {
         if (msgctx.messageEdit) {
             msgctx.setMessageEdit(false);
@@ -49,14 +58,20 @@ function Message({ message }: {message: MessageOBJ}) {
         setEdit(false);
     }
 
-    useEffect(() => {
-        if (messageElement.current !== null) {
-            messageElement.current.scrollIntoView({
-                behavior: "smooth",
-                block: "end"
-            });
+    function cancelEdit() {
+        setMsg(message.content)
+        setEdit(false)
+        msgctx.setMessageEdit(false)
+    }
+
+    function handleKey(event: React.KeyboardEvent<HTMLInputElement>) {
+		if (event.key === 'Enter') {
+            handleEdit();
         }
-    }, [])
+        if (event.key === 'Escape') {
+            cancelEdit();
+        }
+    }
 
     return (
     <div className="Message" ref={messageElement}>
@@ -66,8 +81,8 @@ function Message({ message }: {message: MessageOBJ}) {
             {edit !== true && <p> {message.content} </p> }
             {edit && 
             <div>
-            <input id="chat-text" type="text" defaultValue={msg} onChange={(ev) => {setMsg(ev.target.value)}} />
-            <p className="message-edit-text">Escape to <button className="Message-Edit-Action" onClick={() => {setMsg(message.content); setEdit(false); msgctx.setMessageEdit(false)}}>Cancel</button> • Enter to <button className="Message-Edit-Action" onClick={handleEdit}>Save</button></p>
+            <input id="chat-text" type="text" defaultValue={msg} onKeyDown={handleKey} onChange={(ev) => {setMsg(ev.target.value)}} />
+            <p className="message-edit-text">Escape to <button className="Message-Edit-Action" onClick={cancelEdit}>Cancel</button> • Enter to <button className="Message-Edit-Action" onClick={handleEdit}>Save</button></p>
             </div>
             }
         </div>

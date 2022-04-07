@@ -34,20 +34,17 @@ function Chat({ channel }: { channel: ChannelOBJ }) {
     function updateChat(event: React.KeyboardEvent<HTMLInputElement>) {
 		if (event.key === 'Enter') {
 			event.preventDefault();
-			console.log(Input_message)
-			if (channel.uuid !== "@me") {
-				if (Input_message.length > 0) {
-					const message: Msg_request = {
-						channel: channel.uuid,
-						content: Input_message
-					};
-					channel_context.gateway.send(
-						JSON.stringify({
-							event: "MESSAGE_CREATE",
-							data: message
-						})
-					);
-				}
+			if (Input_message.length > 0) {
+				const message: Msg_request = {
+					channel: channel.uuid,
+					content: Input_message
+				};
+				channel_context.gateway.send(
+					JSON.stringify({
+						event: "MESSAGE_CREATE",
+						data: message
+					})
+				);
 			}
 			setInput_message('');
 		}
