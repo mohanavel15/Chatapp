@@ -36,6 +36,16 @@ func JoinInvite(ctx *Context) {
 		return
 	}
 
+	ban := database.Ban{
+		BannedUser: user.ID,
+		ChannelID:  channel.ID,
+	}
+	db.Where(&ban).First(&ban)
+	if ban.ID != 0 {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
 	member := database.Member{
 		ChannelID: channel.ID,
 		AccountID: user.ID,

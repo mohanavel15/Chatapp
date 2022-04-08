@@ -2,9 +2,11 @@ package restapi
 
 import (
 	"Chatapp/database"
+	"Chatapp/request"
 	"Chatapp/response"
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -143,6 +145,13 @@ func DeleteMember(ctx *Context) {
 	channel_id := vars["id"]
 	member_id := vars["mid"]
 
+	var req request.KickorBan
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
 	var channel database.Channel
 	db.Where("uuid = ?", channel_id).First(&channel)
 	if channel.ID == 0 {
@@ -179,6 +188,18 @@ func DeleteMember(ctx *Context) {
 	if user.Uuid == member.Uuid {
 		w.WriteHeader(http.StatusForbidden)
 		return
+	}
+
+	if req.Ban == true {
+		ban := database.Ban{
+			BannedUser: member.ID,
+			ChannelID:  channel.ID,
+			BannedBy:   user.ID,
+			Reason:     req.Reason,
+			CreatedAt:  time.Now(),
+			UpdatedAt:  time.Now(),
+		}
+		db.Create(&ban)
 	}
 
 	db.Delete(&is_member)

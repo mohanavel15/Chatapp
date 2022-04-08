@@ -57,6 +57,8 @@ func main() {
 	db.AutoMigrate(&database.Member{})
 	db.AutoMigrate(&database.Invites{})
 	db.AutoMigrate(&database.Friend{})
+	db.AutoMigrate(&database.Ban{})
+	db.AutoMigrate(&database.Block{})
 
 	handler = &websocket.EventHandler{}
 	handler.Add("CONNECT", gateway.Connect)

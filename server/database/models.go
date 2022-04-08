@@ -68,3 +68,21 @@ type Friend struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
+
+type Ban struct {
+	ID         uint   `gorm:"primarykey"`
+	BannedUser uint   `gorm:"type:int;not null"`
+	ChannelID  uint   `gorm:"type:int;not null"`
+	BannedBy   uint   `gorm:"type:int;not null"`
+	Reason     string `gorm:"type:varchar(255)"`
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+}
+
+type Block struct {
+	ID          uint `gorm:"primarykey"`
+	BlockedUser uint `gorm:"type:int;not null"`
+	BlockedBy   uint `gorm:"type:int;not null"`
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+}
