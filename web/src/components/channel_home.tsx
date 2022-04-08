@@ -1,13 +1,15 @@
-import { useState, useContext, useEffect } from 'react'
+import { useState, useContext, useEffect, useRef } from 'react'
 import { UserContextOBJ, UserContext } from "../contexts/usercontext";
 import { ContextMenuCtx, ContextMenu } from "../contexts/context_menu_ctx";
 import Friend from './friend';
-
+import axios from 'axios';
 function ChannelHome() {
 	const user_ctx:UserContextOBJ = useContext(UserContext);
 	const [TopBarSelected, setTopBarSelected] = useState(0)
 	const [friends, setFriends] = useState<JSX.Element[]>([]);
 	const ctx_menu_context: ContextMenuCtx = useContext(ContextMenu);
+
+	const FriendUserUUID = useRef<HTMLInputElement>(undefined!);
 
 	useEffect(() => {
 		setFriends([])
@@ -40,6 +42,22 @@ function ChannelHome() {
 		})
 	}, [TopBarSelected, user_ctx.friends])
 
+	function SendFriendRequest() {
+		if (FriendUserUUID.current !== undefined) {
+			if (FriendUserUUID.current.value !== "") {
+				axios.post("http://127.0.0.1:5000/users/@me/friends", { "to": FriendUserUUID.current.value },{ 
+					headers: {
+						Authorization: user_ctx.accessToken
+					}
+				}).then(res => {
+					if (res.status === 200) {
+						FriendUserUUID.current.value = ""
+					}
+				})
+			}
+		}
+	}
+
 
 	return (
 		<div className="Friends">
@@ -47,11 +65,19 @@ function ChannelHome() {
 				<button className='Friends-Top-Bar-Button' onClick={() => {setTopBarSelected(0)}}>Online</button>
 				<button className='Friends-Top-Bar-Button' onClick={() => {setTopBarSelected(1)}}>All</button>
 				<button className='Friends-Top-Bar-Button' onClick={() => {setTopBarSelected(2)}}>Pending</button>
-				<button className='Friends-Top-Bar-Button FTB-AddButton'>Add Friend</button>
+				<button className='Friends-Top-Bar-Button FTB-AddButton' onClick={() => {setTopBarSelected(3)}}>Add Friend</button>
 			</div>
 				{TopBarSelected === 0 && <h3 className='Friends-List-Title'>Online — {friends.length}</h3>}
 				{TopBarSelected === 1 && <h3 className='Friends-List-Title'>All — {friends.length}</h3>}
 				{TopBarSelected === 2 && <h3 className='Friends-List-Title'>Pending — {friends.length}</h3>}
+				{TopBarSelected === 3 && 
+				<div className='add-friend-container'>
+					<div className='add-friend-input-container'>
+						<input className='add-friend-input' type='text' placeholder='User UUID' ref={FriendUserUUID} />
+						<button className='add-friend-button' onClick={SendFriendRequest}>Send Friend Request</button>
+					</div>
+				</div>
+				}
 			<div className='Friends-List'>
 				{friends}
 			</div>

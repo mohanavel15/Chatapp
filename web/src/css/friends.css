@@ -103,3 +103,50 @@
 .Friend-Actions-Decline {
     color: red;
 }
+
+.add-friend-container {
+    /*width: 80%;*/
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 2rem;
+}
+
+.add-friend-input-container {
+    display: flex;
+    width: 75%;
+    height: 3rem;
+    background-color: #202020;
+    border: #000000 solid 1px;
+    border-radius: 0.5rem;
+}
+.add-friend-input {
+    margin-left: 1rem;
+    color: aliceblue;
+    font-size: larger;
+    background: none;
+    border: none;
+    width: 81%;
+}
+
+.add-friend-input:focus {
+    outline: none;
+}
+
+.add-friend-button {
+    width: 12rem;
+    height: 2rem;
+    align-self: center;
+    background-color: #3ba55d;
+    color: #fff;
+    font-size: medium;
+    border: none;
+    opacity: 1;
+    cursor: pointer;
+    border-radius: 0.5rem;
+}
+
+.add-friend-button:hover {
+    opacity: 0.8;
+}

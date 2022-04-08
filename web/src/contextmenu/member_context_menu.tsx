@@ -21,10 +21,14 @@ export default function MemberContextMenu(props:propsMsgCtxProps) {
         left: props.location.event.clientX,
     }
 
-    function handleKickOrBan(_: boolean) {
+    function handleKickOrBan(ban: boolean) {
         axios.delete(`http://127.0.0.1:5000/channels/${channel.uuid}/members/${props.location.member.uuid}`, {
             headers: {
                 Authorization: user_ctx.accessToken
+            },
+            data: {
+                "ban": ban,
+                "reason": "no reason"
             }
         }).then(res => {
             if (res.status === 200) {

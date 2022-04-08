@@ -17,14 +17,6 @@ export interface ChannelOBJ {
     updated_at: string
 }
 
-export interface UserOBJ {
-    uuid:       string
-    username:   string
-    avatar:     string
-    created_at: string
-    updated_at: string
-}
-
 export interface WS_Message {
     event:  string
     data:   any
@@ -39,8 +31,7 @@ export interface UserOBJ {
     uuid:       string
     username:   string
     avatar:     string
-    created_at: string
-    updated_at: string
+    created_at: number
 }
 
 export interface MemberOBJ {
