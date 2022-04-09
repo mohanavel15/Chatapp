@@ -182,13 +182,17 @@ function Channel() {
 		return () => window.removeEventListener('click', handleClick);
 	}, []);
 
+	useEffect(() => {
+		state_context.setEditChannel(false);
+	}, [channel_id]);
+
 	return (
 		<div className="Channel">
 			{ !state_context.Settings && 
 					<MessageCTX>
 					<>
 						<SideBar />
-						{ currentChannel.uuid !== "@me" &&
+						{ currentChannel.uuid !== "@me" && state_context.editChannel !== true &&
 							<>
 								<Chat channel={currentChannel} />
 								<MembersBar channel={currentChannel} />

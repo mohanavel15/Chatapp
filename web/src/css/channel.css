@@ -103,3 +103,106 @@
     font-size: medium;
     color: white;
 }
+
+.channel-edit {
+    height: 100%;
+    width: 100%;
+    display: flex;
+}
+
+.channel-edit-sidebar {
+    height: 100%;
+    width: 16rem;
+    border-right: 2px solid black;
+    display: flex;
+    flex-direction: column;
+}
+
+.channel-edit-main {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.channel-edit-side-bar-btn {
+    margin: 0.5rem;
+    height: 2rem;
+    border-radius: 5px;
+    background-color: grey;
+    border: none;
+    color: white;
+    font-size: larger;
+}
+
+.channel-edit-side-bar-btn:hover {
+    cursor: pointer;
+    opacity: 0.5;
+}
+
+.channel-edit-input {
+    margin: 1rem;
+    height: 3rem;
+    width: 24rem;
+    font-size: larger;
+    background-color: #23272a;
+    border-radius: 0.5rem;
+    color: aliceblue;
+    border: none;
+}
+
+.channel-edit-input:focus {
+    outline: none;
+}
+
+.invites {
+    margin: 1rem;
+    height: 4rem;
+    text-align: left;
+    background-color: #202020;
+    border-radius: 5px;
+    display: flex;
+}
+
+.invite-code {
+    width: 50%;
+    margin-left: 1.5rem;
+    font-size: larger;
+}
+
+.invite-date {
+    position: absolute;
+    right: 0;
+    margin-right: 2.5rem;
+    color: darkgrey;
+    font-size: larger;
+}
+
+.channel-edit-top-bar {
+    height: 4rem;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.channel-edit-title {
+    margin: 1rem;
+    text-align: left;
+}
+
+.create-invite-btn {
+    margin: 1rem;
+    height: 2rem;
+    width: 8rem;
+    align-items: center;
+    font-size: large;
+    color: white;
+    background-color: #3ba55d;
+    border-radius: 3px;
+    border: #3ba55d;
+    opacity: 0.8;
+}
+.create-invite-btn:hover {
+    cursor: pointer;
+    opacity: 1.0;
+}

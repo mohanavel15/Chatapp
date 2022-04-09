@@ -50,3 +50,17 @@ export interface FriendOBJ extends UserOBJ {
     incoming: boolean
     pending: boolean
 }
+
+export interface InviteOBJ {
+    invite_code: string
+	created_at: string
+}
+
+export interface BanOBJ {
+    uuid: string
+    banned_by: UserOBJ
+    banned_user: UserOBJ
+    channel: ChannelOBJ
+    reason: string
+    created_at: number
+}
