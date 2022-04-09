@@ -71,6 +71,7 @@ type Friend struct {
 
 type Ban struct {
 	ID         uint   `gorm:"primarykey"`
+	Uuid       string `gorm:"type:varchar(255);unique;not null"`
 	BannedUser uint   `gorm:"type:int;not null"`
 	ChannelID  uint   `gorm:"type:int;not null"`
 	BannedBy   uint   `gorm:"type:int;not null"`

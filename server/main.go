@@ -102,6 +102,10 @@ func main() {
 	router.HandleFunc("/channels/{id}/members", Authenticated(restapi.GetMembers)).Methods("GET")
 	router.HandleFunc("/channels/{id}/members/{mid}", Authenticated(restapi.GetMember)).Methods("GET")
 	router.HandleFunc("/channels/{id}/members/{mid}", Authenticated(restapi.DeleteMember)).Methods("DELETE")
+	//Bans
+	router.HandleFunc("/channels/{id}/bans", Authenticated(restapi.GetAllBans)).Methods("GET")
+	router.HandleFunc("/channels/{id}/bans/{bid}", Authenticated(restapi.GetBan)).Methods("GET")
+	router.HandleFunc("/channels/{id}/bans/{bid}", Authenticated(restapi.DeleteBan)).Methods("DELETE")
 	// Invites
 	router.HandleFunc("/invites/{id}", Authenticated(restapi.JoinInvite)).Methods("GET")
 	router.HandleFunc("/channels/{id}/invites", Authenticated(restapi.GetInvites)).Methods("GET")

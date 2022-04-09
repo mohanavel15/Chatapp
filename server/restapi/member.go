@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
 
@@ -192,6 +193,7 @@ func DeleteMember(ctx *Context) {
 
 	if req.Ban == true {
 		ban := database.Ban{
+			Uuid:       uuid.New().String(),
 			BannedUser: member.ID,
 			ChannelID:  channel.ID,
 			BannedBy:   user.ID,
