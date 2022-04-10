@@ -6,6 +6,17 @@ import Member from "./member";
 import { ContextMenuCtx, ContextMenu } from "../contexts/context_menu_ctx";
 import { InviteOBJ, BanOBJ } from "../models/models";
 import { UserContextOBJ, UserContext } from "../contexts/usercontext";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTrashCan } from '@fortawesome/free-solid-svg-icons'
+
+function Invite({ invite, onDelete }: { invite: InviteOBJ, onDelete: (invite_code: string) => void }) {
+    return (
+    <div className="invites">
+        <p className="invite-code">{invite.invite_code}</p>
+        <div className="invite-date-and-delete-button"><p className="invite-date">{invite.created_at}</p><button className="delete-invite-button" onClick={() => {onDelete(invite.invite_code)}}><FontAwesomeIcon icon={faTrashCan} /></button></div>
+    </div>
+    )
+}
 
 export default function EditChannel() {
     const user:UserContextOBJ = useContext(UserContext);
@@ -47,10 +58,7 @@ export default function EditChannel() {
         }).then(res => {
             res.data.forEach(invite => {
                 setInvites(prevInvites => [...prevInvites,
-                <div className="invites">
-                    <p className="invite-code">{invite.invite_code}</p>
-                    <p className="invite-date">{invite.created_at}</p>
-                </div>
+                    <Invite invite={invite} onDelete={delete_inite} />
                 ])
             })
         })
@@ -103,9 +111,17 @@ export default function EditChannel() {
             setInvites(prevInvites => [...prevInvites,
             <div className="invites">
                 <p className="invite-code">{res.data.invite_code}</p>
-                <p className="invite-date">{res.data.created_at}</p>
+                <div><p className="invite-date">{res.data.created_at}</p><button><FontAwesomeIcon icon={faTrashCan} /></button></div>
             </div>
             ])
+        })
+    }
+
+    function delete_inite(invite_code: string) {
+        axios.delete(`http://127.0.0.1:5000/channels/${state_context.ChannelOBJ.uuid}/invites/${invite_code}`, {
+            headers: {
+                'Authorization': user.accessToken
+            }
         })
     }
 
