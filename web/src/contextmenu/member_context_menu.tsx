@@ -32,16 +32,7 @@ export default function MemberContextMenu(props:propsMsgCtxProps) {
             }
         }).then(res => {
             if (res.status === 200) {
-                const delete_member = (members: Map<String, Map<String, MemberOBJ>>, member: MemberOBJ) => {
-                    let channel = members.get(member.channel_id);
-                    if (!channel) {
-                        channel = new Map<String, MemberOBJ>();
-                    }
-                    channel.delete(member.uuid);
-                    members.set(member.channel_id, new Map(channel));
-                    return members;
-                }
-                channel_context.setMembers(prevMembers => new Map(delete_member(prevMembers, props.location.member)));
+                channel_context.DeleteMember(props.location.member.channel_id, props.location.member.uuid);
             }
         })
     }

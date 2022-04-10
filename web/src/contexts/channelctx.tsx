@@ -2,16 +2,19 @@ import React, { useState, createContext, useEffect } from 'react'
 import { ChannelOBJ, MessageOBJ, MemberOBJ } from '../models/models'
 import { w3cwebsocket as W3CWebSocket } from "websocket";
 import axios from 'axios'
+import useDoubleMap from '../hooks/useDoubleMap';
 
 export interface ChannelContext {
 	channels: Map<String,ChannelOBJ>;
 	setChannels: React.Dispatch<React.SetStateAction<Map<String, ChannelOBJ>>>
 	
 	messages: Map<String, Map<String, MessageOBJ>>;
-	setMessages: React.Dispatch<React.SetStateAction<Map<String, Map<String, MessageOBJ>>>>
+	UpdateMessage: (key1: String, key2: String, value_: MessageOBJ) => void
+	DeleteMessage: (key1: String, key2: String) => void
 	
 	members: Map<String, Map<String, MemberOBJ>>;
-	setMembers: React.Dispatch<React.SetStateAction<Map<String, Map<String, MemberOBJ>>>>
+	UpdateMember: (key1: String, key2: String, value_: MemberOBJ) => void
+	DeleteMember: (key1: String, key2: String) => void
 	
 	channelsLoaded: boolean
 	setChannelsLoaded: React.Dispatch<React.SetStateAction<boolean>>
@@ -24,9 +27,9 @@ export const ChannelsContext = createContext<ChannelContext>(undefined!);
 export default function ChannelCTX({ children, gateway }: {children: React.ReactChild, gateway: W3CWebSocket}) {
 	
 	let [channels, setChannels] = useState<Map<String,ChannelOBJ>>(new Map<String,ChannelOBJ>());
-	let [members, setMembers] = useState<Map<String, Map<String, MemberOBJ>>>(new Map<String, Map<String, MemberOBJ>>());
-	let [messages, setMessages] = useState<Map<String, Map<String, MessageOBJ>>>(new Map<String, Map<String, MessageOBJ>>())
-
+	//let [members, setMembers] = useState<Map<String, Map<String, MemberOBJ>>>(new Map<String, Map<String, MemberOBJ>>());
+	const [members, UpdateMember, DeleteMember] = useDoubleMap<MemberOBJ>(new Map<String, Map<String, MemberOBJ>>());
+	const [messages, UpdateMessage, DeleteMessage] = useDoubleMap<MessageOBJ>(new Map<String, Map<String, MessageOBJ>>());
 	let [channelsLoaded, setChannelsLoaded] = useState(false)
 
 	useEffect(() => {
@@ -50,7 +53,7 @@ export default function ChannelCTX({ children, gateway }: {children: React.React
 					Authorization: localStorage.getItem("access_token") || ""
 				}
 			}).then(res => {
-				setMessages(prevMsgs =>  new Map(prevMsgs.set(channel, new Map(res.data.map(msgs => [msgs.uuid, msgs])))))
+				res.data.forEach(msg => UpdateMessage(channel, msg.uuid, msg))
 			})
 		})
 	} , [channelsLoaded])
@@ -63,7 +66,7 @@ export default function ChannelCTX({ children, gateway }: {children: React.React
 					Authorization: localStorage.getItem("access_token") || ""
 				}
 			}).then(res => {
-				setMembers(prevMembers =>  new Map(prevMembers.set(channel, new Map(res.data.map(member => [member.uuid, member])))))
+				res.data.forEach(member => UpdateMember(channel, member.uuid, member))
 			})
 		})
 	} , [channelsLoaded])
@@ -72,9 +75,11 @@ export default function ChannelCTX({ children, gateway }: {children: React.React
 		channels: channels,
 		setChannels: setChannels,
 		messages: messages,
-		setMessages: setMessages,
+		UpdateMessage: UpdateMessage,
+		DeleteMessage: DeleteMessage,
 		members: members,
-		setMembers: setMembers,
+		UpdateMember: UpdateMember,
+		DeleteMember: DeleteMember,
 		channelsLoaded: channelsLoaded,
 		setChannelsLoaded: setChannelsLoaded,
 		gateway: gateway

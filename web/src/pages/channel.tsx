@@ -27,49 +27,9 @@ import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 import ChannelHome from "../components/channel_home";
 import MessageCTX from '../contexts/messagectx';
 
-const add_or_update_message = (messages: Map<String, Map<String, MessageOBJ>>, message: MessageOBJ) => {
-	let channel = messages.get(message.channel.uuid);
-	if (!channel) {
-		channel = new Map<String, MessageOBJ>();
-	}
-	channel.set(message.uuid, message);
-	messages.set(message.channel.uuid, new Map(channel));
-	return messages;
-}
-
-const delete_message = (messages: Map<String, Map<String, MessageOBJ>>, message: MessageOBJ) => {
-	let channel = messages.get(message.channel.uuid);
-	if (!channel) {
-		channel = new Map<String, MessageOBJ>();
-	}
-	channel.delete(message.uuid);
-	messages.set(message.channel.uuid, new Map(channel));
-	return messages;
-}
-
 const delete_channel = (channels: Map<String, ChannelOBJ>, channel: ChannelOBJ) => {
 	channels.delete(channel.uuid);
 	return channels;
-}
-
-const add_or_update_member = (members: Map<String, Map<String, MemberOBJ>>, member: MemberOBJ) => {
-	let channel = members.get(member.channel_id);
-	if (!channel) {
-		channel = new Map<String, MemberOBJ>();
-	}
-	channel.set(member.uuid, member);
-	members.set(member.channel_id, new Map(channel));
-	return members;
-}
-
-const delete_member = (members: Map<String, Map<String, MemberOBJ>>, member: MemberOBJ) => {
-	let channel = members.get(member.channel_id);
-	if (!channel) {
-		channel = new Map<String, MemberOBJ>();
-	}
-	channel.delete(member.uuid);
-	members.set(member.channel_id, new Map(channel));
-	return members;
 }
 
 const deleteFriend = (prevFriends: Map<String, FriendOBJ>, friend: FriendOBJ) => {
@@ -106,12 +66,12 @@ function Channel() {
 
 				if (payload.event === 'MESSAGE_CREATE' || payload.event === 'MESSAGE_MODIFY') {
 					const message: MessageOBJ = payload.data;
-					channel_context.setMessages(prevMessages => new Map(add_or_update_message(prevMessages, message)));
+					channel_context.UpdateMessage(message.channel.uuid, message.uuid ,message);
 				}
 
 				if (payload.event === 'MESSAGE_DELETE') {
 					const message: MessageOBJ = payload.data;
-					channel_context.setMessages(prevMessages => new Map(delete_message(prevMessages, message)));
+					channel_context.DeleteMessage(message.channel.uuid, message.uuid);
 				}
 
 				if (payload.event === 'CHANNEL_CREATE' || payload.event === 'CHANNEL_MODIFY') {
@@ -126,12 +86,12 @@ function Channel() {
 
 				if (payload.event === 'MEMBER_JOIN' || payload.event === 'MEMBER_UPDATE') {
 					const member: MemberOBJ = payload.data;
-					channel_context.setMembers(prevMembers => new Map(add_or_update_member(prevMembers, member)));
+					channel_context.UpdateMember(member.channel_id, member.uuid, member);
 				}
 
 				if (payload.event === 'MEMBER_REMOVE') {
 					const member: MemberOBJ = payload.data;
-					channel_context.setMembers(prevMembers => new Map(delete_member(prevMembers, member)));
+					channel_context.DeleteMember(member.channel_id, member.uuid);
 				}
 
 				if (payload.event === 'FRIEND_CREATE' || payload.event === 'FRIEND_MODIFY') {
