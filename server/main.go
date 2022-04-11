@@ -78,6 +78,8 @@ func main() {
 	handler.Add("MESSAGE_MODIFY", gateway.MessageModify)
 	handler.Add("MESSAGE_DELETE", gateway.MessageDelete)
 
+	handler.Add("CALL_START", gateway.CallStart)
+
 	router := mux.NewRouter()
 	headers := handlers.AllowedHeaders([]string{"Content-Type", "Authorization"})
 	methods := handlers.AllowedMethods([]string{"GET", "POST", "PATCH", "DELETE"})
