@@ -19,6 +19,7 @@ import { w3cwebsocket as W3CWebSocket } from "websocket";
 import ChannelCTX from "./contexts/channelctx";
 import UserCTX from "./contexts/usercontext";
 import { CtxMenuCtx } from "./contexts/context_menu_ctx";
+import CallCTX from './contexts/callcontexts';
 
 const gateway = new W3CWebSocket('ws://127.0.0.1:5000/ws');
 function App() {
@@ -33,7 +34,9 @@ function App() {
 								<States>
 									<CtxMenuCtx>
 										<UserCTX>
+											<CallCTX>
 											<Channel />
+											</CallCTX>
 										</UserCTX>
 									</CtxMenuCtx>
 								</States>

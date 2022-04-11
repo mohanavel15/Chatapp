@@ -78,7 +78,7 @@ function Chat({ channel }: { channel: ChannelOBJ }) {
 
     return (
         <div className="Chat">
-			<ChannelHeader name={channel.name} icon={channel.icon} />
+			<ChannelHeader channel={channel} />
 				<div className="chat-message">
 					{message_jsx}
 				</div>

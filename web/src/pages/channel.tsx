@@ -24,10 +24,10 @@ import { UserContextOBJ, UserContext } from "../contexts/usercontext";
 import { ContextMenuCtx, ContextMenu } from "../contexts/context_menu_ctx";
 import { StatesContext, StateContext } from "../contexts/states";
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
-
+import { CallContext, CallContextOBJ } from "../contexts/callcontexts";
+import CallPopUp from "../components/call_pop_up";
 import ChannelHome from "../components/channel_home";
 import MessageCTX from '../contexts/messagectx';
-import CallCTX from '../contexts/callcontexts';
 
 const delete_channel = (channels: Map<String, ChannelOBJ>, channel: ChannelOBJ) => {
 	channels.delete(channel.uuid);
@@ -47,6 +47,7 @@ function Channel() {
 	const state_context: StateContext = useContext(StatesContext);
 	const channel_context: ChannelContext = useContext(ChannelsContext);
 	const ctx_menu_context: ContextMenuCtx = useContext(ContextMenu);
+    const call_ctx: CallContextOBJ = useContext(CallContext);
 
 	useEffect(() => {
 		const onMessage = (message: IMessageEvent) => {
@@ -105,6 +106,15 @@ function Channel() {
 					const friend: FriendOBJ = payload.data;
 					user_ctx.setFriends(prevFriends => new Map(deleteFriend(prevFriends, friend)));
 				}
+
+				if (payload.event === 'CALL_START') {
+					const channel_id = payload.data.channel_id;
+					const channel = channel_context.channels.get(channel_id);
+					if (channel) {
+						call_ctx.setChannel(channel);
+						call_ctx.setIncoming(true);
+					}
+				}
 			}
 		};
 	
@@ -154,7 +164,6 @@ function Channel() {
 	return (
 		<div className="Channel">
 			{ !state_context.Settings && 
-					<CallCTX>
 					<MessageCTX>
 					<>
 						<SideBar />
@@ -170,13 +179,13 @@ function Channel() {
 						{ state_context.deleteChannel && <DeleteChannel /> }
 						{ state_context.deleteMessage && <DeleteMessage /> }
 						{ state_context.showProfile && <Profile /> }
+						{ call_ctx.incoming && <CallPopUp /> }
 						{ ctx_menu_context.showMsgCtxMenu && <MessageContextMenu location={ctx_menu_context.ctxMsgMenuLocation} /> }
 						{ ctx_menu_context.showChannelCtxMenu && <ChannelContextMenu location={ctx_menu_context.ctxChannelMenuLocation} /> }
 						{ ctx_menu_context.showMemberCtxMenu && <MemberContextMenu location={ctx_menu_context.ctxMemberMenuLocation} /> }
 						{ ctx_menu_context.showFriendCtxMenu && <FriendContextMenu value={ctx_menu_context.ctxFriendMenuLocation} /> }
 					</>
 					</MessageCTX>
-					</CallCTX>
 			}
 			{ state_context.Settings && <Settings /> }
 

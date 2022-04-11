@@ -2,89 +2,123 @@ import { setDefaultIcon } from '../utils/errorhandle';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPhone, faPhoneSlash, faVideo, faVideoSlash, faMicrophone, faMicrophoneSlash } from '@fortawesome/free-solid-svg-icons'
 import { useEffect, useState, useContext } from 'react';
-import { StatesContext, StateContext } from "../contexts/states";
 import { UserContextOBJ, UserContext } from "../contexts/usercontext";
 import { CallContext, CallContextOBJ } from "../contexts/callcontexts";
-interface ChannelHeaderProps {
-    name: string;
-    icon: string;
-}
+import { ChannelOBJ } from "../models/models";
+import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 
-function ChannelHeader(props: ChannelHeaderProps) {
-    const [call, setCall] = useState(false);
-    const [video, setVideo] = useState(false);
+function ChannelHeader({ channel }: { channel: ChannelOBJ }) {
     const user:UserContextOBJ = useContext(UserContext);
     const call_ctx: CallContextOBJ = useContext(CallContext);
-    const state_context: StateContext = useContext(StatesContext);
-    let [localStream, setLocalStream] = useState<MediaStream>();
+    const channel_context: ChannelContext = useContext(ChannelsContext);
+
+    const [call, setCall] = useState(false);
+
+    useEffect(() => {
+        console.log("ChannelHeader: useEffect");
+        if (call_ctx.call === true) {
+            console.log("ChannelHeader: useEffect: call_ctx.call === true");
+            if (channel.uuid === call_ctx.channel.uuid) {
+                console.log("ChannelHeader: useEffect: channel.uuid === call_ctx.channel.uuid");
+                setCall(true);
+            } else {
+                setCall(false);
+            }
+        } else {
+            setCall(false);
+        }
+    }, [call_ctx.call, channel]);
 
     async function start_call(video: boolean) {
-        setCall(true);
-        
+        call_ctx.setCall(true);
+        call_ctx.setChannel(channel);
         let local_stream = await navigator.mediaDevices.getUserMedia({ video: video, audio: true });
-        setLocalStream(local_stream);
+        call_ctx.setLocalmedia(local_stream);
         if (video) {
-            setVideo(true);
+            call_ctx.setVideo(true);
+        } else {
+            call_ctx.setVoice(true);
         }
 
         if (!video) {
             let local_audio = document.getElementById("local-audio") as HTMLVideoElement;
-            console.log("not video");
-            console.log(localStream);
-            console.log("playing audio");
             local_audio.srcObject = local_stream;
             local_audio.play();
         }
 
+        channel_context.gateway.send(
+            JSON.stringify({
+                event: "CALL_START",
+                data: {
+                    channel_id: channel.uuid,
+                }
+            })
+        );
     }
 
     async function end_call() {
-        setCall(false);
-        setVideo(false);
-        if (localStream) {
-            localStream.getTracks().forEach(track => {
+        call_ctx.setCall(false);
+        call_ctx.setVideo(false);
+        if (call_ctx.localmedia) {
+            call_ctx.localmedia.getTracks().forEach(track => {
                 track.stop();
             });
         }
-        setLocalStream(undefined);
+        call_ctx.setLocalmedia(undefined);
     }
 
     useEffect(() => {
-        if (call) {
-            if (video) {
+        if (call_ctx.call) {
+            if (call_ctx.video) {
                 let local_video = document.getElementById("local-video") as HTMLVideoElement;
-                localStream?.getVideoTracks().forEach(track => {
-                    track.enabled = true;
-                });
+                if (call_ctx.voice === false) {
+                    call_ctx.localmedia?.getVideoTracks().forEach(track => {
+                        track.enabled = true;
+                    });
 
-                if (localStream) {
-                    local_video.srcObject = localStream;
-                    local_video.play();
+                    if (call_ctx.localmedia) {
+                        local_video.srcObject = call_ctx.localmedia;
+                        local_video.play();
+                    }
+                } else {
+                    call_ctx.setVoice(false);
+                    navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
+                            call_ctx.setLocalmedia(stream);
+                            setTimeout(() => {
+                                if (call_ctx.localmedia) {
+                                    local_video.srcObject = stream;
+                                    local_video.play();
+                                }
+                            }, 1000);
+                        }
+                    );
                 }
+
+                
             } else {
-                localStream?.getVideoTracks().forEach(track => {
+                call_ctx.localmedia?.getVideoTracks().forEach(track => {
                     track.enabled = false;
                 });
 
                 let local_audio = document.getElementById("local-audio") as HTMLVideoElement;
-                if (localStream && local_audio) {
-                    local_audio.srcObject = localStream;
+                if (call_ctx.localmedia && local_audio) {
+                    local_audio.srcObject = call_ctx.localmedia;
                     local_audio.play();
                 }
             }
 
         }
 
-    }, [call, video]);
+    }, [call_ctx.call, call_ctx.video]);
 
     useEffect(() => {
         if (call_ctx.Mute) {
-            localStream?.getAudioTracks().forEach(track => {
+            call_ctx.localmedia?.getAudioTracks().forEach(track => {
                 track.enabled = false;
             })
         }
         else {
-            localStream?.getAudioTracks().forEach(track => {
+            call_ctx.localmedia?.getAudioTracks().forEach(track => {
                 track.enabled = true;
             })
         }
@@ -95,8 +129,8 @@ function ChannelHeader(props: ChannelHeaderProps) {
         { call === false &&
         <div className='channel-header'>
             <div className='channel-header-info'>
-                <img className='channel-avatar' src={props.icon} alt="Avatar" onError={setDefaultIcon} />
-                <h2>{props.name}</h2>
+                <img className='channel-avatar' src={channel.icon} alt="Avatar" onError={setDefaultIcon} />
+                <h2>{channel.name}</h2>
             </div>
             <div className='channel-header-actions'>
                 <button className='channel-header-action-button' onClick={() => {start_call(false)}}><FontAwesomeIcon icon={faPhone} /></button>
@@ -107,15 +141,15 @@ function ChannelHeader(props: ChannelHeaderProps) {
         { call &&
         <div className='channel-header-call'>
             <div className='channel-header-call-info'>
-                { video === false && <><audio id="local-audio" autoPlay></audio><img id="local-voice" className='user-call-avatar' src={user.avatar} alt="Avatar" onError={setDefaultIcon} /></> }
-                { video && <video id="local-video" className='user-call-video-box' autoPlay playsInline></video> }
+                { call_ctx.video === false && <><audio id="local-audio" autoPlay></audio><img id="local-voice" className='user-call-avatar' src={user.avatar} alt="Avatar" onError={setDefaultIcon} /></> }
+                { call_ctx.video && <video id="local-video" className='user-call-video-box' autoPlay playsInline></video> }
             </div>
             <div className='channel-header-call-actions'>
                 { call_ctx.Mute === false && <button className='channel-header-action-button while-in-call' onClick={() => { call_ctx.setMute(true) }}><FontAwesomeIcon icon={faMicrophone} /></button> }
                 { call_ctx.Mute && <button className='channel-header-action-button while-in-call' onClick={() => { call_ctx.setMute(false) }}><FontAwesomeIcon icon={faMicrophoneSlash} /></button> }
                 <button className='channel-header-action-button while-in-call' onClick={() => { end_call() }}><FontAwesomeIcon icon={faPhoneSlash} /></button>
-                { video === false && <button className='channel-header-action-button while-in-call' onClick={() => { setVideo(true) }}><FontAwesomeIcon icon={faVideo} /></button> }
-                { video && <button className='channel-header-action-button while-in-call' onClick={() => { setVideo(false) }}><FontAwesomeIcon icon={faVideoSlash} /></button> }
+                { call_ctx.video === false && <button className='channel-header-action-button while-in-call' onClick={() => { call_ctx.setVideo(true) }}><FontAwesomeIcon icon={faVideo} /></button> }
+                { call_ctx.video && <button className='channel-header-action-button while-in-call' onClick={() => { call_ctx.setVideo(false) }}><FontAwesomeIcon icon={faVideoSlash} /></button> }
             </div>
         </div>
         }
