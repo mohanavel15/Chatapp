@@ -2,8 +2,6 @@ import React, { useState, createContext } from 'react'
 import { ChannelOBJ, MemberOBJ, MessageOBJ } from '../models/models';
 
 export interface StateContext {
-    Mute: boolean;
-    Deafen: boolean;
     Settings: boolean;
     createChannel: boolean;
     editChannel: boolean;
@@ -13,8 +11,6 @@ export interface StateContext {
     messageOBJ: MessageOBJ;
     showProfile: boolean;
     ProfileOBJ: MemberOBJ;
-    setMute: React.Dispatch<React.SetStateAction<boolean>>;
-    setDeafen: React.Dispatch<React.SetStateAction<boolean>>;
     setSettings: React.Dispatch<React.SetStateAction<boolean>>;
     setCreateChannel: React.Dispatch<React.SetStateAction<boolean>>;
     setEditChannel: React.Dispatch<React.SetStateAction<boolean>>;
@@ -29,8 +25,6 @@ export interface StateContext {
 export const StatesContext = createContext<StateContext>(undefined!);
 
 export function States({ children }: {children: React.ReactChild}) {
-    const [Mute, setMute] = useState(false)
-    const [Deafen, setDeafen] = useState(false)
     const [Settings, setSettings] = useState(false)
 
     const [createChannel, setCreateChannel] = useState(false)
@@ -45,8 +39,6 @@ export function States({ children }: {children: React.ReactChild}) {
     const [ProfileOBJ, setProfileOBJ] = useState<MemberOBJ>(undefined!)
 
     const context_value: StateContext = {
-        Mute: Mute,
-        Deafen: Deafen,
         Settings: Settings,
         createChannel: createChannel,
         editChannel: editChannel,
@@ -56,8 +48,6 @@ export function States({ children }: {children: React.ReactChild}) {
         messageOBJ: messageOBJ,
         showProfile: showProfile,
         ProfileOBJ: ProfileOBJ,
-        setMute: setMute,
-        setDeafen: setDeafen,
         setSettings: setSettings,
         setCreateChannel: setCreateChannel,
         setEditChannel: setEditChannel,

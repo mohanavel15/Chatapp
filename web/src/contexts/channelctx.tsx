@@ -27,7 +27,6 @@ export const ChannelsContext = createContext<ChannelContext>(undefined!);
 export default function ChannelCTX({ children, gateway }: {children: React.ReactChild, gateway: W3CWebSocket}) {
 	
 	let [channels, setChannels] = useState<Map<String,ChannelOBJ>>(new Map<String,ChannelOBJ>());
-	//let [members, setMembers] = useState<Map<String, Map<String, MemberOBJ>>>(new Map<String, Map<String, MemberOBJ>>());
 	const [members, UpdateMember, DeleteMember] = useDoubleMap<MemberOBJ>(new Map<String, Map<String, MemberOBJ>>());
 	const [messages, UpdateMessage, DeleteMessage] = useDoubleMap<MessageOBJ>(new Map<String, Map<String, MessageOBJ>>());
 	let [channelsLoaded, setChannelsLoaded] = useState(false)

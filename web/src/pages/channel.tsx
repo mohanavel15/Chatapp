@@ -24,8 +24,10 @@ import { UserContextOBJ, UserContext } from "../contexts/usercontext";
 import { ContextMenuCtx, ContextMenu } from "../contexts/context_menu_ctx";
 import { StatesContext, StateContext } from "../contexts/states";
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
+
 import ChannelHome from "../components/channel_home";
 import MessageCTX from '../contexts/messagectx';
+import CallCTX from '../contexts/callcontexts';
 
 const delete_channel = (channels: Map<String, ChannelOBJ>, channel: ChannelOBJ) => {
 	channels.delete(channel.uuid);
@@ -118,6 +120,9 @@ function Channel() {
 	
 		const onClose = () => {
 			console.log("Disconnected from server");
+			setTimeout(function() {
+				window.location.reload()
+			}, 5000);
 		};
 	
 		channel_context.gateway.onopen = onOpen;
@@ -149,6 +154,7 @@ function Channel() {
 	return (
 		<div className="Channel">
 			{ !state_context.Settings && 
+					<CallCTX>
 					<MessageCTX>
 					<>
 						<SideBar />
@@ -170,6 +176,7 @@ function Channel() {
 						{ ctx_menu_context.showFriendCtxMenu && <FriendContextMenu value={ctx_menu_context.ctxFriendMenuLocation} /> }
 					</>
 					</MessageCTX>
+					</CallCTX>
 			}
 			{ state_context.Settings && <Settings /> }
 
