@@ -5,6 +5,7 @@ import (
 	"Chatapp/request"
 	"Chatapp/response"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -24,13 +25,12 @@ func CreateChannel(ctx *Context) {
 	}
 
 	channel := database.Channel{
-		Uuid:           uuid.New().String(),
-		Name:           request.Name,
-		Icon:           request.Icon,
-		Owner:          user.Uuid,
-		PrivateChannel: false,
-		CreatedAt:      time.Now(),
-		UpdatedAt:      time.Now(),
+		Uuid:      uuid.New().String(),
+		Name:      request.Name,
+		Icon:      request.Icon,
+		Owner:     user.Uuid,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 	db.Create(&channel)
 
@@ -44,13 +44,12 @@ func CreateChannel(ctx *Context) {
 	db.Create(&members)
 
 	response := response.Channel{
-		Uuid:           channel.Uuid,
-		Name:           channel.Name,
-		Icon:           channel.Icon,
-		OwnerID:        user.Uuid,
-		PrivateChannel: channel.PrivateChannel,
-		CreatedAt:      channel.CreatedAt.String(),
-		UpdatedAt:      channel.UpdatedAt.String(),
+		Uuid:      channel.Uuid,
+		Name:      channel.Name,
+		Icon:      channel.Icon,
+		OwnerID:   user.Uuid,
+		CreatedAt: channel.CreatedAt.String(),
+		UpdatedAt: channel.UpdatedAt.String(),
 	}
 	res, err := json.Marshal(response)
 	if err != nil {
@@ -82,13 +81,12 @@ func GetChannels(ctx *Context) {
 		db.Where(&channel).First(&channel)
 
 		res_channel := response.Channel{
-			Uuid:           channel.Uuid,
-			Name:           channel.Name,
-			Icon:           channel.Icon,
-			OwnerID:        channel.Owner,
-			PrivateChannel: channel.PrivateChannel,
-			CreatedAt:      channel.CreatedAt.String(),
-			UpdatedAt:      channel.UpdatedAt.String(),
+			Uuid:      channel.Uuid,
+			Name:      channel.Name,
+			Icon:      channel.Icon,
+			OwnerID:   channel.Owner,
+			CreatedAt: channel.CreatedAt.String(),
+			UpdatedAt: channel.UpdatedAt.String(),
 		}
 
 		res_obj = append(res_obj, res_channel)
@@ -127,13 +125,12 @@ func GetChannel(ctx *Context) {
 	}
 
 	res_channel := response.Channel{
-		Uuid:           channel.Uuid,
-		Name:           channel.Name,
-		Icon:           channel.Icon,
-		OwnerID:        channel.Owner,
-		PrivateChannel: channel.PrivateChannel,
-		CreatedAt:      channel.CreatedAt.String(),
-		UpdatedAt:      channel.UpdatedAt.String(),
+		Uuid:      channel.Uuid,
+		Name:      channel.Name,
+		Icon:      channel.Icon,
+		OwnerID:   channel.Owner,
+		CreatedAt: channel.CreatedAt.String(),
+		UpdatedAt: channel.UpdatedAt.String(),
 	}
 
 	res, err := json.Marshal(res_channel)
@@ -182,13 +179,12 @@ func EditChannel(ctx *Context) {
 	db.Save(&channel)
 
 	res_channel := response.Channel{
-		Uuid:           channel.Uuid,
-		Name:           channel.Name,
-		Icon:           channel.Icon,
-		OwnerID:        channel.Owner,
-		PrivateChannel: channel.PrivateChannel,
-		CreatedAt:      channel.CreatedAt.String(),
-		UpdatedAt:      channel.UpdatedAt.String(),
+		Uuid:      channel.Uuid,
+		Name:      channel.Name,
+		Icon:      channel.Icon,
+		OwnerID:   channel.Owner,
+		CreatedAt: channel.CreatedAt.String(),
+		UpdatedAt: channel.UpdatedAt.String(),
 	}
 
 	res, err := json.Marshal(res_channel)
@@ -224,4 +220,76 @@ func DeleteChannel(ctx *Context) {
 		return
 	}
 	db.Delete(&member)
+}
+
+func GetDMChannel(ctx *Context) {
+	url_vars := mux.Vars(ctx.Req)
+	user_id := url_vars["id"]
+
+	if user_id == ctx.User.Uuid {
+		ctx.Res.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	var dm_user database.Account
+	ctx.Db.Where("uuid = ?", user_id).First(&dm_user)
+
+	if dm_user.ID == 0 {
+		ctx.Res.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	dm_channel := database.DMChannel{
+		FromUser: ctx.User.ID,
+		ToUser:   dm_user.ID,
+	}
+	ctx.Db.Where(&dm_channel).First(&dm_channel)
+	if dm_channel.ID == 0 {
+		dm_channel := database.DMChannel{
+			FromUser: dm_user.ID,
+			ToUser:   ctx.User.ID,
+		}
+		ctx.Db.Where(&dm_channel).First(&dm_channel)
+	}
+	var res response.DMChannel
+
+	if dm_channel.ID == 0 {
+		dm_channel := database.DMChannel{
+			Uuid:      uuid.New().String(),
+			FromUser:  ctx.User.ID,
+			ToUser:    dm_user.ID,
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+		}
+		ctx.Db.Create(&dm_channel)
+		fmt.Println("Created! :", dm_channel.Uuid)
+
+		res = response.DMChannel{
+			Uuid: dm_channel.Uuid,
+			Recipient: response.User{
+				Uuid:      dm_user.Uuid,
+				Avatar:    dm_user.Avatar,
+				Username:  dm_user.Username,
+				CreatedAt: dm_user.CreatedAt.Unix(),
+			},
+		}
+	} else {
+		res = response.DMChannel{
+			Uuid: dm_channel.Uuid,
+			Recipient: response.User{
+				Uuid:      dm_user.Uuid,
+				Avatar:    dm_user.Avatar,
+				Username:  dm_user.Username,
+				CreatedAt: dm_user.CreatedAt.Unix(),
+			},
+		}
+	}
+
+	res_, err := json.Marshal(res)
+	if err != nil {
+		ctx.Res.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	ctx.Res.Header().Set("Content-Type", "application/json")
+	ctx.Res.Write(res_)
 }

@@ -38,13 +38,12 @@ func GetMessages(ctx *Context) {
 	db.Where("channel_id = ?", channel.ID).Find(&messages)
 
 	channel_res := response.Channel{
-		Uuid:           channel.Uuid,
-		Name:           channel.Name,
-		Icon:           channel.Icon,
-		OwnerID:        channel.Owner,
-		PrivateChannel: channel.PrivateChannel,
-		CreatedAt:      channel.CreatedAt.String(),
-		UpdatedAt:      channel.UpdatedAt.String(),
+		Uuid:      channel.Uuid,
+		Name:      channel.Name,
+		Icon:      channel.Icon,
+		OwnerID:   channel.Owner,
+		CreatedAt: channel.CreatedAt.String(),
+		UpdatedAt: channel.UpdatedAt.String(),
 	}
 
 	messages_res := []response.Message{}
@@ -134,13 +133,12 @@ func CreateMessage(ctx *Context) {
 	}
 
 	channel_res := response.Channel{
-		Uuid:           channel.Uuid,
-		Name:           channel.Name,
-		Icon:           channel.Icon,
-		OwnerID:        channel.Owner,
-		PrivateChannel: channel.PrivateChannel,
-		CreatedAt:      channel.CreatedAt.String(),
-		UpdatedAt:      channel.UpdatedAt.String(),
+		Uuid:      channel.Uuid,
+		Name:      channel.Name,
+		Icon:      channel.Icon,
+		OwnerID:   channel.Owner,
+		CreatedAt: channel.CreatedAt.String(),
+		UpdatedAt: channel.UpdatedAt.String(),
 	}
 
 	message_res := response.Message{
@@ -204,13 +202,12 @@ func GetMessage(ctx *Context) {
 	}
 
 	channel_res := response.Channel{
-		Uuid:           channel.Uuid,
-		Name:           channel.Name,
-		Icon:           channel.Icon,
-		OwnerID:        channel.Owner,
-		PrivateChannel: channel.PrivateChannel,
-		CreatedAt:      channel.CreatedAt.String(),
-		UpdatedAt:      channel.UpdatedAt.String(),
+		Uuid:      channel.Uuid,
+		Name:      channel.Name,
+		Icon:      channel.Icon,
+		OwnerID:   channel.Owner,
+		CreatedAt: channel.CreatedAt.String(),
+		UpdatedAt: channel.UpdatedAt.String(),
 	}
 
 	message_res := response.Message{
@@ -292,13 +289,12 @@ func EditMessage(ctx *Context) {
 	}
 
 	channel_res := response.Channel{
-		Uuid:           channel.Uuid,
-		Name:           channel.Name,
-		Icon:           channel.Icon,
-		OwnerID:        channel.Owner,
-		PrivateChannel: channel.PrivateChannel,
-		CreatedAt:      channel.CreatedAt.String(),
-		UpdatedAt:      channel.UpdatedAt.String(),
+		Uuid:      channel.Uuid,
+		Name:      channel.Name,
+		Icon:      channel.Icon,
+		OwnerID:   channel.Owner,
+		CreatedAt: channel.CreatedAt.String(),
+		UpdatedAt: channel.UpdatedAt.String(),
 	}
 
 	message_res := response.Message{

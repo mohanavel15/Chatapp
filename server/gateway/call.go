@@ -38,6 +38,18 @@ func CallStart(ctx *websocket.Context) {
 		return
 	}
 
+	_, ok := ctx.Ws.Conns.Calls[channel.Uuid]
+	if !ok {
+		ctx.Ws.Conns.Calls[channel.Uuid] = make(map[string]*websocket.Call)
+	}
+	ctx.Ws.Conns.Calls[channel.Uuid][ctx.Ws.User.Uuid] = &websocket.Call{
+		Ws: ctx.Ws,
+		Sdp: &websocket.SDP{
+			Type: call_start.Sdp.Type,
+			Sdp:  call_start.Sdp.Sdp,
+		},
+	}
+
 	if users, ok := ctx.Ws.Conns.Channels[channel.Uuid]; ok {
 		for _, user := range users {
 			if user.User.Uuid != ctx.Ws.User.Uuid {

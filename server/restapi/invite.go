@@ -55,13 +55,12 @@ func JoinInvite(ctx *Context) {
 	db.Create(&member)
 
 	res := response.Channel{
-		Uuid:           channel.Uuid,
-		Name:           channel.Name,
-		OwnerID:        channel.Owner,
-		Icon:           channel.Icon,
-		PrivateChannel: channel.PrivateChannel,
-		CreatedAt:      channel.CreatedAt.String(),
-		UpdatedAt:      channel.UpdatedAt.String(),
+		Uuid:      channel.Uuid,
+		Name:      channel.Name,
+		OwnerID:   channel.Owner,
+		Icon:      channel.Icon,
+		CreatedAt: channel.CreatedAt.String(),
+		UpdatedAt: channel.UpdatedAt.String(),
 	}
 
 	res_obj, err := json.Marshal(res)

@@ -63,13 +63,12 @@ func MessageCreate(ctx *websocket.Context) {
 	}
 
 	channel_res := response.Channel{
-		Uuid:           get_channel.Uuid,
-		Name:           get_channel.Name,
-		Icon:           get_channel.Icon,
-		OwnerID:        get_channel.Owner,
-		PrivateChannel: get_channel.PrivateChannel,
-		CreatedAt:      get_channel.CreatedAt.String(),
-		UpdatedAt:      get_channel.UpdatedAt.String(),
+		Uuid:      get_channel.Uuid,
+		Name:      get_channel.Name,
+		Icon:      get_channel.Icon,
+		OwnerID:   get_channel.Owner,
+		CreatedAt: get_channel.CreatedAt.String(),
+		UpdatedAt: get_channel.UpdatedAt.String(),
 	}
 
 	message_res := response.Message{
@@ -147,13 +146,12 @@ func MessageModify(ctx *websocket.Context) {
 	}
 
 	channel_res := response.Channel{
-		Uuid:           get_channel.Uuid,
-		Name:           get_channel.Name,
-		Icon:           get_channel.Icon,
-		OwnerID:        get_channel.Owner,
-		PrivateChannel: get_channel.PrivateChannel,
-		CreatedAt:      get_channel.CreatedAt.String(),
-		UpdatedAt:      get_channel.UpdatedAt.String(),
+		Uuid:      get_channel.Uuid,
+		Name:      get_channel.Name,
+		Icon:      get_channel.Icon,
+		OwnerID:   get_channel.Owner,
+		CreatedAt: get_channel.CreatedAt.String(),
+		UpdatedAt: get_channel.UpdatedAt.String(),
 	}
 
 	message_res := response.Message{
@@ -227,13 +225,12 @@ func MessageDelete(ctx *websocket.Context) {
 		Uuid:    get_message.Uuid,
 		Content: get_message.Content,
 		Channel: response.Channel{
-			Uuid:           get_channel.Uuid,
-			Name:           get_channel.Name,
-			Icon:           get_channel.Icon,
-			OwnerID:        get_channel.Owner,
-			PrivateChannel: get_channel.PrivateChannel,
-			CreatedAt:      get_channel.CreatedAt.String(),
-			UpdatedAt:      get_channel.UpdatedAt.String(),
+			Uuid:      get_channel.Uuid,
+			Name:      get_channel.Name,
+			Icon:      get_channel.Icon,
+			OwnerID:   get_channel.Owner,
+			CreatedAt: get_channel.CreatedAt.String(),
+			UpdatedAt: get_channel.UpdatedAt.String(),
 		},
 		CreatedAt: get_message.CreatedAt.String(),
 		EditedAt:  get_message.UpdatedAt.String(),

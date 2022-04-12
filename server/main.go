@@ -23,6 +23,7 @@ var handler *websocket.EventHandler
 var queue = []*websocket.WS_Message{}
 var onlineUsers = make(map[string]*websocket.Ws)
 var channels = make(map[string]map[string]*websocket.Ws)
+var calls = make(map[string]map[string]*websocket.Call)
 
 // Environment Variables
 var (
@@ -59,6 +60,7 @@ func main() {
 	db.AutoMigrate(&database.Friend{})
 	db.AutoMigrate(&database.Ban{})
 	db.AutoMigrate(&database.Block{})
+	db.AutoMigrate(&database.DMChannel{})
 
 	handler = &websocket.EventHandler{}
 	handler.Add("CONNECT", gateway.Connect)
@@ -124,6 +126,7 @@ func main() {
 	router.HandleFunc("/users/@me/friends/{fid}", Authenticated(restapi.GetFriend)).Methods("GET")
 	router.HandleFunc("/users/@me/friends/{fid}", Authenticated(restapi.RemoveOrDeclineFriend)).Methods("DELETE")
 
+	router.HandleFunc("/dms/{id}", Authenticated(restapi.GetDMChannel)).Methods("GET")
 	// Gateway
 	router.HandleFunc("/ws", Gateway)
 

@@ -34,14 +34,13 @@ type Message struct {
 }
 
 type Channel struct {
-	ID             uint   `gorm:"primarykey"`
-	Uuid           string `gorm:"type:varchar(255);unique;not null"`
-	Name           string `gorm:"type:varchar(255);not null"`
-	Icon           string `gorm:"type:varchar(255);not null"`
-	Owner          string `gorm:"type:varchar(255);not null"`
-	PrivateChannel bool   `gorm:"type:boolean;not null"`
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
+	ID        uint   `gorm:"primarykey"`
+	Uuid      string `gorm:"type:varchar(255);unique;not null"`
+	Name      string `gorm:"type:varchar(255);not null"`
+	Icon      string `gorm:"type:varchar(255);not null"`
+	Owner     string `gorm:"type:varchar(255);not null"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 type Member struct {
@@ -86,4 +85,13 @@ type Block struct {
 	BlockedBy   uint `gorm:"type:int;not null"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
+}
+
+type DMChannel struct {
+	ID        uint   `gorm:"primarykey"`
+	Uuid      string `gorm:"type:varchar(255);unique;not null"`
+	FromUser  uint   `gorm:"type:int;not null"`
+	ToUser    uint   `gorm:"type:int;not null"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }

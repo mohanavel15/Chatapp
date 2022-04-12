@@ -24,13 +24,12 @@ func ChannelCreate(ctx *websocket.Context) {
 	}
 
 	channel := database.Channel{
-		Uuid:           uuid.New().String(),
-		Name:           request.Name,
-		Icon:           request.Icon,
-		Owner:          ctx.Ws.User.Uuid,
-		PrivateChannel: false,
-		CreatedAt:      time.Now(),
-		UpdatedAt:      time.Now(),
+		Uuid:      uuid.New().String(),
+		Name:      request.Name,
+		Icon:      request.Icon,
+		Owner:     ctx.Ws.User.Uuid,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 	ctx.Db.Create(&channel)
 
@@ -44,13 +43,12 @@ func ChannelCreate(ctx *websocket.Context) {
 	ctx.Db.Create(&members)
 
 	response := response.Channel{
-		Uuid:           channel.Uuid,
-		Name:           channel.Name,
-		Icon:           channel.Icon,
-		OwnerID:        ctx.Ws.User.Uuid,
-		PrivateChannel: channel.PrivateChannel,
-		CreatedAt:      channel.CreatedAt.String(),
-		UpdatedAt:      channel.UpdatedAt.String(),
+		Uuid:      channel.Uuid,
+		Name:      channel.Name,
+		Icon:      channel.Icon,
+		OwnerID:   ctx.Ws.User.Uuid,
+		CreatedAt: channel.CreatedAt.String(),
+		UpdatedAt: channel.UpdatedAt.String(),
 	}
 
 	ws_msg := websocket.WS_Message{
@@ -91,13 +89,12 @@ func ChannelModify(ctx *websocket.Context) {
 	ctx.Db.Save(&channel)
 
 	res_channel := response.Channel{
-		Uuid:           channel.Uuid,
-		Name:           channel.Name,
-		Icon:           channel.Icon,
-		OwnerID:        channel.Owner,
-		PrivateChannel: channel.PrivateChannel,
-		CreatedAt:      channel.CreatedAt.String(),
-		UpdatedAt:      channel.UpdatedAt.String(),
+		Uuid:      channel.Uuid,
+		Name:      channel.Name,
+		Icon:      channel.Icon,
+		OwnerID:   channel.Owner,
+		CreatedAt: channel.CreatedAt.String(),
+		UpdatedAt: channel.UpdatedAt.String(),
 	}
 
 	ws_msg := websocket.WS_Message{
@@ -133,13 +130,12 @@ func ChannelDelete(ctx *websocket.Context) {
 	ctx.Db.Delete(&member)
 
 	res_channel := response.Channel{
-		Uuid:           channel.Uuid,
-		Name:           channel.Name,
-		Icon:           channel.Icon,
-		OwnerID:        channel.Owner,
-		PrivateChannel: channel.PrivateChannel,
-		CreatedAt:      channel.CreatedAt.String(),
-		UpdatedAt:      channel.UpdatedAt.String(),
+		Uuid:      channel.Uuid,
+		Name:      channel.Name,
+		Icon:      channel.Icon,
+		OwnerID:   channel.Owner,
+		CreatedAt: channel.CreatedAt.String(),
+		UpdatedAt: channel.UpdatedAt.String(),
 	}
 
 	ws_msg_user := websocket.WS_Message{
