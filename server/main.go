@@ -125,7 +125,8 @@ func main() {
 	router.HandleFunc("/users/@me/friends", Authenticated(restapi.AddOrAcceptFriend)).Methods("POST")
 	router.HandleFunc("/users/@me/friends/{fid}", Authenticated(restapi.GetFriend)).Methods("GET")
 	router.HandleFunc("/users/@me/friends/{fid}", Authenticated(restapi.RemoveOrDeclineFriend)).Methods("DELETE")
-
+	// DMS
+	router.HandleFunc("/users/@me/dms", Authenticated(restapi.GetDMChannels)).Methods("GET")
 	router.HandleFunc("/dms/{id}", Authenticated(restapi.GetDMChannel)).Methods("GET")
 	// Gateway
 	router.HandleFunc("/ws", Gateway)

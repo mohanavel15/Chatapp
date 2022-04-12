@@ -5,7 +5,6 @@ import (
 	"Chatapp/request"
 	"Chatapp/response"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -220,76 +219,4 @@ func DeleteChannel(ctx *Context) {
 		return
 	}
 	db.Delete(&member)
-}
-
-func GetDMChannel(ctx *Context) {
-	url_vars := mux.Vars(ctx.Req)
-	user_id := url_vars["id"]
-
-	if user_id == ctx.User.Uuid {
-		ctx.Res.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	var dm_user database.Account
-	ctx.Db.Where("uuid = ?", user_id).First(&dm_user)
-
-	if dm_user.ID == 0 {
-		ctx.Res.WriteHeader(http.StatusNotFound)
-		return
-	}
-
-	dm_channel := database.DMChannel{
-		FromUser: ctx.User.ID,
-		ToUser:   dm_user.ID,
-	}
-	ctx.Db.Where(&dm_channel).First(&dm_channel)
-	if dm_channel.ID == 0 {
-		dm_channel := database.DMChannel{
-			FromUser: dm_user.ID,
-			ToUser:   ctx.User.ID,
-		}
-		ctx.Db.Where(&dm_channel).First(&dm_channel)
-	}
-	var res response.DMChannel
-
-	if dm_channel.ID == 0 {
-		dm_channel := database.DMChannel{
-			Uuid:      uuid.New().String(),
-			FromUser:  ctx.User.ID,
-			ToUser:    dm_user.ID,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-		}
-		ctx.Db.Create(&dm_channel)
-		fmt.Println("Created! :", dm_channel.Uuid)
-
-		res = response.DMChannel{
-			Uuid: dm_channel.Uuid,
-			Recipient: response.User{
-				Uuid:      dm_user.Uuid,
-				Avatar:    dm_user.Avatar,
-				Username:  dm_user.Username,
-				CreatedAt: dm_user.CreatedAt.Unix(),
-			},
-		}
-	} else {
-		res = response.DMChannel{
-			Uuid: dm_channel.Uuid,
-			Recipient: response.User{
-				Uuid:      dm_user.Uuid,
-				Avatar:    dm_user.Avatar,
-				Username:  dm_user.Username,
-				CreatedAt: dm_user.CreatedAt.Unix(),
-			},
-		}
-	}
-
-	res_, err := json.Marshal(res)
-	if err != nil {
-		ctx.Res.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	ctx.Res.Header().Set("Content-Type", "application/json")
-	ctx.Res.Write(res_)
 }
