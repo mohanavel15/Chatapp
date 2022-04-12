@@ -11,6 +11,15 @@ export default function ChannelBar() {
 
 	useEffect(() => {
 		setChannels_element([])
+		const dmchannels =  Array.from(channel_context.DMChannels.values())
+		dmchannels.forEach(channel => {
+			setChannels_element(prev_channels => [...prev_channels,
+				<div key={channel.uuid}>
+				<ChannelList id={channel.uuid} icon={channel.recipient.avatar} name={channel.recipient.username} dm={true} />
+				</div>
+			])
+		})
+
 		const channels =  Array.from(channel_context.channels.values())
 		channels.forEach(channel => {
 			setChannels_element(prevElement => [...prevElement, 
@@ -20,11 +29,11 @@ export default function ChannelBar() {
 					ctx_menu_context.setChannelCtxMenuLocation({x: event.clientX, y: event.clientY, channel: channel})
 					ctx_menu_context.setShowChannelCtxMenu(true);
 				}}>
-				<ChannelList id={channel.uuid} icon={channel.icon} name={channel.name} />
+				<ChannelList id={channel.uuid} icon={channel.icon} name={channel.name} dm={false} />
 				</div>
 		])
 		})
-	}, [channel_context.channels])
+	}, [channel_context.channels, channel_context.DMChannels])
 
 	return (
 		<div className='ChannelBar'>

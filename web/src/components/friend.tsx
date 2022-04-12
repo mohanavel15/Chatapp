@@ -1,13 +1,17 @@
 import React, { useContext } from 'react'
 import axios from 'axios';
-import { FriendOBJ } from '../models/models';
+import { FriendOBJ, DMChannelOBJ } from '../models/models';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheck, faX } from '@fortawesome/free-solid-svg-icons'
+import { faCheck, faX, faMessage } from '@fortawesome/free-solid-svg-icons'
 import { UserContextOBJ, UserContext } from "../contexts/usercontext";
 import { setDefaultAvatar } from '../utils/errorhandle';
+import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
+import { useNavigate } from "react-router-dom";
 
 function Friend({ friend_obj }: { friend_obj: FriendOBJ }) {
 	const user_ctx:UserContextOBJ = useContext(UserContext);
+    const channel_ctx: ChannelContext = useContext(ChannelsContext);
+    const navigate = useNavigate();
 
     function Accept() {
         const updateFriend = (prevFriends: Map<String, FriendOBJ>) => {
@@ -48,6 +52,22 @@ function Friend({ friend_obj }: { friend_obj: FriendOBJ }) {
         })
     }
 
+    function Message() {
+        axios.get<DMChannelOBJ>(`http://127.0.0.1:5000/dms/${friend_obj.uuid}`, {
+            headers: {
+                Authorization: localStorage.getItem("access_token") || ""
+            }
+        }).then(response => {
+            if (response.status === 200) {
+                const dm_channel_id = response.data.uuid;
+                if (!channel_ctx.DMChannels.has(dm_channel_id)) {
+                    channel_ctx.setDMChannels(prevChannels => new Map(prevChannels.set(dm_channel_id, response.data)));
+                }
+                navigate(`/channels/${dm_channel_id}`);
+            }
+        })
+    }
+
     return (
         <div className='Friend'>
             <div className='Friend-User'>
@@ -57,6 +77,7 @@ function Friend({ friend_obj }: { friend_obj: FriendOBJ }) {
             <div className='Friend-Actions-Container'>
             { friend_obj.pending === true && friend_obj.incoming === true && <button className='Friend-Actions Friend-Actions-Accept' onClick={Accept}><FontAwesomeIcon icon={faCheck} /></button> }
             { friend_obj.pending === true && <button className='Friend-Actions Friend-Actions-Decline' onClick={Decline}><FontAwesomeIcon icon={faX} /></button> }
+            { friend_obj.pending === false && friend_obj.incoming === false && <button className='Friend-Actions Friend-Actions-Accept' onClick={Message}><FontAwesomeIcon icon={faMessage} /></button> }
             </div>
         </div>
     )

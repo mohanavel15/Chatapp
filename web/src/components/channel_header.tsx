@@ -1,16 +1,26 @@
-import { setDefaultIcon } from '../utils/errorhandle';
+import { setDefaultIcon, setDefaultAvatar } from '../utils/errorhandle';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPhone, faPhoneSlash, faVideo, faVideoSlash, faMicrophone, faMicrophoneSlash } from '@fortawesome/free-solid-svg-icons'
 import { useEffect, useState, useContext } from 'react';
 import { UserContextOBJ, UserContext } from "../contexts/usercontext";
 import { CallContext, CallContextOBJ } from "../contexts/callcontexts";
-import { ChannelOBJ } from "../models/models";
+import { ChannelOBJ, DMChannelOBJ } from "../models/models";
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 
-function ChannelHeader({ channel }: { channel: ChannelOBJ }) {
+function ChannelHeader({ channel_id, dm }: { channel_id: string, dm: boolean }) {
     const user:UserContextOBJ = useContext(UserContext);
     const call_ctx: CallContextOBJ = useContext(CallContext);
     const channel_context: ChannelContext = useContext(ChannelsContext);
+
+    let channel: ChannelOBJ | undefined;
+    let dm_channel: DMChannelOBJ | undefined;
+
+    if (dm) {
+        dm_channel = channel_context.DMChannels.get(channel_id);
+    } else {
+        channel = channel_context.channels.get(channel_id);
+    }
+
 
     const [call, setCall] = useState(false);
 
@@ -18,7 +28,7 @@ function ChannelHeader({ channel }: { channel: ChannelOBJ }) {
         console.log("ChannelHeader: useEffect");
         if (call_ctx.call === true) {
             console.log("ChannelHeader: useEffect: call_ctx.call === true");
-            if (channel.uuid === call_ctx.channel.uuid) {
+            if (channel?.uuid === call_ctx.channel.uuid) {
                 console.log("ChannelHeader: useEffect: channel.uuid === call_ctx.channel.uuid");
                 setCall(true);
             } else {
@@ -31,7 +41,7 @@ function ChannelHeader({ channel }: { channel: ChannelOBJ }) {
 
     async function start_call(video: boolean) {
         call_ctx.setCall(true);
-        call_ctx.setChannel(channel);
+        //call_ctx.setChannel(channel);
         let local_stream = await navigator.mediaDevices.getUserMedia({ video: video, audio: true });
         call_ctx.setLocalmedia(local_stream);
         if (video) {
@@ -50,7 +60,7 @@ function ChannelHeader({ channel }: { channel: ChannelOBJ }) {
             JSON.stringify({
                 event: "CALL_START",
                 data: {
-                    channel_id: channel.uuid,
+                    channel_id: channel?.uuid,
                 }
             })
         );
@@ -65,6 +75,7 @@ function ChannelHeader({ channel }: { channel: ChannelOBJ }) {
             });
         }
         call_ctx.setLocalmedia(undefined);
+        call_ctx.peer_connection.close();
     }
 
     useEffect(() => {
@@ -129,13 +140,17 @@ function ChannelHeader({ channel }: { channel: ChannelOBJ }) {
         { call === false &&
         <div className='channel-header'>
             <div className='channel-header-info'>
-                <img className='channel-avatar' src={channel.icon} alt="Avatar" onError={setDefaultIcon} />
-                <h2>{channel.name}</h2>
+                { dm && <img className='channel-avatar' src={dm_channel?.recipient.avatar} alt="Avatar" onError={setDefaultAvatar} /> }
+                { dm === false && <img className='channel-avatar' src={channel?.icon} alt="Avatar" onError={setDefaultIcon} /> }
+                { dm && <h2>{dm_channel?.recipient.username}</h2> }
+                { dm === false && <h2>{channel?.name}</h2> }
             </div>
+            { dm &&
             <div className='channel-header-actions'>
                 <button className='channel-header-action-button' onClick={() => {start_call(false)}}><FontAwesomeIcon icon={faPhone} /></button>
                 <button className='channel-header-action-button' onClick={() => {start_call(true)}}><FontAwesomeIcon icon={faVideo} /></button>
             </div>
+            }   
         </div>
         }
         { call &&

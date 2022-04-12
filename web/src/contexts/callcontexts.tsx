@@ -1,5 +1,6 @@
-import React, { useState, createContext } from 'react'
+import React, { useState, createContext, useEffect, useContext } from 'react'
 import { ChannelOBJ } from "../models/models";
+import { ChannelsContext, ChannelContext } from "./channelctx";
 export interface CallContextOBJ {
     call: boolean;
     voice: boolean;
@@ -32,6 +33,8 @@ export default function CallCTX({ children }: {children: React.ReactChild}) {
     const [Channel, setChannel] = useState<ChannelOBJ>(undefined!)
     const [localmedia, setLocalmedia] = useState<MediaStream>()
 
+	const channel_context: ChannelContext = useContext(ChannelsContext);
+
     const ice_servers = {
         iceServers: [
             {
@@ -41,6 +44,46 @@ export default function CallCTX({ children }: {children: React.ReactChild}) {
         iceCandidatePoolSize: 10,
     }
     const peer_connection = new RTCPeerConnection(ice_servers);
+    useEffect(() => {
+        if (localmedia) {
+            localmedia.getTracks().forEach(track => {
+                peer_connection.addTrack(track, localmedia)
+            })
+        }
+    }, [localmedia])
+
+    useEffect(() => {
+        if (call) {
+            peer_connection.createOffer().then(offer => {
+                peer_connection.setLocalDescription(offer);
+                console.log("CallCTX: createOffer: offer: ", offer);
+                channel_context.gateway.send(
+                    JSON.stringify({
+                        event: "CALL_START",
+                        data: {
+                            channel_id: Channel.uuid,
+                            sdp: offer.sdp,
+                        }
+                    })
+                );
+            })
+        }
+    }, [call])
+
+
+    peer_connection.onicecandidate = (event) => {
+        if (event.candidate) {
+            channel_context.gateway.send(
+                JSON.stringify({
+                    event: "ICE_CANDIDATE",
+                    data: {
+                        channel_id: Channel.uuid,
+                        candidate: event.candidate,
+                    }
+                })
+            )
+        }
+    }
 
     const context_value: CallContextOBJ = {
         call: call,

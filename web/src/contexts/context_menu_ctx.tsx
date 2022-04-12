@@ -3,9 +3,9 @@ import { MessageOBJ, ChannelOBJ, MemberOBJ, FriendOBJ } from '../models/models';
 
 export interface ContextMenuCtx {
     showMsgCtxMenu: boolean;
-    ctxMsgMenuLocation: {x: number, y: number, message:MessageOBJ, channel:ChannelOBJ};
+    ctxMsgMenuLocation: {x: number, y: number, message:MessageOBJ, channel_id:string};
     setShowMsgCtxMenu: React.Dispatch<React.SetStateAction<boolean>>;
-    setMsgCtxMenuLocation: React.Dispatch<React.SetStateAction<{x: number, y: number, message: MessageOBJ, channel:ChannelOBJ}>>;
+    setMsgCtxMenuLocation: React.Dispatch<React.SetStateAction<{x: number, y: number, message: MessageOBJ, channel_id:string}>>;
 
     showChannelCtxMenu: boolean;
     ctxChannelMenuLocation: {x: number, y: number, channel: ChannelOBJ};
@@ -29,7 +29,7 @@ export const ContextMenu = createContext<ContextMenuCtx>(undefined!);
 
 export function CtxMenuCtx({ children }: {children: React.ReactChild}) {
 	const [showMsgCtxMenu, setShowMsgCtxMenu] = useState(false);
-	const [ctxMsgMenuLocation, setMsgCtxMenuLocation] = useState<{x: number, y: number, message:MessageOBJ, channel:ChannelOBJ}>(undefined!);
+	const [ctxMsgMenuLocation, setMsgCtxMenuLocation] = useState<{x: number, y: number, message:MessageOBJ, channel_id:string}>(undefined!);
 
     const [showChannelCtxMenu, setShowChannelCtxMenu] = useState(false);
     const [ctxChannelMenuLocation, setChannelCtxMenuLocation] = useState<{x: number, y: number, channel:ChannelOBJ}>(undefined!);

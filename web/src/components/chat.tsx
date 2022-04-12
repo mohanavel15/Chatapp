@@ -8,7 +8,7 @@ import { ChannelOBJ, Msg_request, MessageOBJ } from '../models/models';
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 import { ContextMenuCtx, ContextMenu } from "../contexts/context_menu_ctx";
 
-function Chat({ channel }: { channel: ChannelOBJ }) {
+function Chat({ channel_id, dm }: { channel_id: string, dm: boolean }) {
     // Emoji picker https://www.cluemediator.com/how-to-add-emoji-picker-in-the-react
 	const channel_context: ChannelContext = useContext(ChannelsContext);
     const [Input_message, setInput_message] = useState('');
@@ -36,7 +36,7 @@ function Chat({ channel }: { channel: ChannelOBJ }) {
 			event.preventDefault();
 			if (Input_message.length > 0) {
 				const message: Msg_request = {
-					channel: channel.uuid,
+					channel: channel_id,
 					content: Input_message
 				};
 				channel_context.gateway.send(
@@ -52,18 +52,20 @@ function Chat({ channel }: { channel: ChannelOBJ }) {
 	
 	useEffect(() => {
 		setMessage_jsx([])
-		let msg_channel = channel_context.messages.get(channel.uuid);
+		let msg_channel = channel_context.messages.get(channel_id);
+
 		if (!msg_channel) {
 			msg_channel = new Map<String, MessageOBJ>()
 		}
+
 		msg_channel.forEach((message, key) => {
-				if (message.channel.uuid === channel.uuid) {
+				if (message.channel.uuid === channel_id) {
 					setMessage_jsx(prevMessage =>  [...prevMessage, 
 					<div key={message.uuid} onContextMenu={
 						(event) => {
 							event.preventDefault();
 							ctx_menu_context.closeAll();
-							ctx_menu_context.setMsgCtxMenuLocation({x: event.clientX, y: event.clientY, message: message, channel: channel});
+							ctx_menu_context.setMsgCtxMenuLocation({x: event.clientX, y: event.clientY, message: message, channel_id: channel_id});
 							ctx_menu_context.setShowMsgCtxMenu(true);
 						}
 					}>
@@ -74,11 +76,11 @@ function Chat({ channel }: { channel: ChannelOBJ }) {
 					])
 				}
 			});
-	}, [channel_context.messages, channel]);
+	}, [channel_context.messages, channel_id]);
 
     return (
         <div className="Chat">
-			<ChannelHeader channel={channel} />
+			<ChannelHeader channel_id={channel_id} dm={dm} />
 				<div className="chat-message">
 					{message_jsx}
 				</div>

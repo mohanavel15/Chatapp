@@ -64,3 +64,8 @@ export interface BanOBJ {
     reason: string
     created_at: number
 }
+
+export interface DMChannelOBJ {
+    uuid: string
+    recipient: UserOBJ
+}

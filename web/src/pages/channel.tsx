@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { useContext, useEffect } from "react";
 import { IMessageEvent } from "websocket";
 
-import { MessageOBJ, ChannelOBJ, MemberOBJ, UserOBJ, FriendOBJ } from "../models/models";
+import { MessageOBJ, ChannelOBJ, MemberOBJ, UserOBJ, FriendOBJ, DMChannelOBJ } from "../models/models";
 import Settings from "./settings"; 
 
 import SideBar from "../components/sidebar";
@@ -144,8 +144,17 @@ function Channel() {
 		};
 	}, []);
 
+	let dm: boolean = true;
+	let dm_channel: DMChannelOBJ | undefined;
+
+	dm_channel = channel_context.DMChannels.get(channel_id);
+	if (dm_channel === undefined) {
+		dm = false;
+		dm_channel = { uuid: "@me", recipient: { uuid: "@me", username: "@me", avatar: "", created_at: 0 } };
+	}
+
 	let currentChannel = channel_context.channels.get(channel_id);
-	if (!currentChannel) {
+	if (currentChannel === undefined) {
 		currentChannel = { uuid: "@me", name: "@me",icon: "", owner_id: "", created_at: "", updated_at: ""};
 	}
 
@@ -167,13 +176,15 @@ function Channel() {
 					<MessageCTX>
 					<>
 						<SideBar />
-						{ currentChannel.uuid !== "@me" && state_context.editChannel !== true &&
+						{ dm && <Chat channel_id={dm_channel.uuid} dm={true} />}
+						{ dm === false && currentChannel.uuid !== "@me" && state_context.editChannel !== true &&
 							<>
-								<Chat channel={currentChannel} />
+								<Chat channel_id={currentChannel.uuid} dm={false} />
 								<MembersBar channel={currentChannel} />
 							</>
 						}
-						{ currentChannel.uuid === "@me" && <ChannelHome /> }
+
+						{ currentChannel.uuid === "@me" && dm_channel.uuid === "@me" && <ChannelHome /> }
 						{ state_context.createChannel && <CreateChannel /> }
 						{ state_context.editChannel && <EditChannel /> }
 						{ state_context.deleteChannel && <DeleteChannel /> }
