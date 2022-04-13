@@ -4,7 +4,7 @@ import Message from './message';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFaceLaughBeam } from '@fortawesome/free-solid-svg-icons'
 import ChannelHeader from './channel_header';
-import { ChannelOBJ, Msg_request, MessageOBJ } from '../models/models';
+import { Msg_request, MessageOBJ } from '../models/models';
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 import { ContextMenuCtx, ContextMenu } from "../contexts/context_menu_ctx";
 
@@ -59,7 +59,7 @@ function Chat({ channel_id, dm }: { channel_id: string, dm: boolean }) {
 		}
 
 		msg_channel.forEach((message, key) => {
-				if (message.channel.uuid === channel_id) {
+				if (message.channel_id === channel_id) {
 					setMessage_jsx(prevMessage =>  [...prevMessage, 
 					<div key={message.uuid} onContextMenu={
 						(event) => {
@@ -69,9 +69,7 @@ function Chat({ channel_id, dm }: { channel_id: string, dm: boolean }) {
 							ctx_menu_context.setShowMsgCtxMenu(true);
 						}
 					}>
-					<Message  
-					message={message}
-					/>
+					<Message message={message} dm={dm} />
 					</div>
 					])
 				}

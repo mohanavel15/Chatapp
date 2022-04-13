@@ -14,7 +14,7 @@ func BroadcastMessage(ws *Ws, ws_msg WS_Message) {
 	var message response.Message
 	json.Unmarshal(byte_data, &message)
 
-	channel_uuid := message.Channel.Uuid
+	channel_uuid := message.ChannelID
 	if channel, ok := ws.Conns.Channels[channel_uuid]; ok {
 		for _, ws_conn := range channel {
 			ws_conn.Write(byte_ws_msg)

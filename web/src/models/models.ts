@@ -3,7 +3,7 @@ export interface MessageOBJ {
     uuid:           string
     content:        string
     author:         UserOBJ
-    channel:        ChannelOBJ
+    channel_id:     string
     created_at:     string
     updated_at:     string
 }

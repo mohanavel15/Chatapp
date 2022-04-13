@@ -69,12 +69,12 @@ function Channel() {
 
 				if (payload.event === 'MESSAGE_CREATE' || payload.event === 'MESSAGE_MODIFY') {
 					const message: MessageOBJ = payload.data;
-					channel_context.UpdateMessage(message.channel.uuid, message.uuid ,message);
+					channel_context.UpdateMessage(message.channel_id, message.uuid ,message);
 				}
 
 				if (payload.event === 'MESSAGE_DELETE') {
 					const message: MessageOBJ = payload.data;
-					channel_context.DeleteMessage(message.channel.uuid, message.uuid);
+					channel_context.DeleteMessage(message.channel_id, message.uuid);
 				}
 
 				if (payload.event === 'CHANNEL_CREATE' || payload.event === 'CHANNEL_MODIFY') {
