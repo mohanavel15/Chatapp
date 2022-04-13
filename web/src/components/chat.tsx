@@ -69,7 +69,7 @@ function Chat({ channel_id, dm }: { channel_id: string, dm: boolean }) {
 							ctx_menu_context.setShowMsgCtxMenu(true);
 						}
 					}>
-					<Message message={message} dm={dm} />
+					<Message message={message} />
 					</div>
 					])
 				}

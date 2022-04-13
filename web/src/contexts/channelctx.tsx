@@ -60,14 +60,16 @@ export default function ChannelCTX({ children, gateway }: {children: React.React
     }, [])
 
 	useEffect(() => {
+		const dm_channel_keys: String[] =  Array.from(DMChannels.keys())
 		const channel_keys: String[] =  Array.from(channels.keys())
-		channel_keys.forEach(channel => {
-			axios.get<MessageOBJ[]>(`http://127.0.0.1:5000/channels/${channel}/messages`, {
+		const keys: String[] = [...dm_channel_keys, ...channel_keys]
+		keys.forEach(key => {
+			axios.get<MessageOBJ[]>(`http://127.0.0.1:5000/channels/${key}/messages`, {
 				headers: {
 					Authorization: localStorage.getItem("access_token") || ""
 				}
 			}).then(res => {
-				res.data.forEach(msg => UpdateMessage(channel, msg.uuid, msg))
+				res.data.forEach(msg => UpdateMessage(key, msg.uuid, msg))
 			})
 		})
 	} , [channelsLoaded])
