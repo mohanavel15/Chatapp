@@ -27,7 +27,7 @@ type Message struct {
 	ID        uint   `gorm:"primarykey"`
 	Uuid      string `gorm:"type:varchar(255);not null"`
 	Content   string `gorm:"type:varchar(255);not null"`
-	ChannelID uint   `gorm:"type:int;not null"`
+	ChannelID string `gorm:"type:varchar(255);not null"`
 	AccountID uint   `gorm:"type:int;not null"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
