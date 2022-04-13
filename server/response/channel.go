@@ -43,3 +43,10 @@ type DMChannel struct {
 	Uuid      string `json:"uuid"`
 	Recipient User   `json:"recipient"`
 }
+
+func NewDMChannel(channel *database.DMChannel, user User) DMChannel {
+	return DMChannel{
+		Uuid:      channel.Uuid,
+		Recipient: user,
+	}
+}
