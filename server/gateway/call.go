@@ -18,7 +18,7 @@ func CallStart(ctx *websocket.Context) {
 		return
 	}
 
-	channel := database.Channel{
+	channel := database.DMChannel{
 		Uuid: call_start.ChannelID,
 	}
 	ctx.Db.First(&channel)
@@ -27,34 +27,22 @@ func CallStart(ctx *websocket.Context) {
 		return
 	}
 
-	members := database.Member{
-		ChannelID: channel.ID,
-		AccountID: ctx.Ws.User.ID,
-	}
-
-	ctx.Db.First(&members)
-
-	if members.ID == 0 {
+	if channel.FromUser != ctx.Ws.User.ID && channel.ToUser != ctx.Ws.User.ID {
 		return
 	}
 
-	_, ok := ctx.Ws.Conns.Calls[channel.Uuid]
-	if !ok {
-		ctx.Ws.Conns.Calls[channel.Uuid] = make(map[string]*websocket.Call)
-	}
-	ctx.Ws.Conns.Calls[channel.Uuid][ctx.Ws.User.Uuid] = &websocket.Call{
-		Ws: ctx.Ws,
-		Sdp: &websocket.SDP{
-			Type: call_start.Sdp.Type,
-			Sdp:  call_start.Sdp.Sdp,
-		},
+	var get_user2 database.Account
+	if channel.FromUser != ctx.Ws.User.ID {
+		ctx.Db.Where("id = ?", channel.FromUser).First(&get_user2)
+	} else {
+		ctx.Db.Where("id = ?", channel.ToUser).First(&get_user2)
 	}
 
-	if users, ok := ctx.Ws.Conns.Channels[channel.Uuid]; ok {
-		for _, user := range users {
-			if user.User.Uuid != ctx.Ws.User.Uuid {
-				user.Write(ctx.Raw)
-			}
-		}
+	if get_user2.ID == 0 {
+		return
+	}
+
+	if user2, ok := ctx.Ws.Conns.Users[get_user2.Uuid]; ok {
+		user2.Write(ctx.Raw)
 	}
 }
