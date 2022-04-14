@@ -21,15 +21,11 @@ function ChannelHeader({ channel_id, dm }: { channel_id: string, dm: boolean }) 
         channel = channel_context.channels.get(channel_id);
     }
 
-
     const [call, setCall] = useState(false);
 
     useEffect(() => {
-        console.log("ChannelHeader: useEffect");
         if (call_ctx.call === true) {
-            console.log("ChannelHeader: useEffect: call_ctx.call === true");
-            if (channel?.uuid === call_ctx.channel.uuid) {
-                console.log("ChannelHeader: useEffect: channel.uuid === call_ctx.channel.uuid");
+            if (dm_channel?.uuid === call_ctx.channel.uuid) {
                 setCall(true);
             } else {
                 setCall(false);
@@ -40,30 +36,34 @@ function ChannelHeader({ channel_id, dm }: { channel_id: string, dm: boolean }) 
     }, [call_ctx.call, channel]);
 
     async function start_call(video: boolean) {
+        if (!dm_channel) {
+            return;
+        }
+        
         call_ctx.setCall(true);
-        //call_ctx.setChannel(channel);
+        call_ctx.setChannel(dm_channel);
+        
         let local_stream = await navigator.mediaDevices.getUserMedia({ video: video, audio: true });
         call_ctx.setLocalmedia(local_stream);
+        
         if (video) {
             call_ctx.setVideo(true);
         } else {
             call_ctx.setVoice(true);
         }
 
-        if (!video) {
-            let local_audio = document.getElementById("local-audio") as HTMLVideoElement;
-            local_audio.srcObject = local_stream;
-            local_audio.play();
-        }
-
-        channel_context.gateway.send(
-            JSON.stringify({
-                event: "CALL_START",
-                data: {
-                    channel_id: channel?.uuid,
-                }
-            })
-        );
+        call_ctx.peerConnection.createOffer().then(offer => {
+            call_ctx.setPeerConnection((p) => {p.setLocalDescription(offer); return p});
+            channel_context.gateway.send(
+                JSON.stringify({
+                    event: "CALL_START",
+                    data: {
+                        channel_id: dm_channel?.uuid,
+                        sdp: offer,
+                    }
+                })
+            );
+        })
     }
 
     async function end_call() {
@@ -75,9 +75,10 @@ function ChannelHeader({ channel_id, dm }: { channel_id: string, dm: boolean }) 
             });
         }
         call_ctx.setLocalmedia(undefined);
-        call_ctx.peer_connection.close();
+        //call_ctx.setPeerConnection(p => {p.close(); return p});
     }
 
+    /*
     useEffect(() => {
         if (call_ctx.call) {
             if (call_ctx.video) {
@@ -121,6 +122,7 @@ function ChannelHeader({ channel_id, dm }: { channel_id: string, dm: boolean }) 
         }
 
     }, [call_ctx.call, call_ctx.video]);
+    */
 
     useEffect(() => {
         if (call_ctx.Mute) {
@@ -156,8 +158,11 @@ function ChannelHeader({ channel_id, dm }: { channel_id: string, dm: boolean }) 
         { call &&
         <div className='channel-header-call'>
             <div className='channel-header-call-info'>
-                { call_ctx.video === false && <><audio id="local-audio" autoPlay></audio><img id="local-voice" className='user-call-avatar' src={user.avatar} alt="Avatar" onError={setDefaultIcon} /></> }
+                <div key={user.uuid}>
+                { call_ctx.video === false && <><audio id="local-audio" autoPlay></audio><img id="local-voice" className='user-call-avatar' src={user.avatar} alt="Avatar" onError={setDefaultAvatar} /></> }
                 { call_ctx.video && <video id="local-video" className='user-call-video-box' autoPlay playsInline></video> }
+                </div>
+                { call_ctx.users }
             </div>
             <div className='channel-header-call-actions'>
                 { call_ctx.Mute === false && <button className='channel-header-action-button while-in-call' onClick={() => { call_ctx.setMute(true) }}><FontAwesomeIcon icon={faMicrophone} /></button> }

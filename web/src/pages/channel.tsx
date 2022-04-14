@@ -29,6 +29,8 @@ import CallPopUp from "../components/call_pop_up";
 import ChannelHome from "../components/channel_home";
 import MessageCTX from '../contexts/messagectx';
 
+import { setDefaultAvatar } from '../utils/errorhandle';
+
 const delete_channel = (channels: Map<String, ChannelOBJ>, channel: ChannelOBJ) => {
 	channels.delete(channel.uuid);
 	return channels;
@@ -108,12 +110,36 @@ function Channel() {
 				}
 
 				if (payload.event === 'CALL_START') {
+					console.log('call started');
 					const channel_id = payload.data.channel_id;
-					const channel = channel_context.channels.get(channel_id);
+					const channel = channel_context.DMChannels.get(channel_id);
 					if (channel) {
+						call_ctx.setUsers(prevUsers => [...prevUsers, 
+							<div key={channel.recipient.uuid}>
+								{ call_ctx.video === false && <><img id="local-voice" className='user-call-avatar' src={channel.recipient.avatar} alt="Avatar" onError={setDefaultAvatar} /></> }
+                				{ call_ctx.video && <video id="remote-video" className='user-call-video-box' autoPlay playsInline></video> }
+							</div>
+						])
 						call_ctx.setChannel(channel);
-						call_ctx.setIncoming(true);
+						call_ctx.setRemoteSDP(new RTCSessionDescription(payload.data.sdp));
+						call_ctx.setIncoming(true)
 					}
+				}
+
+				if (payload.event === 'CALL_ANSWER') {
+					
+						const user = channel_context.DMChannels.get(payload.data.channel_id);
+						call_ctx.setUsers(prevUsers => [...prevUsers, 
+							<>
+								{ call_ctx.video === false && <><img id="local-voice" className='user-call-avatar' src={user?.recipient.avatar} alt="Avatar" onError={setDefaultAvatar} /></> }
+                				{ call_ctx.video && <video id="remote-video" className='user-call-video-box' autoPlay playsInline></video> }
+							</>
+						])
+						console.log("users: ", call_ctx.users);
+						console.log('got answer');
+						let answer = new RTCSessionDescription(payload.data.sdp)
+						call_ctx.setRemoteSDP(answer);
+					
 				}
 			}
 		};
@@ -130,9 +156,9 @@ function Channel() {
 	
 		const onClose = () => {
 			console.log("Disconnected from server");
-			setTimeout(function() {
+			/*setTimeout(function() {
 				window.location.reload()
-			}, 5000);
+			}, 5000);*/
 		};
 	
 		channel_context.gateway.onopen = onOpen;

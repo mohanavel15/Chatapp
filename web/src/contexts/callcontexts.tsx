@@ -1,5 +1,5 @@
 import React, { useState, createContext, useEffect, useContext } from 'react'
-import { ChannelOBJ } from "../models/models";
+import { DMChannelOBJ } from "../models/models";
 import { ChannelsContext, ChannelContext } from "./channelctx";
 export interface CallContextOBJ {
     call: boolean;
@@ -8,17 +8,24 @@ export interface CallContextOBJ {
     Mute: boolean;
     Deafen: boolean;
     incoming: boolean;
-    channel: ChannelOBJ;
+    channel: DMChannelOBJ;
     setCall: React.Dispatch<React.SetStateAction<boolean>>;
     setVoice: React.Dispatch<React.SetStateAction<boolean>>;
     setVideo: React.Dispatch<React.SetStateAction<boolean>>;
     setMute: React.Dispatch<React.SetStateAction<boolean>>;
     setDeafen: React.Dispatch<React.SetStateAction<boolean>>;
     setIncoming: React.Dispatch<React.SetStateAction<boolean>>;
-    setChannel: React.Dispatch<React.SetStateAction<ChannelOBJ>>;
+    setChannel: React.Dispatch<React.SetStateAction<DMChannelOBJ>>;
     localmedia: MediaStream | undefined;
     setLocalmedia: React.Dispatch<React.SetStateAction<MediaStream | undefined>>
-    peer_connection: RTCPeerConnection;
+    peerConnection: RTCPeerConnection;
+    setPeerConnection: React.Dispatch<React.SetStateAction<RTCPeerConnection>>;
+    offer: RTCSessionDescriptionInit | undefined
+    setOffer: React.Dispatch<React.SetStateAction<RTCSessionDescriptionInit | undefined>>
+    remoteSDP: RTCSessionDescriptionInit | undefined
+    setRemoteSDP: React.Dispatch<React.SetStateAction<RTCSessionDescriptionInit | undefined>>
+    users: JSX.Element[]
+    setUsers: React.Dispatch<React.SetStateAction<JSX.Element[]>>
 }
 
 export const CallContext = createContext<CallContextOBJ>(undefined!);
@@ -30,8 +37,12 @@ export default function CallCTX({ children }: {children: React.ReactChild}) {
     const [video, setVideo] = useState(false)
     const [Mute, setMute] = useState(false)
     const [Deafen, setDeafen] = useState(false)
-    const [Channel, setChannel] = useState<ChannelOBJ>(undefined!)
+    const [Channel, setChannel] = useState<DMChannelOBJ>(undefined!)
     const [localmedia, setLocalmedia] = useState<MediaStream>()
+    const [remoteMedia, setRemoteMedia] = useState<MediaStream>(new MediaStream())
+    const [offer, setOffer] = useState<RTCSessionDescriptionInit>()
+    const [remoteSDP, setRemoteSDP] = useState<RTCSessionDescriptionInit>()
+    const [users, setAUsers] = useState<JSX.Element[]>([])
 
 	const channel_context: ChannelContext = useContext(ChannelsContext);
 
@@ -43,35 +54,18 @@ export default function CallCTX({ children }: {children: React.ReactChild}) {
         ],
         iceCandidatePoolSize: 10,
     }
-    const peer_connection = new RTCPeerConnection(ice_servers);
+    const [peerConnection, setPeerConnection] = useState<RTCPeerConnection>(new RTCPeerConnection(ice_servers))
+    
     useEffect(() => {
         if (localmedia) {
             localmedia.getTracks().forEach(track => {
-                peer_connection.addTrack(track, localmedia)
+                peerConnection.addTrack(track, localmedia)
+                setPeerConnection(peerConnection)
             })
         }
     }, [localmedia])
 
-    useEffect(() => {
-        if (call) {
-            peer_connection.createOffer().then(offer => {
-                peer_connection.setLocalDescription(offer);
-                console.log("CallCTX: createOffer: offer: ", offer);
-                channel_context.gateway.send(
-                    JSON.stringify({
-                        event: "CALL_START",
-                        data: {
-                            channel_id: Channel.uuid,
-                            sdp: offer.sdp,
-                        }
-                    })
-                );
-            })
-        }
-    }, [call])
-
-
-    peer_connection.onicecandidate = (event) => {
+    peerConnection.onicecandidate = (event) => {
         if (event.candidate) {
             channel_context.gateway.send(
                 JSON.stringify({
@@ -84,6 +78,32 @@ export default function CallCTX({ children }: {children: React.ReactChild}) {
             )
         }
     }
+
+    peerConnection.ontrack = (event) => {
+        event.streams.forEach(stream => {
+            console.log("got stream");
+            stream.getTracks().forEach(track => {
+                setRemoteMedia(r => { r.addTrack(track); return r })
+            })
+        })
+    }
+
+    useEffect(() => {
+        if (remoteSDP) {
+            setPeerConnection(p => {p.setRemoteDescription(remoteSDP); return p})
+        }
+    }, [remoteSDP])
+
+    useEffect(() => {
+        if (call) {
+            const remote_call_audio = document.getElementById('remote-call-audio') as HTMLVideoElement;
+            if (remote_call_audio) {
+                console.log('remote_call_audio');
+                remote_call_audio.srcObject = remoteMedia;
+                remote_call_audio.play();
+            }
+        }
+    }, [remoteMedia])
 
     const context_value: CallContextOBJ = {
         call: call,
@@ -102,7 +122,14 @@ export default function CallCTX({ children }: {children: React.ReactChild}) {
         setIncoming: setIncoming,
         localmedia: localmedia,
         setLocalmedia: setLocalmedia,
-        peer_connection: peer_connection,
+        peerConnection: peerConnection,
+        setPeerConnection: setPeerConnection,
+        offer: offer,
+        setOffer: setOffer,
+        remoteSDP: remoteSDP,
+        setRemoteSDP: setRemoteSDP,
+        users: users,
+        setUsers: setAUsers,
     }
     
 
