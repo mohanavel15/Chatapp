@@ -83,6 +83,78 @@ func (ws *Ws) ReadLoop() {
 
 					delete(members, ws.User.Uuid)
 				}
+
+				res_user := response.NewUser(ws.User, 0)
+				var dm_channels1 []database.DMChannel
+				var dm_channels2 []database.DMChannel
+				ws.Db.Where("from_user = ?", ws.User.ID).Find(&dm_channels1)
+				ws.Db.Where("to_user = ?", ws.User.ID).Find(&dm_channels2)
+
+				var res_dm_channels []response.DMChannel
+				for _, dm_channel := range dm_channels1 {
+					var user database.Account
+					ws.Db.Where("id = ?", dm_channel.ToUser).First(&user)
+
+					var status int
+					isConnected := ws.Conns.Users[user.Uuid]
+					if isConnected == nil {
+						status = 0
+					} else {
+						status = 1
+					}
+
+					res_user2 := response.NewUser(&user, status)
+					res_dm_channels = append(res_dm_channels, response.DMChannel{
+						Uuid:      dm_channel.Uuid,
+						Recipient: res_user2,
+					})
+					if isConnected != nil {
+						res_dm_update := WS_Message{
+							Event: "DM_CHANNEL_MODIFY",
+							Data: response.DMChannel{
+								Uuid:      dm_channel.Uuid,
+								Recipient: res_user,
+							},
+						}
+
+						res_dm_update_json, err := json.Marshal(res_dm_update)
+						if err == nil {
+							isConnected.Write(res_dm_update_json)
+						}
+					}
+				}
+
+				for _, dm_channel := range dm_channels2 {
+					var user database.Account
+					ws.Db.Where("id = ?", dm_channel.FromUser).First(&user)
+					var status int
+					isConnected := ws.Conns.Users[user.Uuid]
+					if isConnected == nil {
+						status = 0
+					} else {
+						status = 1
+					}
+					res_user2 := response.NewUser(&user, status)
+					res_dm_channels = append(res_dm_channels, response.DMChannel{
+						Uuid:      dm_channel.Uuid,
+						Recipient: res_user2,
+					})
+
+					if isConnected != nil {
+						res_dm_update := WS_Message{
+							Event: "DM_CHANNEL_MODIFY",
+							Data: response.DMChannel{
+								Uuid:      dm_channel.Uuid,
+								Recipient: res_user,
+							},
+						}
+
+						res_dm_update_json, err := json.Marshal(res_dm_update)
+						if err == nil {
+							isConnected.Write(res_dm_update_json)
+						}
+					}
+				}
 				delete(ws.Conns.Users, ws.User.Uuid)
 			}
 			return

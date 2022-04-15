@@ -24,6 +24,7 @@ func NewUser(user *database.Account, status int) User {
 		Uuid:      user.Uuid,
 		Avatar:    user.Avatar,
 		Username:  user.Username,
+		Status:    status,
 		CreatedAt: user.CreatedAt.Unix(),
 	}
 }
