@@ -1,0 +1,131 @@
+.settings {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.settings-header {
+    background-color: #202020;
+    height: 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+
+.settings-close {
+    color: gray;
+    font-size: x-large;
+    height: 2.5rem;
+    width: 2.5rem;
+    cursor: pointer;
+    background: none;
+    border: 2px solid gray;
+    border-radius: 50%;
+}
+
+.settings-close:hover {
+    background-color: gray;
+    color: #202020;
+}
+
+.settings-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    overflow-y: scroll;
+}
+
+.settings-content-item {
+    width: 50%;
+    text-align: left;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+.settings-content-item + .settings-content-item {
+    border-top: 1px solid gray;
+}
+
+.settings-content-item-title {
+    color: gray;
+}
+
+.settings-content-item input {
+    width: 80%;
+    height: 1.5rem;
+    border: 2px solid gray;
+    border-radius: 5px;
+    padding: 5px;
+    font-size: large;
+    margin: 0.5rem;
+}
+
+.settings-content-item input:focus {
+    outline: none;
+}
+
+.settings-content-item button {
+    width: 8rem;
+    height: 2.5rem;
+    border-radius: 5px;
+    padding: 5px;
+    font-size: large;
+    cursor: pointer;
+    margin: 0.5rem;
+}
+
+.toggle {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 30px;
+}
+
+.toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-btn {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 30px;
+    background-color: #202020;
+    transition: all .4s;
+}
+
+.toggle-btn:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 5px;
+    bottom: 5px;
+    border-radius: 50%;
+    background-color: white;
+    transition: .4s;
+}
+
+.toggle input:checked + .toggle-btn {
+    background-color: #3ba55d;
+}
+
+.toggle input:checked + .toggle-btn:before {
+    transform: translateX(30px);
+}
+
+.toggle-button {
+    display: inline-flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: larger;
+    text-decoration: solid;
+}
