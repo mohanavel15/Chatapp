@@ -1,17 +1,36 @@
 import React, { useContext } from 'react'
 import axios from 'axios';
 import { FriendOBJ, DMChannelOBJ } from '../models/models';
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheck, faX, faMessage } from '@fortawesome/free-solid-svg-icons'
 import { UserContextOBJ, UserContext } from "../contexts/usercontext";
 import { setDefaultAvatar } from '../utils/errorhandle';
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 import { useNavigate } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircle, faDotCircle, faCircleMinus, IconDefinition, faCheck, faX, faMessage } from '@fortawesome/free-solid-svg-icons';
 
 function Friend({ friend_obj }: { friend_obj: FriendOBJ }) {
 	const user_ctx:UserContextOBJ = useContext(UserContext);
     const channel_ctx: ChannelContext = useContext(ChannelsContext);
     const navigate = useNavigate();
+
+    let style: React.CSSProperties
+    let icon: IconDefinition
+    if (friend_obj.status === 1) {
+        style = {
+            color: "lime"
+        }
+        icon = faCircle
+    } else if (friend_obj.status === 2) {
+        style = {
+            color: "red"
+        }
+        icon = faCircleMinus
+    } else {
+        style = {
+            color: "grey"
+        }
+        icon = faDotCircle
+    }
 
     function Accept() {
         const updateFriend = (prevFriends: Map<String, FriendOBJ>) => {
@@ -29,7 +48,6 @@ function Friend({ friend_obj }: { friend_obj: FriendOBJ }) {
                 Authorization: user_ctx.accessToken
             }
         }).then(response => {
-            console.log(response);
             if (response.status === 200) {
                 user_ctx.setFriends(prevFriends => new Map(updateFriend(prevFriends)));
             }
@@ -71,7 +89,10 @@ function Friend({ friend_obj }: { friend_obj: FriendOBJ }) {
     return (
         <div className='Friend'>
             <div className='Friend-User'>
+                <div className='Friend-Avatar-Container'>
                 <img className='Friend-Avatar' src={friend_obj.avatar} alt={"Avatar"} onError={setDefaultAvatar} />
+                <FontAwesomeIcon className='Friend-Status' icon={icon} style={style} />
+                </div>
                 <h3 className='Friend-Name'>{friend_obj.username}</h3>
             </div>
             <div className='Friend-Actions-Container'>

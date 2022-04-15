@@ -44,8 +44,6 @@ function UserCTX({ children }: { children: React.ReactChild }) {
                     localStorage.removeItem("access_token");
                     window.location.href = "/";
                 }
-            }).catch(err => {
-                console.log(err);
             });
         } else {
             window.location.href = "/";
