@@ -53,7 +53,7 @@ function ChannelHeader({ channel_id, dm }: { channel_id: string, dm: boolean }) 
         }
 
         call_ctx.peerConnection.createOffer().then(offer => {
-            call_ctx.setPeerConnection((p) => {p.setLocalDescription(offer); return p});
+            call_ctx.peerConnection.setLocalDescription(offer);
             channel_context.gateway.send(
                 JSON.stringify({
                     event: "CALL_START",
@@ -75,10 +75,9 @@ function ChannelHeader({ channel_id, dm }: { channel_id: string, dm: boolean }) 
             });
         }
         call_ctx.setLocalmedia(undefined);
-        //call_ctx.setPeerConnection(p => {p.close(); return p});
     }
 
-    /*
+    
     useEffect(() => {
         if (call_ctx.call) {
             if (call_ctx.video) {
@@ -122,7 +121,7 @@ function ChannelHeader({ channel_id, dm }: { channel_id: string, dm: boolean }) 
         }
 
     }, [call_ctx.call, call_ctx.video]);
-    */
+
 
     useEffect(() => {
         if (call_ctx.Mute) {

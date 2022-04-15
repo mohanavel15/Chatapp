@@ -19,7 +19,6 @@ export interface CallContextOBJ {
     localmedia: MediaStream | undefined;
     setLocalmedia: React.Dispatch<React.SetStateAction<MediaStream | undefined>>
     peerConnection: RTCPeerConnection;
-    setPeerConnection: React.Dispatch<React.SetStateAction<RTCPeerConnection>>;
     offer: RTCSessionDescriptionInit | undefined
     setOffer: React.Dispatch<React.SetStateAction<RTCSessionDescriptionInit | undefined>>
     remoteSDP: RTCSessionDescriptionInit | undefined
@@ -54,13 +53,11 @@ export default function CallCTX({ children }: {children: React.ReactChild}) {
         ],
         iceCandidatePoolSize: 10,
     }
-    const [peerConnection, setPeerConnection] = useState<RTCPeerConnection>(new RTCPeerConnection(ice_servers))
-    
+    const peerConnection = new RTCPeerConnection(ice_servers)
     useEffect(() => {
         if (localmedia) {
             localmedia.getTracks().forEach(track => {
                 peerConnection.addTrack(track, localmedia)
-                setPeerConnection(peerConnection)
             })
         }
     }, [localmedia])
@@ -83,14 +80,14 @@ export default function CallCTX({ children }: {children: React.ReactChild}) {
         event.streams.forEach(stream => {
             console.log("got stream");
             stream.getTracks().forEach(track => {
-                setRemoteMedia(r => { r.addTrack(track); return r })
+                setRemoteMedia((r) => { r.addTrack(track); return r })
             })
         })
     }
 
     useEffect(() => {
         if (remoteSDP) {
-            setPeerConnection(p => {p.setRemoteDescription(remoteSDP); return p})
+            peerConnection.setRemoteDescription(remoteSDP)
         }
     }, [remoteSDP])
 
@@ -123,7 +120,6 @@ export default function CallCTX({ children }: {children: React.ReactChild}) {
         localmedia: localmedia,
         setLocalmedia: setLocalmedia,
         peerConnection: peerConnection,
-        setPeerConnection: setPeerConnection,
         offer: offer,
         setOffer: setOffer,
         remoteSDP: remoteSDP,

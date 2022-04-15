@@ -12,10 +12,10 @@ function CallPopUp() {
 	async function answser() {
 		call_ctx.setCall(true);
 		call_ctx.setIncoming(false);
-		let stream = await navigator.mediaDevices.getUserMedia({ video: false, audio: true })
+		let stream = await navigator.mediaDevices.getUserMedia({ audio: true })
 		call_ctx.setLocalmedia(stream)
 		let answer = await call_ctx.peerConnection.createAnswer()
-		call_ctx.setPeerConnection(p => {p.setLocalDescription(answer); return p})
+		call_ctx.peerConnection.setLocalDescription(answer)
 		channel_context.gateway.send(
 			JSON.stringify({
 				event: "CALL_ANSWER",
