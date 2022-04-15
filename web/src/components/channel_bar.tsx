@@ -15,7 +15,7 @@ export default function ChannelBar() {
 		dmchannels.forEach(channel => {
 			setChannels_element(prev_channels => [...prev_channels,
 				<div key={channel.uuid}>
-				<ChannelList id={channel.uuid} icon={channel.recipient.avatar} name={channel.recipient.username} dm={true} />
+				<ChannelList id={channel.uuid} icon={channel.recipient.avatar} name={channel.recipient.username} status={channel.recipient.status} dm={true} />
 				</div>
 			])
 		})
@@ -29,7 +29,7 @@ export default function ChannelBar() {
 					ctx_menu_context.setChannelCtxMenuLocation({x: event.clientX, y: event.clientY, channel: channel})
 					ctx_menu_context.setShowChannelCtxMenu(true);
 				}}>
-				<ChannelList id={channel.uuid} icon={channel.icon} name={channel.name} dm={false} />
+				<ChannelList id={channel.uuid} icon={channel.icon} name={channel.name} status={0} dm={false} />
 				</div>
 		])
 		})

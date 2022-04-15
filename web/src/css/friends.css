@@ -50,10 +50,14 @@
     margin-left: 10%;
     line-height: 3rem;
     align-self: center;
-    border-top: 1px solid gray;
     text-align: left;
     display: flex;
 }
+
+.Friend + .Friend {
+    border-top: 1px solid gray;
+}
+
 .Friend-User {
     display: flex;
     width: 50%;
@@ -105,7 +109,6 @@
 }
 
 .add-friend-container {
-    /*width: 80%;*/
     display: flex;
     flex-direction: column;
     align-items: center;

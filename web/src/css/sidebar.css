@@ -60,6 +60,31 @@
     margin-left: 0.5rem;
 }
 
+.dm_avatar {
+    position: relative;
+    height: 2rem;
+    width: 2rem;
+    margin-top: 0.5rem;
+    margin-right: 1rem;
+    margin-left: 0.5rem;
+}
+
+.dm_avatar img {
+    border-radius: 50%;
+    height: 2rem;
+    width: 2rem;
+}
+
+.dm_status_icon {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    height: 10px;
+    width: 10px;
+    background-color: #2c2f33;
+    border: 2px solid #2c2f33;
+    border-radius: 50%;
+}
 
 .profile-bar {
     position: relative;

@@ -31,22 +31,17 @@ export interface UserOBJ {
     uuid:       string
     username:   string
     avatar:     string
+    status: number
     created_at: number
 }
 
-export interface MemberOBJ {
-	uuid:       string
-	avatar:     string
-	username:   string
+export interface MemberOBJ extends UserOBJ {
 	is_owner:   boolean
-	status:     number
 	channel_id:  string
 	joined_at:   string
-	created_at:  string
 }
 
 export interface FriendOBJ extends UserOBJ {
-    status: number
     incoming: boolean
     pending: boolean
 }
@@ -68,4 +63,11 @@ export interface BanOBJ {
 export interface DMChannelOBJ {
     uuid: string
     recipient: UserOBJ
+}
+
+export interface ReadyOBJ {
+    user: UserOBJ
+    dm_channels: DMChannelOBJ[]
+    channels: ChannelOBJ[]
+    friends: FriendOBJ[]
 }

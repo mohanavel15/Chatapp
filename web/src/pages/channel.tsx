@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { useContext, useEffect } from "react";
 import { IMessageEvent } from "websocket";
 
-import { MessageOBJ, ChannelOBJ, MemberOBJ, UserOBJ, FriendOBJ, DMChannelOBJ } from "../models/models";
+import { MessageOBJ, ChannelOBJ, MemberOBJ, UserOBJ, FriendOBJ, DMChannelOBJ, ReadyOBJ } from "../models/models";
 import Settings from "./settings"; 
 
 import SideBar from "../components/sidebar";
@@ -58,10 +58,22 @@ function Channel() {
 			if (typeof data === "string") {
 				const payload = JSON.parse(data);
 				if (payload.event === 'READY') {
-					const user: UserOBJ = payload.data;
-					user_ctx.setUuid(user.uuid);
-					user_ctx.setUsername(user.username);
-					user_ctx.setAvatar(user.avatar);
+					const ready: ReadyOBJ = payload.data;
+					user_ctx.setUuid(ready.user.uuid);
+					user_ctx.setUsername(ready.user.username);
+					user_ctx.setAvatar(ready.user.avatar);
+
+					ready.channels.forEach((channel: ChannelOBJ) => {
+						channel_context.setChannels(prev => new Map(prev.set(channel.uuid, channel)));
+					});
+
+					ready.dm_channels.forEach((dm_channel: DMChannelOBJ) => {
+						channel_context.setDMChannels(prev => new Map(prev.set(dm_channel.uuid, dm_channel)));
+					});
+
+					ready.friends.forEach((friend: FriendOBJ) => {
+						user_ctx.setFriends(prev => new Map(prev.set(friend.uuid, friend)));
+					});
 				}
 
 				if (payload.event === 'INVAILD_SESSION') {
@@ -87,6 +99,11 @@ function Channel() {
 				if (payload.event === 'CHANNEL_DELETE') {
 					const channel: ChannelOBJ = payload.data;
 					channel_context.setChannels(prevChannels => new Map(delete_channel(prevChannels, channel)));
+				}
+
+				if (payload.event === 'DM_CHANNEL_CREATE' || payload.event === 'DM_CHANNEL_MODIFY') {
+					const channel: DMChannelOBJ = payload.data;
+					channel_context.setDMChannels(prevChannels => new Map(prevChannels.set(channel.uuid, channel)));
 				}
 
 				if (payload.event === 'MEMBER_JOIN' || payload.event === 'MEMBER_UPDATE') {
@@ -156,9 +173,9 @@ function Channel() {
 	
 		const onClose = () => {
 			console.log("Disconnected from server");
-			/*setTimeout(function() {
+			setTimeout(function() {
 				window.location.reload()
-			}, 5000);*/
+			}, 5000);
 		};
 	
 		channel_context.gateway.onopen = onOpen;
@@ -176,7 +193,7 @@ function Channel() {
 	dm_channel = channel_context.DMChannels.get(channel_id);
 	if (dm_channel === undefined) {
 		dm = false;
-		dm_channel = { uuid: "@me", recipient: { uuid: "@me", username: "@me", avatar: "", created_at: 0 } };
+		dm_channel = { uuid: "@me", recipient: { uuid: "@me", username: "@me", avatar: "", status:0, created_at: 0 } };
 	}
 
 	let currentChannel = channel_context.channels.get(channel_id);
