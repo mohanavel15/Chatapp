@@ -105,38 +105,38 @@ func Login(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 }
 
 func Logout(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
-	var request request.Signout
-	_ = json.NewDecoder(r.Body).Decode(&request)
-
-	if request.AccessToken != "" {
-		if VaildateAccessToken(request.AccessToken, db) != true {
-			w.Write([]byte("Invalid access token"))
-			return
-		}
-		var session database.Session
-		db.Where("access_token = ?", request.AccessToken).Delete(&session)
-		w.Write([]byte("Successfully logged out"))
-	} else {
-		w.WriteHeader(http.StatusBadRequest)
+	access_token := r.Header.Get("Authorization")
+	if access_token == "" {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
 	}
+
+	if VaildateAccessToken(access_token, db) != true {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	var session database.Session
+	db.Where("access_token = ?", access_token).Delete(&session)
+	w.WriteHeader(http.StatusOK)
 }
 
 func Signout(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
-	var request request.Signout
-	_ = json.NewDecoder(r.Body).Decode(&request)
-
-	if request.AccessToken != "" {
-		if VaildateAccessToken(request.AccessToken, db) != true {
-			w.Write([]byte("Invalid access token"))
-			return
-		}
-		var session database.Session
-		db.Where("access_token = ?", request.AccessToken).First(&session)
-		db.Where("uuid = ?", &session.Uuid).Delete(database.Session{})
-		w.Write([]byte("Successfully signed out"))
-	} else {
-		w.WriteHeader(http.StatusBadRequest)
+	access_token := r.Header.Get("Authorization")
+	if access_token == "" {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
 	}
+
+	if VaildateAccessToken(access_token, db) != true {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	var session database.Session
+	db.Where("access_token = ?", access_token).First(&session)
+	db.Where("uuid = ?", &session.Uuid).Delete(database.Session{})
+	w.WriteHeader(http.StatusOK)
 }
 
 func VaildateAccessToken(AccessToken string, db *gorm.DB) bool {
