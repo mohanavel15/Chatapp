@@ -1,5 +1,7 @@
 package websocket
 
+import "Chatapp/response"
+
 type Connect struct {
 	Token string
 }
@@ -44,4 +46,11 @@ type SDP struct {
 type Call struct {
 	Sdp *SDP `json:"sdp"`
 	Ws  *Ws  `json:"ws"`
+}
+
+type Ready struct {
+	User       response.User        `json:"user"`
+	DMChannels []response.DMChannel `json:"dm_channels"`
+	Channels   []response.Channel   `json:"channels"`
+	Friends    []response.Friend    `json:"friends"`
 }

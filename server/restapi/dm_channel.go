@@ -22,7 +22,16 @@ func GetDMChannels(ctx *Context) {
 	for _, dm_channel := range dm_channels1 {
 		var user database.Account
 		ctx.Db.Where("id = ?", dm_channel.ToUser).First(&user)
-		res_user := response.NewUser(&user)
+
+		var status int
+		isConnected := ctx.Conn.Users[user.Uuid]
+		if isConnected == nil {
+			status = 0
+		} else {
+			status = 1
+		}
+		res_user := response.NewUser(&user, status)
+
 		res = append(res, response.DMChannel{
 			Uuid:      dm_channel.Uuid,
 			Recipient: res_user,
@@ -32,7 +41,14 @@ func GetDMChannels(ctx *Context) {
 	for _, dm_channel := range dm_channels2 {
 		var user database.Account
 		ctx.Db.Where("id = ?", dm_channel.FromUser).First(&user)
-		res_user := response.NewUser(&user)
+		var status int
+		isConnected2 := ctx.Conn.Users[user.Uuid]
+		if isConnected2 == nil {
+			status = 0
+		} else {
+			status = 1
+		}
+		res_user := response.NewUser(&user, status)
 		res = append(res, response.DMChannel{
 			Uuid:      dm_channel.Uuid,
 			Recipient: res_user,

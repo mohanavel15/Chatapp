@@ -9,11 +9,13 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var db *gorm.DB
@@ -37,8 +39,18 @@ var (
 )
 
 func main() {
+	gorm_logger := logger.New(
+		log.New(os.Stdout, "\r\n", log.LstdFlags),
+		logger.Config{
+			SlowThreshold:             time.Second,
+			LogLevel:                  logger.Silent,
+			IgnoreRecordNotFoundError: true,
+			Colorful:                  false,
+		},
+	)
+
 	dbUri := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable", PG_HOST, PG_PORT, PG_USER, PG_DATABASE, PG_PASSWORD)
-	db, err = gorm.Open(postgres.Open(dbUri), &gorm.Config{})
+	db, err = gorm.Open(postgres.Open(dbUri), &gorm.Config{Logger: gorm_logger})
 
 	if err != nil {
 		log.Fatal(fmt.Sprintf("Failed to connect database: %s", err))

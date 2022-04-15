@@ -40,8 +40,8 @@ func GetMessages(ctx *Context) {
 			return
 		}
 
-		user_res1 := response.NewUser(&user)
-		user_res2 := response.NewUser(&get_user2)
+		user_res1 := response.NewUser(&user, 0)
+		user_res2 := response.NewUser(&get_user2, 0)
 
 		messages := []database.Message{}
 		db.Where("channel_id = ?", get_dm_channel.Uuid).Find(&messages)
@@ -188,7 +188,7 @@ func CreateMessage(ctx *Context) {
 			Uuid:      message.Uuid,
 			Content:   message.Content,
 			ChannelID: get_dm_channel.Uuid,
-			Author:    response.NewUser(&user),
+			Author:    response.NewUser(&user, 0),
 			CreatedAt: message.CreatedAt.Unix(),
 			EditedAt:  message.UpdatedAt.Unix(),
 		}
@@ -291,8 +291,8 @@ func GetMessage(ctx *Context) {
 			return
 		}
 
-		user_res1 := response.NewUser(&user)
-		user_res2 := response.NewUser(&get_user2)
+		user_res1 := response.NewUser(&user, 0)
+		user_res2 := response.NewUser(&get_user2, 0)
 
 		message_res := response.Message{
 			Uuid:      message.Uuid,
@@ -431,8 +431,8 @@ func EditMessage(ctx *Context) {
 		message.UpdatedAt = time.Now()
 		db.Save(&message)
 
-		user_res1 := response.NewUser(&user)
-		user_res2 := response.NewUser(&get_user2)
+		user_res1 := response.NewUser(&user, 0)
+		user_res2 := response.NewUser(&get_user2, 0)
 
 		message_res := response.Message{
 			Uuid:      message.Uuid,

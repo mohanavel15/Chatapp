@@ -54,7 +54,15 @@ func MessageCreate(ctx *websocket.Context) {
 
 		ctx.Db.Create(&new_message)
 
-		author := response.NewUser(ctx.Ws.User)
+		var status int
+		isConnected := ctx.Ws.Conns.Users[ctx.Ws.User.Uuid]
+		if isConnected == nil {
+			status = 0
+		} else {
+			status = 1
+		}
+
+		author := response.NewUser(ctx.Ws.User, status)
 
 		message_res := response.Message{
 			Uuid:      new_message.Uuid,

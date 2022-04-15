@@ -43,9 +43,9 @@ func GetFriends(ctx *Context) {
 				Uuid:      friend_user.Uuid,
 				Username:  friend_user.Username,
 				Avatar:    friend_user.Avatar,
+				Status:    status,
 				CreatedAt: friend_user.CreatedAt.Unix(),
 			},
-			Status:   status,
 			Pending:  false,
 			Incoming: false,
 		}
@@ -236,9 +236,9 @@ func GetFriend(ctx *Context) {
 			Uuid:      friend_user.Uuid,
 			Username:  friend_user.Username,
 			Avatar:    friend_user.Avatar,
+			Status:    status,
 			CreatedAt: friend_user.CreatedAt.Unix(),
 		},
-		Status:   status,
 		Pending:  false,
 		Incoming: false,
 	}
@@ -316,9 +316,9 @@ func RemoveOrDeclineFriend(ctx *Context) {
 				Uuid:      ctx.User.Uuid,
 				Username:  ctx.User.Username,
 				Avatar:    ctx.User.Avatar,
+				Status:    status,
 				CreatedAt: ctx.User.CreatedAt.Unix(),
 			},
-			Status:   status,
 			Pending:  false,
 			Incoming: false,
 		}
@@ -342,9 +342,9 @@ func RemoveOrDeclineFriend(ctx *Context) {
 				Uuid:      friend_user.Uuid,
 				Username:  friend_user.Username,
 				Avatar:    friend_user.Avatar,
+				Status:    status,
 				CreatedAt: friend_user.CreatedAt.Unix(),
 			},
-			Status:   status,
 			Pending:  false,
 			Incoming: false,
 		}
