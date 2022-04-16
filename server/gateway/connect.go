@@ -3,6 +3,7 @@ package gateway
 import (
 	"Chatapp/database"
 	"Chatapp/response"
+	"Chatapp/restapi"
 	"Chatapp/websocket"
 	"encoding/json"
 	"fmt"
@@ -20,6 +21,16 @@ func Connect(ctx *websocket.Context) {
 
 	token := connect_req.Token
 	if token == "" {
+		return
+	}
+
+	is_valid := restapi.ValidateAccessToken(token, ctx.Db)
+	if is_valid != true {
+		ws_message := websocket.WS_Message{
+			Event: "INVAILD_SESSION",
+		}
+		res, _ := json.Marshal(ws_message)
+		ctx.Ws.Write(res)
 		return
 	}
 

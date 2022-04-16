@@ -111,7 +111,7 @@ func Logout(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 		return
 	}
 
-	if VaildateAccessToken(access_token, db) != true {
+	if ValidateAccessToken(access_token, db) != true {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -128,7 +128,7 @@ func Signout(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 		return
 	}
 
-	if VaildateAccessToken(access_token, db) != true {
+	if ValidateAccessToken(access_token, db) != true {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -139,10 +139,10 @@ func Signout(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func VaildateAccessToken(AccessToken string, db *gorm.DB) bool {
+func ValidateAccessToken(AccessToken string, db *gorm.DB) bool {
 	uuid, err := ValidateJWT(AccessToken)
 	if err != nil {
-		log.Fatal(fmt.Sprintf("Failed to validate access token : %s", err))
+		return false
 	}
 	var session database.Session
 	db.Where("access_token = ?", AccessToken).First(&session)
@@ -180,7 +180,6 @@ func ValidateJWT(tokenString string) (string, error) {
 	})
 
 	if err != nil {
-		log.Fatal(fmt.Sprintf("Couldn't parse the token: %s", err))
 		return "", err
 	}
 

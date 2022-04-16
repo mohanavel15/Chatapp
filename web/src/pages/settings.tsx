@@ -36,7 +36,7 @@ function Settings() {
         if (signout) {
             url = "http://127.0.0.1:5000/signout";
         }
-        axios.post(url, {
+        axios.post(url, {}, {
             headers: {
                 authorization: user_ctx.accessToken
             }
