@@ -1,6 +1,5 @@
 import React, { useState, createContext, useEffect } from 'react'
 import { ChannelOBJ, MessageOBJ, MemberOBJ, DMChannelOBJ } from '../models/models'
-import { w3cwebsocket as W3CWebSocket } from "websocket";
 import axios from 'axios'
 import useDoubleMap from '../hooks/useDoubleMap';
 
@@ -19,12 +18,12 @@ export interface ChannelContext {
 	UpdateMember: (key1: String, key2: String, value_: MemberOBJ) => void
 	DeleteMember: (key1: String, key2: String) => void
 	
-	gateway: W3CWebSocket;
+	gateway: WebSocket;
 }
 
 export const ChannelsContext = createContext<ChannelContext>(undefined!);
 
-export default function ChannelCTX({ children, gateway }: {children: React.ReactChild, gateway: W3CWebSocket}) {
+export default function ChannelCTX({ children, gateway }: {children: React.ReactChild, gateway: WebSocket}) {
 	let [DMChannels, setDMChannels] = useState<Map<String, DMChannelOBJ>>(new Map());
 	let [channels, setChannels] = useState<Map<String,ChannelOBJ>>(new Map<String,ChannelOBJ>());
 	const [members, UpdateMember, DeleteMember] = useDoubleMap<MemberOBJ>(new Map<String, Map<String, MemberOBJ>>());

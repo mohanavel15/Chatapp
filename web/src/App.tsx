@@ -16,13 +16,12 @@ import './css/contextmenu.css';
 import './css/friends.css';
 import './css/profile.css';
 import './css/settings.css';
-import { w3cwebsocket as W3CWebSocket } from "websocket";
 import ChannelCTX from "./contexts/channelctx";
 import UserCTX from "./contexts/usercontext";
 import { CtxMenuCtx } from "./contexts/context_menu_ctx";
 import CallCTX from './contexts/callcontexts';
 
-const gateway = new W3CWebSocket('ws://127.0.0.1:5000/ws');
+const gateway = new WebSocket('ws://127.0.0.1:5000/ws');
 function App() {
   	return (
 		<div className="App">
