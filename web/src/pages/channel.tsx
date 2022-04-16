@@ -227,7 +227,7 @@ function Channel() {
 							</>
 						}
 
-						{ currentChannel.uuid === "@me" && dm_channel.uuid === "@me" && <ChannelHome /> }
+						{ currentChannel.uuid === "@me" && dm_channel.uuid === "@me" && !state_context.editChannel && <ChannelHome /> }
 						{ state_context.createChannel && <CreateChannel /> }
 						{ state_context.editChannel && <EditChannel /> }
 						{ state_context.deleteChannel && <DeleteChannel /> }

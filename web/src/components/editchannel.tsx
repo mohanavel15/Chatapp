@@ -8,7 +8,7 @@ import { InviteOBJ, BanOBJ } from "../models/models";
 import { UserContextOBJ, UserContext } from "../contexts/usercontext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrashCan } from '@fortawesome/free-solid-svg-icons'
-
+import { setDefaultAvatar } from "../utils/errorhandle";
 function Invite({ invite, onDelete }: { invite: InviteOBJ, onDelete: (invite_code: string) => void }) {
     return (
     <div className="invites">
@@ -29,6 +29,9 @@ export default function EditChannel() {
     const [invites, setInvites] = useState<JSX.Element[]>([]);
     const [bans, setBans] = useState<JSX.Element[]>([]);
 
+    const [banReload, setBanReload] = useState(false);
+    const [InviteReload, setInviteReload] = useState(false);
+
     useEffect(() => {
         setMembersElement([]);
         const members = channel_context.members.get(state_context.ChannelOBJ.uuid)
@@ -47,7 +50,7 @@ export default function EditChannel() {
           		</div>])
             })
         }
-    }, []);
+    }, [channel_context.members]);
 
     useEffect(() => {
         setInvites([]);
@@ -62,7 +65,19 @@ export default function EditChannel() {
                 ])
             })
         })
-    }, []);
+    }, [InviteReload]);
+
+    function Unban(ban_id: string) {
+        axios.delete(`http://127.0.0.1:5000/channels/${state_context.ChannelOBJ.uuid}/bans/${ban_id}`, {
+            headers: {
+                'Authorization': user.accessToken
+            }
+        }).then(res => {
+            if (res.status === 200) {
+                setBanReload(prevBanReload => !prevBanReload);
+            }
+        })
+    }
 
     useEffect(() => {
         setBans([]);
@@ -74,12 +89,28 @@ export default function EditChannel() {
             res.data.forEach(ban => {
                 setBans(prevBans => [...prevBans,
                 <div className="bans">
-                    <p className="">{ban.banned_user.username}</p>
+                    <div className="ban-container">
+                        <div className="ban-user-container">
+                            <img className="ban-avatar" src={ban.banned_user.avatar} onError={setDefaultAvatar} />
+                            <p>{ban.banned_user.username}</p>
+                        </div>
+                        <div className="ban-action">
+                        <button className="delete-invite-button" onClick={() => {Unban(ban.uuid)}}><FontAwesomeIcon icon={faTrashCan} /></button>
+                        </div>
+                    </div>
+                    <div className="ban-container">
+                    <h4>Reason:</h4>
+                    <p>{ban.reason}</p>
+                    </div>
+                    <div className="ban-container">
+                    <h4>Banned By:</h4>
+                    <p className="ban-by-username">{ban.banned_by.username}</p>
+                    </div>
                 </div>
                 ])
             })
         })
-    }, []);
+    }, [banReload]);
 
 
     const channel_name = useRef<HTMLInputElement>(undefined!);
@@ -122,7 +153,13 @@ export default function EditChannel() {
             headers: {
                 'Authorization': user.accessToken
             }
-        })
+        }).then(
+            res => {
+                if (res.status === 200) {
+                    setInviteReload(prevInviteReload => !prevInviteReload);
+                }
+            }
+        )
     }
 
     return (

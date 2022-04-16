@@ -354,3 +354,52 @@
 .btn-green {
     color: green;
 }
+
+.bans {
+    margin: 1rem;
+    height: auto;
+    text-align: left;
+    background-color: #202020;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+}
+
+.bans p {
+    margin-left: 1rem;
+    font-size: larger;
+}
+
+.ban-avatar {
+    height: 3rem;
+    width: 3rem;
+    border-radius: 50%;
+    background-color: grey;
+}
+
+.ban-by-username {
+    font-size: small;
+}
+
+.ban-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+    margin-left: 1rem;
+}
+
+.ban-user-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+    margin: 0.3rem;
+    width: 50%;
+}
+.ban-action {
+    width: 50%;
+    display: flex;
+    justify-content: flex-end;
+    margin-right: 1rem;
+}

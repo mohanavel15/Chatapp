@@ -37,27 +37,12 @@ func GetAllBans(ctx *Context) {
 	for _, ban := range bans {
 		var user database.Account
 		ctx.Db.Where("id = ?", ban.BannedBy).First(&user)
-
-		var status int
-		isConnected := ctx.Conn.Users[user.Uuid]
-		if isConnected == nil {
-			status = 0
-		} else {
-			status = 1
-		}
-		bannedby := response.NewUser(&user, status)
+		bannedby := response.NewUser(&user, 0)
 
 		var banned_user database.Account
 		ctx.Db.Where("id = ?", ban.BannedUser).First(&banned_user)
 
-		var banned_user_status int
-		isConnected2 := ctx.Conn.Users[banned_user.Uuid]
-		if isConnected2 == nil {
-			banned_user_status = 0
-		} else {
-			banned_user_status = 1
-		}
-		banneduser := response.NewUser(&banned_user, banned_user_status)
+		banneduser := response.NewUser(&banned_user, 0)
 
 		res_ban := response.NewBan(bannedby, banneduser, res_channel, &ban)
 		res_bans = append(res_bans, res_ban)
@@ -108,26 +93,12 @@ func GetBan(ctx *Context) {
 	var user database.Account
 	ctx.Db.Where("id = ?", ban.BannedBy).First(&user)
 
-	var status int
-	isConnected := ctx.Conn.Users[user.Uuid]
-	if isConnected == nil {
-		status = 0
-	} else {
-		status = 1
-	}
-	bannedby := response.NewUser(&user, status)
+	bannedby := response.NewUser(&user, 0)
 
 	var banned_user database.Account
 	ctx.Db.Where("id = ?", ban.BannedUser).First(&banned_user)
 
-	var banned_user_status int
-	isConnected2 := ctx.Conn.Users[banned_user.Uuid]
-	if isConnected2 == nil {
-		banned_user_status = 0
-	} else {
-		banned_user_status = 1
-	}
-	banneduser := response.NewUser(&banned_user, banned_user_status)
+	banneduser := response.NewUser(&banned_user, 0)
 
 	res_ban := response.NewBan(bannedby, banneduser, res_channel, &ban)
 
