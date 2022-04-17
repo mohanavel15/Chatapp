@@ -105,6 +105,7 @@ func main() {
 	router.HandleFunc("/signin", IncludeDB(restapi.Login)).Methods("POST")
 	router.HandleFunc("/logout", IncludeDB(restapi.Logout)).Methods("POST")
 	router.HandleFunc("/signout", IncludeDB(restapi.Signout)).Methods("POST")
+	router.HandleFunc("/changepassword", Authenticated(restapi.ChangePassword)).Methods("POST")
 	// Channels
 	router.HandleFunc("/channels/{id}", Authenticated(restapi.GetChannel)).Methods("GET")
 	router.HandleFunc("/channels/{id}", Authenticated(restapi.EditChannel)).Methods("PATCH")

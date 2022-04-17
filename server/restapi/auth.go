@@ -139,6 +139,37 @@ func Signout(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 	w.WriteHeader(http.StatusOK)
 }
 
+func ChangePassword(ctx *Context) {
+	var request request.ChangePassword
+	_ = json.NewDecoder(ctx.Req.Body).Decode(&request)
+
+	if request.CurrentPassword == "" || request.NewPassword == "" {
+		ctx.Res.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	var account database.Account
+	ctx.Db.Where("uuid = ?", ctx.User.Uuid).First(&account)
+
+	err := bcrypt.CompareHashAndPassword([]byte(account.Password), []byte(request.CurrentPassword))
+	if err != nil {
+		ctx.Res.WriteHeader(http.StatusBadRequest)
+		ctx.Res.Write([]byte("Invalid password"))
+		return
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(request.NewPassword), bcrypt.DefaultCost)
+	if err != nil {
+		log.Fatal(fmt.Sprintf("Password Hashing Failed : %s", err))
+	}
+
+	account.Password = string(hashedPassword)
+	ctx.Db.Save(&account)
+
+	ctx.Db.Where("uuid = ?", account.Uuid).Delete(database.Session{})
+	ctx.Res.WriteHeader(http.StatusOK)
+}
+
 func ValidateAccessToken(AccessToken string, db *gorm.DB) bool {
 	uuid, err := ValidateJWT(AccessToken)
 	if err != nil {
