@@ -140,6 +140,9 @@ function Channel() {
 						call_ctx.setChannel(channel);
 						call_ctx.setRemoteSDP(new RTCSessionDescription(payload.data.sdp));
 						call_ctx.setIncoming(true)
+						setTimeout(() => {
+							call_ctx.setIncoming(false)
+						}, 60000);
 					}
 				}
 
@@ -223,7 +226,7 @@ function Channel() {
 						{ dm === false && currentChannel.uuid !== "@me" && state_context.editChannel !== true &&
 							<>
 								<Chat channel_id={currentChannel.uuid} dm={false} />
-								<MembersBar channel={currentChannel} />
+								{ state_context.showMembers && <MembersBar channel={currentChannel} /> }
 							</>
 						}
 

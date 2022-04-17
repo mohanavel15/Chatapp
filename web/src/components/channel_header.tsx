@@ -1,16 +1,18 @@
 import { setDefaultIcon, setDefaultAvatar } from '../utils/errorhandle';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPhone, faPhoneSlash, faVideo, faVideoSlash, faMicrophone, faMicrophoneSlash } from '@fortawesome/free-solid-svg-icons'
+import { faPhone, faPhoneSlash, faVideo, faVideoSlash, faMicrophone, faMicrophoneSlash, faUserGroup } from '@fortawesome/free-solid-svg-icons'
 import { useEffect, useState, useContext } from 'react';
 import { UserContextOBJ, UserContext } from "../contexts/usercontext";
 import { CallContext, CallContextOBJ } from "../contexts/callcontexts";
 import { ChannelOBJ, DMChannelOBJ } from "../models/models";
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
+import { StatesContext, StateContext } from "../contexts/states";
 
 function ChannelHeader({ channel_id, dm }: { channel_id: string, dm: boolean }) {
     const user:UserContextOBJ = useContext(UserContext);
     const call_ctx: CallContextOBJ = useContext(CallContext);
     const channel_context: ChannelContext = useContext(ChannelsContext);
+    const state_context: StateContext = useContext(StatesContext);
 
     let channel: ChannelOBJ | undefined;
     let dm_channel: DMChannelOBJ | undefined;
@@ -146,12 +148,11 @@ function ChannelHeader({ channel_id, dm }: { channel_id: string, dm: boolean }) 
                 { dm && <h2>{dm_channel?.recipient.username}</h2> }
                 { dm === false && <h2>{channel?.name}</h2> }
             </div>
-            { dm &&
             <div className='channel-header-actions'>
-                <button className='channel-header-action-button' onClick={() => {start_call(false)}}><FontAwesomeIcon icon={faPhone} /></button>
-                <button className='channel-header-action-button' onClick={() => {start_call(true)}}><FontAwesomeIcon icon={faVideo} /></button>
+                { dm && <button className='channel-header-action-button' onClick={() => {start_call(false)}}><FontAwesomeIcon icon={faPhone} /></button> }
+                { dm && <button className='channel-header-action-button' onClick={() => {start_call(true)}}><FontAwesomeIcon icon={faVideo} /></button> }
+                { !dm && <button className='channel-header-action-button' onClick={() => {state_context.setShowMembers(!state_context.showMembers)}}><FontAwesomeIcon icon={faUserGroup} /></button> }
             </div>
-            }   
         </div>
         }
         { call &&

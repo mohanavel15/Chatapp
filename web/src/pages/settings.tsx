@@ -23,11 +23,6 @@ function Settings() {
             headers: {
                 authorization: user_ctx.accessToken
             }
-        }).then(response => {
-            if (response.status === 200) {
-                localStorage.removeItem('access_token');
-                window.location.href = '/login';
-            }
         })
     }
 

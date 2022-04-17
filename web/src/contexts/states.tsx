@@ -11,6 +11,7 @@ export interface StateContext {
     messageOBJ: MessageOBJ;
     showProfile: boolean;
     ProfileOBJ: MemberOBJ;
+    showMembers: boolean;
     setSettings: React.Dispatch<React.SetStateAction<boolean>>;
     setCreateChannel: React.Dispatch<React.SetStateAction<boolean>>;
     setEditChannel: React.Dispatch<React.SetStateAction<boolean>>;
@@ -20,6 +21,7 @@ export interface StateContext {
     setMessageOBJ: React.Dispatch<React.SetStateAction<MessageOBJ>>;
     setShowProfile: React.Dispatch<React.SetStateAction<boolean>>;
     setProfileOBJ: React.Dispatch<React.SetStateAction<MemberOBJ>>;
+    setShowMembers: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const StatesContext = createContext<StateContext>(undefined!);
@@ -38,6 +40,8 @@ export function States({ children }: {children: React.ReactChild}) {
     const [showProfile, setShowProfile] = useState(false)
     const [ProfileOBJ, setProfileOBJ] = useState<MemberOBJ>(undefined!)
 
+    const [showMembers, setShowMembers] = useState(true)
+
     const context_value: StateContext = {
         Settings: Settings,
         createChannel: createChannel,
@@ -48,6 +52,7 @@ export function States({ children }: {children: React.ReactChild}) {
         messageOBJ: messageOBJ,
         showProfile: showProfile,
         ProfileOBJ: ProfileOBJ,
+        showMembers: showMembers,
         setSettings: setSettings,
         setCreateChannel: setCreateChannel,
         setEditChannel: setEditChannel,
@@ -56,7 +61,8 @@ export function States({ children }: {children: React.ReactChild}) {
         setDeleteMessage: setDeleteMessage,
         setMessageOBJ: setMessageOBJ,
         setShowProfile: setShowProfile,
-        setProfileOBJ: setProfileOBJ
+        setProfileOBJ: setProfileOBJ,
+        setShowMembers: setShowMembers
     }
 
     return (
