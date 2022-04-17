@@ -49,7 +49,7 @@ export default function ChannelCTX({ children, gateway }: {children: React.React
 	useEffect(() => {
 		const channel_keys: String[] =  Array.from(channels.keys())
 		channel_keys.forEach(channel => {
-			if (!messages.has(channel)) {
+			if (!members.has(channel)) {
 				axios.get<MemberOBJ[]>(`http://127.0.0.1:5000/channels/${channel}/members`, {
 					headers: {
 						Authorization: localStorage.getItem("access_token") || ""

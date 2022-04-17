@@ -49,8 +49,14 @@ function Settings() {
             return;
         }
         if (new_password_ref.current.value === confirm_password_ref.current.value) {
-            alert("not implemented")
-            return;
+            axios.post("http://127.0.0.1:5000/changepassword", {
+                "current_password": password_ref.current.value,
+                "new_password": new_password_ref.current.value
+            }, {
+                headers: {
+                    authorization: user_ctx.accessToken,
+                },
+            })
         } else {
             alert("New password and confirm password is not match");
             return;

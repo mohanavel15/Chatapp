@@ -222,7 +222,7 @@ function Channel() {
 					<MessageCTX>
 					<>
 						<SideBar />
-						{ dm && <Chat channel_id={dm_channel.uuid} dm={true} />}
+						{ dm && state_context.editChannel !== true && <Chat channel_id={dm_channel.uuid} dm={true} />}
 						{ dm === false && currentChannel.uuid !== "@me" && state_context.editChannel !== true &&
 							<>
 								<Chat channel_id={currentChannel.uuid} dm={false} />
