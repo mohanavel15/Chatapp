@@ -1,7 +1,7 @@
 import React, { useState, createContext, useEffect } from 'react'
 import { ChannelOBJ, MessageOBJ, MemberOBJ, DMChannelOBJ } from '../models/models'
-import axios from 'axios'
 import useDoubleMap from '../hooks/useDoubleMap';
+import Routes from '../config';
 
 export interface ChannelContext {
 	DMChannels: Map<String,DMChannelOBJ>;
@@ -35,13 +35,20 @@ export default function ChannelCTX({ children, gateway }: {children: React.React
 		const keys: String[] = [...dm_channel_keys, ...channel_keys]
 		keys.forEach(key => {
 			if (!messages.has(key)) {
-				axios.get<MessageOBJ[]>(`http://127.0.0.1:5000/channels/${key}/messages`, {
+				const url = Routes.Channels+`/${key}/messages`
+				fetch(url, {
+					method: "GET",
 					headers: {
-						Authorization: localStorage.getItem("access_token") || ""
+						"Authorization": localStorage.getItem("access_token") || ""
 					}
-				}).then(res => {
-					res.data.forEach(msg => UpdateMessage(key, msg.uuid, msg))
+				}).then(response => {
+					if (response.status === 200) {
+						response.json().then((msgs: MessageOBJ[]) => {
+							msgs.forEach(msg => UpdateMessage(key, msg.uuid, msg))
+						})
+					}
 				})
+
 			}
 		})
 	} , [channels, DMChannels])
@@ -50,12 +57,18 @@ export default function ChannelCTX({ children, gateway }: {children: React.React
 		const channel_keys: String[] =  Array.from(channels.keys())
 		channel_keys.forEach(channel => {
 			if (!members.has(channel)) {
-				axios.get<MemberOBJ[]>(`http://127.0.0.1:5000/channels/${channel}/members`, {
+				const url = Routes.Channels+`/${channel}/members`
+				fetch(url, {
+					method: "GET",
 					headers: {
-						Authorization: localStorage.getItem("access_token") || ""
+						"Authorization": localStorage.getItem("access_token") || ""
 					}
-				}).then(res => {
-					res.data.forEach(member => UpdateMember(channel, member.uuid, member))
+				}).then(response => {
+					if (response.status === 200) {
+						response.json().then((msgs: MemberOBJ[]) => {
+							msgs.forEach(member => UpdateMember(channel, member.uuid, member))
+						})
+					}
 				})
 			}
 		})

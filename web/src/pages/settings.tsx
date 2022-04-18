@@ -4,7 +4,8 @@ import ToggleBtn from '../utils/togglebtn';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faX } from '@fortawesome/free-solid-svg-icons';
 import { UserContext } from "../contexts/usercontext";
-import axios from 'axios';
+import { useNavigate } from "react-router-dom";
+import Routes from '../config';
 
 function Settings() {
     const state_context: StateContext = useContext(StatesContext);
@@ -18,27 +19,40 @@ function Settings() {
 
     const who_can_dm_ref = useRef<HTMLInputElement>(undefined!);
 
+    const navigate = useNavigate();
+
     function avatar() {
-        axios.patch("http://127.0.0.1:5000/users/@me", {"avatar": avatar_ref.current.value}, {
+        fetch(Routes.currentUser, {
+            method: "PATCH",
             headers: {
-                authorization: user_ctx.accessToken
+                "Content-Type": "application/json",
+                "Authorization": user_ctx.accessToken
+            },
+            body: JSON.stringify({
+                "avatar": avatar_ref.current.value
+            })
+        }).then(response => {
+            if (response.status === 200) {
+                alert("Successfully updated avatar!")
             }
         })
     }
 
     function logout(signout: boolean) {
-        let url = "http://127.0.0.1:5000/logout";
+        let url = Routes.logout;
         if (signout) {
-            url = "http://127.0.0.1:5000/signout";
+            url = Routes.signout;
         }
-        axios.post(url, {}, {
+        
+        fetch(url, {
+            method: "POST",
             headers: {
-                authorization: user_ctx.accessToken
+                "Authorization": user_ctx.accessToken
             }
         }).then(response => {
             if (response.status === 200) {
                 localStorage.removeItem('access_token');
-                window.location.href = '/login';
+                navigate("/login");
             }
         })
     }
@@ -49,19 +63,25 @@ function Settings() {
             return;
         }
         if (new_password_ref.current.value === confirm_password_ref.current.value) {
-            axios.post("http://127.0.0.1:5000/changepassword", {
-                "current_password": password_ref.current.value,
-                "new_password": new_password_ref.current.value
-            }, {
+            fetch(Routes.changePassword, {
+                method: "POST",
                 headers: {
-                    authorization: user_ctx.accessToken,
+                    "Content-Type": "application/json",
+                    "Authorization": user_ctx.accessToken
                 },
+                body: JSON.stringify({
+                    "current_password": password_ref.current.value,
+                    "new_password": new_password_ref.current.value
+                })
+            }).then(response => {
+                if (response.status === 200) {
+                    alert("Successfully changed password!")
+                }
             })
         } else {
             alert("New password and confirm password is not match");
             return;
         }
-        
     }
 
     function who_can_dm() {

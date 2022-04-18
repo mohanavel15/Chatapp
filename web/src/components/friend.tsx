@@ -1,12 +1,12 @@
 import React, { useContext } from 'react'
-import axios from 'axios';
-import { FriendOBJ, DMChannelOBJ } from '../models/models';
+import { FriendOBJ } from '../models/models';
 import { UserContextOBJ, UserContext } from "../contexts/usercontext";
 import { setDefaultAvatar } from '../utils/errorhandle';
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle, faDotCircle, faCircleMinus, IconDefinition, faCheck, faX, faMessage } from '@fortawesome/free-solid-svg-icons';
+import Routes from '../config';
 
 function Friend({ friend_obj }: { friend_obj: FriendOBJ }) {
 	const user_ctx:UserContextOBJ = useContext(UserContext);
@@ -42,11 +42,15 @@ function Friend({ friend_obj }: { friend_obj: FriendOBJ }) {
             }
             return prevFriends;
         }
-
-        axios.post("http://127.0.0.1:5000/users/@me/friends", { "to": friend_obj.uuid },{ 
+        fetch(Routes.Friends, {
+            method: "POST",
             headers: {
-                Authorization: user_ctx.accessToken
-            }
+                "Authorization": user_ctx.accessToken,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                "to": friend_obj.uuid
+            })
         }).then(response => {
             if (response.status === 200) {
                 user_ctx.setFriends(prevFriends => new Map(updateFriend(prevFriends)));
@@ -59,10 +63,12 @@ function Friend({ friend_obj }: { friend_obj: FriendOBJ }) {
             prevFriends.delete(friend_obj.uuid);
             return prevFriends;
         }
-        axios.delete(`http://127.0.0.1:5000/users/@me/friends/${friend_obj.uuid}`, {
+        const url = Routes.Friends + "/" + friend_obj.uuid; 
+        fetch(url, {
+            method: "DELETE",
             headers: {
-				Authorization: localStorage.getItem("access_token") || ""
-			}
+                "Authorization": user_ctx.accessToken,
+            }
         }).then(response => {
             if (response.status === 200) {
                 user_ctx.setFriends(prevFriends => new Map(deleteFriend(prevFriends)));
@@ -71,17 +77,20 @@ function Friend({ friend_obj }: { friend_obj: FriendOBJ }) {
     }
 
     function Message() {
-        axios.get<DMChannelOBJ>(`http://127.0.0.1:5000/dms/${friend_obj.uuid}`, {
+        const url = Routes.host + "/dms/" + friend_obj.uuid;
+        fetch(url, {
+            method: "GET",
             headers: {
-                Authorization: localStorage.getItem("access_token") || ""
+                "Authorization": user_ctx.accessToken,
             }
         }).then(response => {
             if (response.status === 200) {
-                const dm_channel_id = response.data.uuid;
-                if (!channel_ctx.DMChannels.has(dm_channel_id)) {
-                    channel_ctx.setDMChannels(prevChannels => new Map(prevChannels.set(dm_channel_id, response.data)));
-                }
-                navigate(`/channels/${dm_channel_id}`);
+                response.json().then(dm_channel => {
+                    if (!channel_ctx.DMChannels.has(dm_channel.uuid)) {
+                        channel_ctx.setDMChannels(prevChannels => new Map(prevChannels.set(dm_channel.uuid, dm_channel)));
+                    }
+                    navigate(`/channels/${dm_channel.uuid}`);
+                })
             }
         })
     }

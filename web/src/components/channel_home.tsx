@@ -2,7 +2,8 @@ import { useState, useContext, useEffect, useRef } from 'react'
 import { UserContextOBJ, UserContext } from "../contexts/usercontext";
 import { ContextMenuCtx, ContextMenu } from "../contexts/context_menu_ctx";
 import Friend from './friend';
-import axios from 'axios';
+import Routes from '../config';
+
 function ChannelHome() {
 	const user_ctx:UserContextOBJ = useContext(UserContext);
 	const [TopBarSelected, setTopBarSelected] = useState(0)
@@ -45,12 +46,17 @@ function ChannelHome() {
 	function SendFriendRequest() {
 		if (FriendUserUUID.current !== undefined) {
 			if (FriendUserUUID.current.value !== "") {
-				axios.post("http://127.0.0.1:5000/users/@me/friends", { "to": FriendUserUUID.current.value },{ 
+				fetch(Routes.Friends, {
+					method: "POST",
 					headers: {
-						Authorization: user_ctx.accessToken
-					}
-				}).then(res => {
-					if (res.status === 200) {
+						"Authorization": user_ctx.accessToken,
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						"to": FriendUserUUID.current.value
+					})
+				}).then(response => {
+					if (response.status === 200) {
 						FriendUserUUID.current.value = ""
 					}
 				})

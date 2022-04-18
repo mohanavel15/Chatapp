@@ -1,9 +1,9 @@
-import axios from 'axios';
 import React, { useRef, useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChannelsContext, ChannelContext } from '../contexts/channelctx';
 import { StatesContext, StateContext } from "../contexts/states";
 import { UserContextOBJ, UserContext } from "../contexts/usercontext";
+import Routes from '../config';
 
 function SideTopBar() {
     const navegate = useNavigate();
@@ -15,17 +15,21 @@ function SideTopBar() {
 
     function JoinChannel(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
         event.preventDefault()
-        const inv_code = InviteCode.current.value
-        axios.get(`http://127.0.0.1:5000/invites/${inv_code}`, {
+        const inv_code = InviteCode.current.value;
+        const url = Routes.Invites+`/${inv_code}`
+        fetch(url, {
+            method: "GET",
             headers: {
-				Authorization: user_ctx.accessToken
-			}
-        }).then(res => {
-            if (res.status === 200) {
-                channel_context.setChannels(prevChannels => new Map(prevChannels.set(res.data.uuid, res.data)));
-                navegate(`/channels/${res.data.uuid}`)
-            }
-        })
+                "Authorization": user_ctx.accessToken,
+                }
+            }).then(response => {
+                if (response.status === 200) {
+                    response.json().then(channel => {
+                        channel_context.setChannels(prevChannels => new Map(prevChannels.set(channel.uuid, channel)));
+                        navegate(`/channels/${channel.uuid}`)
+                    })
+                }
+            })
         InviteCode.current.value = ""
     }
 

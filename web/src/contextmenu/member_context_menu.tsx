@@ -1,10 +1,10 @@
 import React, { useContext } from 'react'
-import axios from 'axios';
 import { MemberOBJ, ChannelOBJ, DMChannelOBJ } from '../models/models';
 import { UserContextOBJ, UserContext } from "../contexts/usercontext";
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 import { StatesContext, StateContext } from "../contexts/states";
 import { useNavigate } from "react-router-dom";
+import Routes from '../config';
 
 interface propsMsgCtxProps {
     location: {event: React.MouseEvent<HTMLDivElement, MouseEvent>, member: MemberOBJ, channel: ChannelOBJ},
@@ -24,14 +24,17 @@ export default function MemberContextMenu(props:propsMsgCtxProps) {
     }
 
     function handleKickOrBan(ban: boolean) {
-        axios.delete(`http://127.0.0.1:5000/channels/${channel.uuid}/members/${props.location.member.uuid}`, {
+        const url = Routes.Channels + "/" + channel.uuid + "/members/" + props.location.member.uuid;
+        fetch(url, {
+            method: "DELETE",
             headers: {
-                Authorization: user_ctx.accessToken
+                "Authorization": user_ctx.accessToken,
+                "Content-Type": "application/json"
             },
-            data: {
+            body: JSON.stringify({
                 "ban": ban,
                 "reason": "no reason"
-            }
+            })
         }).then(res => {
             if (res.status === 200) {
                 channel_context.DeleteMember(props.location.member.channel_id, props.location.member.uuid);
@@ -40,17 +43,20 @@ export default function MemberContextMenu(props:propsMsgCtxProps) {
     }
 
     function Message() {
-        axios.get<DMChannelOBJ>(`http://127.0.0.1:5000/dms/${props.location.member.uuid}`, {
+        const url = Routes.host + "/dms/" + props.location.member.uuid;
+        fetch(url, {
+            method: "GET",
             headers: {
-                Authorization: localStorage.getItem("access_token") || ""
+                "Authorization": user_ctx.accessToken,
             }
         }).then(response => {
             if (response.status === 200) {
-                const dm_channel_id = response.data.uuid;
-                if (!channel_context.DMChannels.has(dm_channel_id)) {
-                    channel_context.setDMChannels(prevChannels => new Map(prevChannels.set(dm_channel_id, response.data)));
-                }
-                navigate(`/channels/${dm_channel_id}`);
+                response.json().then(dm_channel => {
+                    if (!channel_context.DMChannels.has(dm_channel.uuid)) {
+                        channel_context.setDMChannels(prevChannels => new Map(prevChannels.set(dm_channel.uuid, dm_channel)));
+                    }
+                    navigate(`/channels/${dm_channel.uuid}`);
+                })
             }
         })
     }

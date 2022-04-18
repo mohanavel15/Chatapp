@@ -1,7 +1,6 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { StatesContext, StateContext } from "../contexts/states";
 import { ChannelsContext, ChannelContext } from '../contexts/channelctx';
-import axios from "axios";
 import Member from "./member";
 import { ContextMenuCtx, ContextMenu } from "../contexts/context_menu_ctx";
 import { InviteOBJ, BanOBJ } from "../models/models";
@@ -9,6 +8,8 @@ import { UserContextOBJ, UserContext } from "../contexts/usercontext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrashCan } from '@fortawesome/free-solid-svg-icons'
 import { setDefaultAvatar } from "../utils/errorhandle";
+import Routes from "../config";
+
 function Invite({ invite, onDelete }: { invite: InviteOBJ, onDelete: (invite_code: string) => void }) {
     return (
     <div className="invites">
@@ -54,26 +55,30 @@ export default function EditChannel() {
 
     useEffect(() => {
         setInvites([]);
-        axios.get<InviteOBJ[]>(`http://127.0.0.1:5000/channels/${state_context.ChannelOBJ.uuid}/invites`, {
-            headers: {
-                'Authorization': user.accessToken
-            }
-        }).then(res => {
-            res.data.forEach(invite => {
-                setInvites(prevInvites => [...prevInvites,
-                    <Invite invite={invite} onDelete={delete_inite} />
-                ])
-            })
-        })
-    }, [InviteReload]);
-
-    function Unban(ban_id: string) {
-        axios.delete(`http://127.0.0.1:5000/channels/${state_context.ChannelOBJ.uuid}/bans/${ban_id}`, {
+        const url = Routes.Channels + "/" + state_context.ChannelOBJ.uuid + "/invites";
+        fetch(url, {
+            method: "GET",
             headers: {
                 'Authorization': user.accessToken
             }
         }).then(res => {
             if (res.status === 200) {
+                res.json().then((invites: InviteOBJ[]) => {
+                    setInvites(prevInvites => [...prevInvites, ...invites.map(invite => <Invite invite={invite} onDelete={delete_invite} />)])
+                })
+            }
+        })
+    }, [InviteReload]);
+
+    function Unban(ban_id: string) {
+        const url = Routes.Channels + "/" + state_context.ChannelOBJ.uuid + "/bans/" + ban_id;
+        fetch(url, {
+            method: "DELETE",
+            headers: {
+                'Authorization': user.accessToken
+            }
+        }).then(response => {
+            if (response.status === 200) {
                 setBanReload(prevBanReload => !prevBanReload);
             }
         })
@@ -81,37 +86,42 @@ export default function EditChannel() {
 
     useEffect(() => {
         setBans([]);
-        axios.get<BanOBJ[]>(`http://127.0.0.1:5000/channels/${state_context.ChannelOBJ.uuid}/bans`, {
+        const url = Routes.Channels + "/" + state_context.ChannelOBJ.uuid + "/bans";
+        fetch(url, {
+            method: "GET",
             headers: {
                 'Authorization': user.accessToken
             }
-        }).then(res => {
-            res.data.forEach(ban => {
-                setBans(prevBans => [...prevBans,
-                <div className="bans">
-                    <div className="ban-container">
-                        <div className="ban-user-container">
-                            <img className="ban-avatar" src={ban.banned_user.avatar} onError={setDefaultAvatar} />
-                            <p>{ban.banned_user.username}</p>
+        }).then(response => {
+            if (response.status === 200) {
+                response.json().then((bans: BanOBJ[]) => {
+                    bans.forEach(ban => {
+                        setBans(prevBans => [...prevBans,
+                        <div className="bans">
+                            <div className="ban-container">
+                                <div className="ban-user-container">
+                                    <img className="ban-avatar" src={ban.banned_user.avatar} onError={setDefaultAvatar} />
+                                    <p>{ban.banned_user.username}</p>
+                                </div>
+                                <div className="ban-action">
+                                    <button className="delete-invite-button" onClick={() => {Unban(ban.uuid)}}><FontAwesomeIcon icon={faTrashCan} /></button>
+                                </div>
+                            </div>
+                            <div className="ban-container">
+                                <h4>Reason:</h4>
+                                <p>{ban.reason}</p>
+                            </div>
+                            <div className="ban-container">
+                                <h4>Banned By:</h4>
+                                <p className="ban-by-username">{ban.banned_by.username}</p>
+                            </div>
                         </div>
-                        <div className="ban-action">
-                        <button className="delete-invite-button" onClick={() => {Unban(ban.uuid)}}><FontAwesomeIcon icon={faTrashCan} /></button>
-                        </div>
-                    </div>
-                    <div className="ban-container">
-                    <h4>Reason:</h4>
-                    <p>{ban.reason}</p>
-                    </div>
-                    <div className="ban-container">
-                    <h4>Banned By:</h4>
-                    <p className="ban-by-username">{ban.banned_by.username}</p>
-                    </div>
-                </div>
-                ])
-            })
+                        ])
+                    })
+                })
+            }
         })
     }, [banReload]);
-
 
     const channel_name = useRef<HTMLInputElement>(undefined!);
     const channel_icon = useRef<HTMLInputElement>(undefined!);
@@ -134,32 +144,33 @@ export default function EditChannel() {
     }
 
     function create_invite() {
-        axios.post<InviteOBJ>(`http://127.0.0.1:5000/channels/${state_context.ChannelOBJ.uuid}/invites`, {}, {
+        const url = Routes.Channels + "/" + state_context.ChannelOBJ.uuid + "/invites";
+        fetch(url, {
+            method: "POST",
             headers: {
                 'Authorization': user.accessToken
             }
         }).then(res => {
-            setInvites(prevInvites => [...prevInvites,
-            <div className="invites">
-                <p className="invite-code">{res.data.invite_code}</p>
-                <div><p className="invite-date">{res.data.created_at}</p><button><FontAwesomeIcon icon={faTrashCan} /></button></div>
-            </div>
-            ])
+            if (res.status === 200) {
+                res.json().then((invite: InviteOBJ) => {
+                    setInvites(prevInvites => [...prevInvites, <Invite invite={invite} onDelete={delete_invite} />])
+                })
+            }
         })
     }
 
-    function delete_inite(invite_code: string) {
-        axios.delete(`http://127.0.0.1:5000/channels/${state_context.ChannelOBJ.uuid}/invites/${invite_code}`, {
+    function delete_invite(invite_code: string) {
+        const url = Routes.Channels +  `/${state_context.ChannelOBJ.uuid}/invites/${invite_code}`;
+        fetch(url, {
+            method: 'DELETE',
             headers: {
                 'Authorization': user.accessToken
             }
-        }).then(
-            res => {
-                if (res.status === 200) {
-                    setInviteReload(prevInviteReload => !prevInviteReload);
-                }
+        }).then(response => {
+            if (response.status === 200) {
+                setInviteReload(prevInviteReload => !prevInviteReload);
             }
-        )
+        })
     }
 
     return (

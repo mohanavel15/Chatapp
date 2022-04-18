@@ -1,6 +1,6 @@
 import { createContext, useEffect, useState } from "react";
-import axios from "axios";
-import { UserOBJ, FriendOBJ } from "../models/models";
+import { FriendOBJ } from "../models/models";
+import Routes from "../config";
 export interface UserContextOBJ {
     uuid: string;
     username: string;
@@ -10,7 +10,6 @@ export interface UserContextOBJ {
     setUsername:React.Dispatch<React.SetStateAction<string>>;
     setAvatar:React.Dispatch<React.SetStateAction<string>>;
     setAccessToken:React.Dispatch<React.SetStateAction<string>>;
-
     friends: Map<String,FriendOBJ>;
 	setFriends: React.Dispatch<React.SetStateAction<Map<String, FriendOBJ>>>
 }
@@ -18,7 +17,6 @@ export interface UserContextOBJ {
 export const UserContext = createContext<UserContextOBJ>(undefined!);
 
 function UserCTX({ children }: { children: React.ReactChild }) {
-
     const [uuid, setUuid] = useState<string>("");
     const [username, setUsername] = useState<string>("");
     const [avatar, setAvatar] = useState<string>("");
@@ -27,40 +25,29 @@ function UserCTX({ children }: { children: React.ReactChild }) {
 
     useEffect(() => {
         const token = localStorage.getItem("access_token") || "";
-
         if (token !== "") {
-            axios.get<UserOBJ>("http://127.0.0.1:5000/users/@me", {
+            fetch(Routes.currentUser, {
+                method: "GET",
                 headers: {
                     "Authorization": token
                 }
-            }).then(res => {
-                if (res.status === 200) {
-                    const user = res.data;
-                    setUuid(user.uuid);
-                    setUsername(user.username);
-                    setAvatar(user.avatar);
-                    setAccessToken(token);
+            }).then(response => {
+                if (response.status === 200) {
+                    response.json().then(user => {
+                        setUuid(user.uuid);
+                        setUsername(user.username);
+                        setAvatar(user.avatar);
+                        setAccessToken(token);
+                    });
                 } else {
                     localStorage.removeItem("access_token");
                     window.location.href = "/";
                 }
-            });
+            })
         } else {
             window.location.href = "/";
         }
     }, []);
-
-    useEffect(() => {
-		axios.get<FriendOBJ[]>('http://127.0.0.1:5000/users/@me/friends', {
-			headers: {
-				Authorization: localStorage.getItem("access_token") || ""
-			}
-		}).then(res => {
-			res.data.forEach(friend => {
-				setFriends(prevFriends => new Map(prevFriends.set(friend.uuid, friend)))
-			})
-		})
-    }, [])
 
     const context_value: UserContextOBJ = {
         uuid: uuid,
@@ -74,7 +61,6 @@ function UserCTX({ children }: { children: React.ReactChild }) {
         friends: friends,
         setFriends: setFriends
     }
-    
     
     return (
     <UserContext.Provider value={context_value}>
