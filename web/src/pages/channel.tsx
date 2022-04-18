@@ -147,13 +147,12 @@ function Channel() {
 				}
 
 				if (payload.event === 'CALL_ANSWER') {
-					
 						const user = channel_context.DMChannels.get(payload.data.channel_id);
 						call_ctx.setUsers(prevUsers => [...prevUsers, 
-							<>
+							<div key={user?.recipient.uuid}>
 								{ call_ctx.video === false && <><img id="local-voice" className='user-call-avatar' src={user?.recipient.avatar} alt="Avatar" onError={setDefaultAvatar} /></> }
                 				{ call_ctx.video && <video id="remote-video" className='user-call-video-box' autoPlay playsInline></video> }
-							</>
+							</div>
 						])
 						console.log("users: ", call_ctx.users);
 						console.log('got answer');

@@ -3,7 +3,7 @@
     top:0;
     bottom:0;
     left: 0;
-    width: 15%;
+    width: 240px;
     display: flex;
     flex-direction: column;
     text-decoration: none;
@@ -48,6 +48,11 @@
 .channel_name p {
     padding: 0;
     font-size: 1rem;
+    height: 1rem;
+    width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     color: #ffffff;
     text-align: left;
 }

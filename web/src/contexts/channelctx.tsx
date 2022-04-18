@@ -34,43 +34,38 @@ export default function ChannelCTX({ children, gateway }: {children: React.React
 		const channel_keys: String[] =  Array.from(channels.keys())
 		const keys: String[] = [...dm_channel_keys, ...channel_keys]
 		keys.forEach(key => {
-			if (!messages.has(key)) {
-				const url = Routes.Channels+`/${key}/messages`
-				fetch(url, {
-					method: "GET",
-					headers: {
-						"Authorization": localStorage.getItem("access_token") || ""
-					}
-				}).then(response => {
-					if (response.status === 200) {
-						response.json().then((msgs: MessageOBJ[]) => {
-							msgs.forEach(msg => UpdateMessage(key, msg.uuid, msg))
-						})
-					}
-				})
-
-			}
+			const url = Routes.Channels+`/${key}/messages`
+			fetch(url, {
+				method: "GET",
+				headers: {
+					"Authorization": localStorage.getItem("access_token") || ""
+				}
+			}).then(response => {
+				if (response.status === 200) {
+					response.json().then((msgs: MessageOBJ[]) => {
+						msgs.forEach(msg => UpdateMessage(key, msg.uuid, msg))
+					})
+				}
+			})
 		})
 	} , [channels, DMChannels])
 
 	useEffect(() => {
 		const channel_keys: String[] =  Array.from(channels.keys())
 		channel_keys.forEach(channel => {
-			if (!members.has(channel)) {
-				const url = Routes.Channels+`/${channel}/members`
-				fetch(url, {
-					method: "GET",
-					headers: {
-						"Authorization": localStorage.getItem("access_token") || ""
-					}
-				}).then(response => {
-					if (response.status === 200) {
-						response.json().then((msgs: MemberOBJ[]) => {
-							msgs.forEach(member => UpdateMember(channel, member.uuid, member))
-						})
-					}
-				})
-			}
+			const url = Routes.Channels+`/${channel}/members`
+			fetch(url, {
+				method: "GET",
+				headers: {
+					"Authorization": localStorage.getItem("access_token") || ""
+				}
+			}).then(response => {
+				if (response.status === 200) {
+					response.json().then((members: MemberOBJ[]) => {
+						members.forEach(member => UpdateMember(channel, member.uuid, member))
+					})
+				}
+			})
 		})
 	} , [channels])
 

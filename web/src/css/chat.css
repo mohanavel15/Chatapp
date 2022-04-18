@@ -3,7 +3,7 @@
   color: aliceblue;
   background-color: #23272a;
   overflow:hidden;
-  width: 85%;
+  width: 100%;
   display: flex;
   flex-direction: column;
 }
