@@ -20,13 +20,6 @@ export PG_DATABASE="chatapp"
 ### Run Server
 
 ```bash
-make build
-make run
-```
-
-OR
-
-```bash
 go build
 source .env
 ./Chatapp
@@ -35,18 +28,11 @@ source .env
 ### Server Dependency
 
 ```bash
-go get -u gorm.io/gorm
-go get -u gorm.io/driver/postgres
-go get -u github.com/google/uuid
-go get -u github.com/gorilla/mux
-go get -u github.com/gorilla/websocket
-go get -u github.com/gorilla/handlers
-go get -u golang.org/x/crypto/bcrypt
-go get -u github.com/golang-jwt/jwt
+go get .
 ```
 
 ## Setup Database
-### Postgres Databse Docker
+### Postgres Database Docker
 ```bash
 docker-compose up -d
 ```
@@ -58,14 +44,7 @@ In web folder
 ### Web Client Dependency
 
 ```bash
-npm install react-router-dom
-npm install emoji-picker-react
-npm install axios
-npm install websocket
-npm install prop-types
-npm install @fortawesome/fontawesome-svg-core
-npm install @fortawesome/free-solid-svg-icons
-npm install @fortawesome/react-fontawesome
+npm ci
 ```
 
 ### Run Web Client
