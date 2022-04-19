@@ -28,16 +28,8 @@ func Authenticated(function AuthFunction) http.HandlerFunc {
 			return
 		}
 
-		is_valid := restapi.ValidateAccessToken(access_token, db)
+		is_valid, session := restapi.ValidateAccessToken(access_token, db)
 		if is_valid != true {
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
-
-		var session database.Session
-		db.Where("access_token = ?", access_token).First(&session)
-
-		if session.Uuid == "" {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}

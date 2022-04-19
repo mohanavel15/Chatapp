@@ -24,23 +24,13 @@ func Connect(ctx *websocket.Context) {
 		return
 	}
 
-	is_valid := restapi.ValidateAccessToken(token, ctx.Db)
+	is_valid, get_session := restapi.ValidateAccessToken(token, ctx.Db)
 	if is_valid != true {
 		ws_message := websocket.WS_Message{
 			Event: "INVAILD_SESSION",
 		}
 		res, _ := json.Marshal(ws_message)
 		ctx.Ws.Write(res)
-		return
-	}
-
-	get_session := database.Session{
-		AccessToken: token,
-	}
-
-	ctx.Db.Where(&get_session).First(&get_session)
-
-	if get_session.ID == 0 {
 		return
 	}
 

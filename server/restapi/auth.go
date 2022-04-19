@@ -111,13 +111,13 @@ func Logout(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 		return
 	}
 
-	if ValidateAccessToken(access_token, db) != true {
+	is_valid, session := ValidateAccessToken(access_token, db)
+	if is_valid != true {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
-	var session database.Session
-	db.Where("access_token = ?", access_token).Delete(&session)
+	db.Delete(&session)
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -128,13 +128,11 @@ func Signout(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 		return
 	}
 
-	if ValidateAccessToken(access_token, db) != true {
+	is_valid, session := ValidateAccessToken(access_token, db)
+	if is_valid != true {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-
-	var session database.Session
-	db.Where("access_token = ?", access_token).First(&session)
 	db.Where("uuid = ?", &session.Uuid).Delete(database.Session{})
 	w.WriteHeader(http.StatusOK)
 }
@@ -170,17 +168,17 @@ func ChangePassword(ctx *Context) {
 	ctx.Res.WriteHeader(http.StatusOK)
 }
 
-func ValidateAccessToken(AccessToken string, db *gorm.DB) bool {
+func ValidateAccessToken(AccessToken string, db *gorm.DB) (bool, database.Session) {
 	uuid, err := ValidateJWT(AccessToken)
 	if err != nil {
-		return false
+		return false, database.Session{}
 	}
 	var session database.Session
 	db.Where("access_token = ?", AccessToken).First(&session)
 	if session.Uuid == uuid {
-		return true
+		return true, session
 	}
-	return false
+	return false, database.Session{}
 }
 
 func GenerateJWT(uuid string) (string, error) {

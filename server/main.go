@@ -25,9 +25,7 @@ var handler *websocket.EventHandler
 var queue = []*websocket.WS_Message{}
 var onlineUsers = make(map[string]*websocket.Ws)
 var channels = make(map[string]map[string]*websocket.Ws)
-var calls = make(map[string]map[string]*websocket.Call)
 
-// Environment Variables
 var (
 	HOST        = os.Getenv("SERVER_HOST")
 	PORT        = os.Getenv("SERVER_PORT")
