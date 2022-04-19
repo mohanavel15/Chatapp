@@ -87,7 +87,7 @@ func GetDMChannel(ctx *Context) {
 	}
 	ctx.Db.Where(&dm_channel).First(&dm_channel)
 	if dm_channel.ID == 0 {
-		dm_channel := database.DMChannel{
+		dm_channel = database.DMChannel{
 			FromUser: dm_user.ID,
 			ToUser:   ctx.User.ID,
 		}
