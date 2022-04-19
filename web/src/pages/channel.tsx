@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { useContext, useEffect } from "react";
 import { IMessageEvent } from "websocket";
 
-import { MessageOBJ, ChannelOBJ, MemberOBJ, UserOBJ, FriendOBJ, DMChannelOBJ, ReadyOBJ } from "../models/models";
+import { MessageOBJ, ChannelOBJ, MemberOBJ, FriendOBJ, DMChannelOBJ, ReadyOBJ } from "../models/models";
 import Settings from "./settings"; 
 
 import SideBar from "../components/sidebar";
@@ -24,12 +24,8 @@ import { UserContextOBJ, UserContext } from "../contexts/usercontext";
 import { ContextMenuCtx, ContextMenu } from "../contexts/context_menu_ctx";
 import { StatesContext, StateContext } from "../contexts/states";
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
-import { CallContext, CallContextOBJ } from "../contexts/callcontexts";
-import CallPopUp from "../components/call_pop_up";
 import ChannelHome from "../components/channel_home";
 import MessageCTX from '../contexts/messagectx';
-
-import { setDefaultAvatar } from '../utils/errorhandle';
 
 const delete_channel = (channels: Map<String, ChannelOBJ>, channel: ChannelOBJ) => {
 	channels.delete(channel.uuid);
@@ -49,7 +45,6 @@ function Channel() {
 	const state_context: StateContext = useContext(StatesContext);
 	const channel_context: ChannelContext = useContext(ChannelsContext);
 	const ctx_menu_context: ContextMenuCtx = useContext(ContextMenu);
-    const call_ctx: CallContextOBJ = useContext(CallContext);
 
 	useEffect(() => {
 		const onMessage = (message: IMessageEvent) => {
@@ -124,41 +119,6 @@ function Channel() {
 				if (payload.event === 'FRIEND_DELETE') {
 					const friend: FriendOBJ = payload.data;
 					user_ctx.setFriends(prevFriends => new Map(deleteFriend(prevFriends, friend)));
-				}
-
-				if (payload.event === 'CALL_START') {
-					console.log('call started');
-					const channel_id = payload.data.channel_id;
-					const channel = channel_context.DMChannels.get(channel_id);
-					if (channel) {
-						call_ctx.setUsers(prevUsers => [...prevUsers, 
-							<div key={channel.recipient.uuid}>
-								{ call_ctx.video === false && <><img id="local-voice" className='user-call-avatar' src={channel.recipient.avatar} alt="Avatar" onError={setDefaultAvatar} /></> }
-                				{ call_ctx.video && <video id="remote-video" className='user-call-video-box' autoPlay playsInline></video> }
-							</div>
-						])
-						call_ctx.setChannel(channel);
-						call_ctx.setRemoteSDP(new RTCSessionDescription(payload.data.sdp));
-						call_ctx.setIncoming(true)
-						setTimeout(() => {
-							call_ctx.setIncoming(false)
-						}, 60000);
-					}
-				}
-
-				if (payload.event === 'CALL_ANSWER') {
-						const user = channel_context.DMChannels.get(payload.data.channel_id);
-						call_ctx.setUsers(prevUsers => [...prevUsers, 
-							<div key={user?.recipient.uuid}>
-								{ call_ctx.video === false && <><img id="local-voice" className='user-call-avatar' src={user?.recipient.avatar} alt="Avatar" onError={setDefaultAvatar} /></> }
-                				{ call_ctx.video && <video id="remote-video" className='user-call-video-box' autoPlay playsInline></video> }
-							</div>
-						])
-						console.log("users: ", call_ctx.users);
-						console.log('got answer');
-						let answer = new RTCSessionDescription(payload.data.sdp)
-						call_ctx.setRemoteSDP(answer);
-					
 				}
 			}
 		};
@@ -235,7 +195,6 @@ function Channel() {
 						{ state_context.deleteChannel && <DeleteChannel /> }
 						{ state_context.deleteMessage && <DeleteMessage /> }
 						{ state_context.showProfile && <Profile /> }
-						{ call_ctx.incoming && <CallPopUp /> }
 						{ ctx_menu_context.showMsgCtxMenu && <MessageContextMenu location={ctx_menu_context.ctxMsgMenuLocation} /> }
 						{ ctx_menu_context.showChannelCtxMenu && <ChannelContextMenu location={ctx_menu_context.ctxChannelMenuLocation} /> }
 						{ ctx_menu_context.showMemberCtxMenu && <MemberContextMenu location={ctx_menu_context.ctxMemberMenuLocation} /> }

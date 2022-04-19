@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes as RouterRoutes, Route } from "react-router-dom";
 import Channel from "./pages/channel";
 import Login from "./pages/login";
 import Home from "./pages/home";
@@ -19,24 +19,22 @@ import './css/settings.css';
 import ChannelCTX from "./contexts/channelctx";
 import UserCTX from "./contexts/usercontext";
 import { CtxMenuCtx } from "./contexts/context_menu_ctx";
-import CallCTX from './contexts/callcontexts';
+import Routes from "./config";
 
-const gateway = new WebSocket('ws://127.0.0.1:5000/ws');
+const gateway = new WebSocket(Routes.ws);
 function App() {
   	return (
 		<div className="App">
 			<ChannelCTX gateway={gateway}>
 				<BrowserRouter>
-					<Routes>
+					<RouterRoutes>
 						<Route path="/">
 							<Route index element={<Home />} />
 							<Route path="channels/:id" element={
 								<States>
 									<CtxMenuCtx>
 										<UserCTX>
-											<CallCTX>
 											<Channel />
-											</CallCTX>
 										</UserCTX>
 									</CtxMenuCtx>
 								</States>
@@ -45,7 +43,7 @@ function App() {
 							<Route path="register" element={<Register />} />
 							<Route path="*" element={<NoPage />} />
 						</Route>
-					</Routes>
+					</RouterRoutes>
 				</BrowserRouter>
 			</ChannelCTX>
 		</div>
