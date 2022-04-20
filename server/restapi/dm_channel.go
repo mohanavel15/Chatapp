@@ -4,58 +4,36 @@ import (
 	"Chatapp/database"
 	"Chatapp/response"
 	"encoding/json"
-	"fmt"
 	"net/http"
-	"time"
 
-	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
 
 func GetDMChannels(ctx *Context) {
-	var dm_channels1 []database.DMChannel
-	var dm_channels2 []database.DMChannel
-	ctx.Db.Where("from_user = ?", ctx.User.ID).Find(&dm_channels1)
-	ctx.Db.Where("to_user = ?", ctx.User.ID).Find(&dm_channels2)
+	dm_channels := database.GetDMChannels(&ctx.User, ctx.Db)
+	res_dm_channels := []response.DMChannel{}
 
-	var res []response.DMChannel
-	for _, dm_channel := range dm_channels1 {
-		var user database.Account
-		ctx.Db.Where("id = ?", dm_channel.ToUser).First(&user)
-
-		var status int
-		isConnected := ctx.Conn.Users[user.Uuid]
-		if isConnected == nil {
-			status = 0
+	for _, dm_channel := range dm_channels {
+		var dm_user database.Account
+		if dm_channel.FromUser != ctx.User.ID {
+			ctx.Db.Where("id = ?", dm_channel.FromUser).First(&dm_user)
 		} else {
+			ctx.Db.Where("id = ?", dm_channel.ToUser).First(&dm_user)
+		}
+
+		status := 0
+		if _, ok := ctx.Conn.Users[dm_user.Uuid]; ok {
 			status = 1
 		}
-		res_user := response.NewUser(&user, status)
 
-		res = append(res, response.DMChannel{
+		res_user := response.NewUser(&dm_user, status)
+		res_dm_channels = append(res_dm_channels, response.DMChannel{
 			Uuid:      dm_channel.Uuid,
 			Recipient: res_user,
 		})
 	}
 
-	for _, dm_channel := range dm_channels2 {
-		var user database.Account
-		ctx.Db.Where("id = ?", dm_channel.FromUser).First(&user)
-		var status int
-		isConnected2 := ctx.Conn.Users[user.Uuid]
-		if isConnected2 == nil {
-			status = 0
-		} else {
-			status = 1
-		}
-		res_user := response.NewUser(&user, status)
-		res = append(res, response.DMChannel{
-			Uuid:      dm_channel.Uuid,
-			Recipient: res_user,
-		})
-	}
-
-	res_, err := json.Marshal(res)
+	res_, err := json.Marshal(res_dm_channels)
 	if err != nil {
 		ctx.Res.WriteHeader(http.StatusInternalServerError)
 		return
@@ -73,58 +51,20 @@ func GetDMChannel(ctx *Context) {
 		return
 	}
 
-	var dm_user database.Account
-	ctx.Db.Where("uuid = ?", user_id).First(&dm_user)
-
-	if dm_user.ID == 0 {
-		ctx.Res.WriteHeader(http.StatusNotFound)
+	dm_channel, dm_user, statusCode := database.GetUserDM(user_id, &ctx.User, ctx.Db)
+	if statusCode != http.StatusOK {
+		ctx.Res.WriteHeader(statusCode)
 		return
 	}
 
-	dm_channel := database.DMChannel{
-		FromUser: ctx.User.ID,
-		ToUser:   dm_user.ID,
-	}
-	ctx.Db.Where(&dm_channel).First(&dm_channel)
-	if dm_channel.ID == 0 {
-		dm_channel = database.DMChannel{
-			FromUser: dm_user.ID,
-			ToUser:   ctx.User.ID,
-		}
-		ctx.Db.Where(&dm_channel).First(&dm_channel)
-	}
-	var res response.DMChannel
-
-	if dm_channel.ID == 0 {
-		dm_channel := database.DMChannel{
-			Uuid:      uuid.New().String(),
-			FromUser:  ctx.User.ID,
-			ToUser:    dm_user.ID,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-		}
-		ctx.Db.Create(&dm_channel)
-		fmt.Println("Created! :", dm_channel.Uuid)
-
-		res = response.DMChannel{
-			Uuid: dm_channel.Uuid,
-			Recipient: response.User{
-				Uuid:      dm_user.Uuid,
-				Avatar:    dm_user.Avatar,
-				Username:  dm_user.Username,
-				CreatedAt: dm_user.CreatedAt.Unix(),
-			},
-		}
-	} else {
-		res = response.DMChannel{
-			Uuid: dm_channel.Uuid,
-			Recipient: response.User{
-				Uuid:      dm_user.Uuid,
-				Avatar:    dm_user.Avatar,
-				Username:  dm_user.Username,
-				CreatedAt: dm_user.CreatedAt.Unix(),
-			},
-		}
+	res := response.DMChannel{
+		Uuid: dm_channel.Uuid,
+		Recipient: response.User{
+			Uuid:      dm_user.Uuid,
+			Avatar:    dm_user.Avatar,
+			Username:  dm_user.Username,
+			CreatedAt: dm_user.CreatedAt.Unix(),
+		},
 	}
 
 	res_, err := json.Marshal(res)

@@ -6,50 +6,19 @@ import (
 	"Chatapp/response"
 	"Chatapp/websocket"
 	"encoding/json"
-	"time"
-
-	"github.com/google/uuid"
+	"net/http"
 )
 
 func ChannelCreate(ctx *websocket.Context) {
 	var request request.Channel
 	err := json.Unmarshal(ctx.Data, &request)
 
-	if err != nil {
+	if err != nil || request.Name == "" {
 		return
 	}
 
-	if request.Name == "" {
-		return
-	}
-
-	channel := database.Channel{
-		Uuid:      uuid.New().String(),
-		Name:      request.Name,
-		Icon:      request.Icon,
-		Owner:     ctx.Ws.User.Uuid,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-	}
-	ctx.Db.Create(&channel)
-
-	members := database.Member{
-		ChannelID: channel.ID,
-		AccountID: ctx.Ws.User.ID,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-	}
-
-	ctx.Db.Create(&members)
-
-	response := response.Channel{
-		Uuid:      channel.Uuid,
-		Name:      channel.Name,
-		Icon:      channel.Icon,
-		OwnerID:   ctx.Ws.User.Uuid,
-		CreatedAt: channel.CreatedAt.String(),
-		UpdatedAt: channel.UpdatedAt.String(),
-	}
+	channel := database.CreateChannel(request.Name, request.Icon, ctx.Ws.User, ctx.Db)
+	response := response.NewChannel(channel)
 
 	ws_msg := websocket.WS_Message{
 		Event: "CHANNEL_CREATE",
@@ -68,41 +37,13 @@ func ChannelModify(ctx *websocket.Context) {
 		return
 	}
 
-	var channel database.Channel
-	ctx.Db.Where("uuid = ?", channel_req.Uuid).First(&channel)
-
-	if channel.ID == 0 {
+	channel, statusCode := database.ModifyChannel(channel_req.Uuid, channel_req.Name, channel_req.Icon, ctx.Ws.User, ctx.Db)
+	if statusCode != http.StatusOK {
 		return
 	}
 
-	if channel.Owner != ctx.Ws.User.Uuid {
-		return
-	}
-
-	if channel_req.Name != "" {
-		channel.Name = channel_req.Name
-	}
-	if channel_req.Icon != "" {
-		channel.Icon = channel_req.Icon
-	}
-	channel.UpdatedAt = time.Now()
-	ctx.Db.Save(&channel)
-
-	res_channel := response.Channel{
-		Uuid:      channel.Uuid,
-		Name:      channel.Name,
-		Icon:      channel.Icon,
-		OwnerID:   channel.Owner,
-		CreatedAt: channel.CreatedAt.String(),
-		UpdatedAt: channel.UpdatedAt.String(),
-	}
-
-	ws_msg := websocket.WS_Message{
-		Event: "CHANNEL_MODIFY",
-		Data:  res_channel,
-	}
-
-	ctx.Broadcast(ws_msg)
+	res_channel := response.NewChannel(channel)
+	websocket.BroadcastToChannel(ctx.Ws.Conns, res_channel.Uuid, "CHANNEL_MODIFY", res_channel)
 }
 
 func ChannelDelete(ctx *websocket.Context) {
@@ -113,62 +54,21 @@ func ChannelDelete(ctx *websocket.Context) {
 		return
 	}
 
-	var channel database.Channel
-	ctx.Db.Where("uuid = ?", channel_req.Uuid).First(&channel)
-
-	if channel.ID == 0 {
+	channel, member, statusCode := database.DeleteChannel(channel_req.Uuid, ctx.Ws.User, ctx.Db)
+	if statusCode != http.StatusOK {
 		return
 	}
-
-	var member database.Member
-	ctx.Db.Where("channel_id = ? AND account_id = ?", channel.ID, ctx.Ws.User.ID).First(&member)
-
-	if member.ID == 0 {
-		return
-	}
-
-	ctx.Db.Delete(&member)
-
-	res_channel := response.Channel{
-		Uuid:      channel.Uuid,
-		Name:      channel.Name,
-		Icon:      channel.Icon,
-		OwnerID:   channel.Owner,
-		CreatedAt: channel.CreatedAt.String(),
-		UpdatedAt: channel.UpdatedAt.String(),
-	}
+	res_channel := response.NewChannel(channel)
+	res_member := response.NewMember(ctx.Ws.User, channel, member)
 
 	ws_msg_user := websocket.WS_Message{
 		Event: "CHANNEL_DELETE",
 		Data:  res_channel,
 	}
-
 	res, _ := json.Marshal(ws_msg_user)
-
 	ctx.Send(res)
 
-	res_member := response.Member{
-		Uuid:      ctx.Ws.User.Uuid,
-		Username:  ctx.Ws.User.Username,
-		Avatar:    ctx.Ws.User.Avatar,
-		Is_Owner:  channel.Owner == ctx.Ws.User.Uuid,
-		Status:    1,
-		ChannelID: channel.Uuid,
-		CreatedAt: ctx.Ws.User.CreatedAt.String(),
-		JoinedAt:  member.CreatedAt.String(),
-	}
-
-	ws_msg := websocket.WS_Message{
-		Event: "MEMBER_REMOVE",
-		Data:  res_member,
-	}
-
-	ws_res, _ := json.Marshal(ws_msg)
-	if members, ok := ctx.Ws.Conns.Channels[channel.Uuid]; ok {
-		for _, member := range members {
-			member.Write(ws_res)
-		}
-	}
+	websocket.BroadcastToChannel(ctx.Ws.Conns, channel.Uuid, "MEMBER_REMOVE", res_member)
 }
 
 func ChannelJoin(ctx *websocket.Context) {}
