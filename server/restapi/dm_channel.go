@@ -57,14 +57,14 @@ func GetDMChannel(ctx *Context) {
 		return
 	}
 
+	status := 0
+	if _, ok := ctx.Conn.Users[dm_user.Uuid]; ok {
+		status = 1
+	}
+
 	res := response.DMChannel{
-		Uuid: dm_channel.Uuid,
-		Recipient: response.User{
-			Uuid:      dm_user.Uuid,
-			Avatar:    dm_user.Avatar,
-			Username:  dm_user.Username,
-			CreatedAt: dm_user.CreatedAt.Unix(),
-		},
+		Uuid:      dm_channel.Uuid,
+		Recipient: response.NewUser(dm_user, status),
 	}
 
 	res_, err := json.Marshal(res)
