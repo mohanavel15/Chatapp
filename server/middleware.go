@@ -43,7 +43,6 @@ func Authenticated(function AuthFunction) http.HandlerFunc {
 		}
 
 		conns := websocket.Connections{
-			Queue:    queue,
 			Users:    onlineUsers,
 			Channels: channels,
 		}

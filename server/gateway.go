@@ -25,7 +25,6 @@ func Gateway(w http.ResponseWriter, r *http.Request) {
 	}
 
 	conns := ws.Connections{
-		Queue:    queue,
 		Users:    onlineUsers,
 		Channels: channels,
 	}
@@ -38,5 +37,4 @@ func Gateway(w http.ResponseWriter, r *http.Request) {
 		Conns:   &conns,
 	}
 	go ws.ReadLoop()
-	go ws.HandleQueue()
 }

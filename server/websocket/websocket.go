@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"strings"
-	"time"
 
 	"Chatapp/database"
 	"Chatapp/response"
@@ -189,25 +188,6 @@ func (ws *Ws) HandleWSMessage(data []byte) {
 		}
 	} else {
 		ws.Handler.Handle(ctx)
-	}
-}
-
-func (ws *Ws) HandleQueue() {
-	for {
-		if len(ws.Conns.Queue) > 0 {
-			for _, ws_message := range ws.Conns.Queue {
-				switch ws_message.Event {
-				case "MESSAGE_CREATE":
-					BroadcastMessage(ws, *ws_message)
-				case "MESSAGE_MODIFY":
-					BroadcastMessage(ws, *ws_message)
-				case "MESSAGE_DELETE":
-					BroadcastMessage(ws, *ws_message)
-				}
-				ws.Conns.Queue = ws.Conns.Queue[1:]
-			}
-		}
-		time.Sleep(time.Millisecond)
 	}
 }
 

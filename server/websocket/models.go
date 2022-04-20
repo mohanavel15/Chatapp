@@ -26,26 +26,14 @@ type MessageEdit struct {
 }
 
 type Connections struct {
-	Queue    []*WS_Message
 	Users    map[string]*Ws
 	Channels map[string]map[string]*Ws
-	Calls    map[string]map[string]*Call
 }
 
 type Channel struct {
 	Uuid string `json:"uuid"`
 	Name string `json:"name"`
 	Icon string `json:"icon"`
-}
-
-type SDP struct {
-	Type string `json:"type"`
-	Sdp  string `json:"sdp"`
-}
-
-type Call struct {
-	Sdp *SDP `json:"sdp"`
-	Ws  *Ws  `json:"ws"`
 }
 
 type Ready struct {
