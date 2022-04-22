@@ -58,8 +58,15 @@ function Chat({ channel_id, dm }: { channel_id: string, dm: boolean }) {
 			msg_channel = new Map<String, MessageOBJ>()
 		}
 
+		let preDate: string
 		msg_channel.forEach((message, key) => {
 				if (message.channel_id === channel_id) {
+					let date = new Date(message.created_at * 1000).toLocaleDateString();
+					if (preDate === undefined || preDate !== date) {
+						setMessage_jsx(prevMessage =>  [...prevMessage, <div key={date} className="date-divider">{date}</div>])
+						preDate = date;
+					}
+
 					setMessage_jsx(prevMessage =>  [...prevMessage, 
 					<div key={message.uuid} onContextMenu={
 						(event) => {

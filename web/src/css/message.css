@@ -51,3 +51,34 @@
     font-size: 0.8rem;
     font-weight: normal;
 }
+
+.date-divider {
+    position: relative;
+    text-align: center;
+    font-size: 1rem;
+    color: #828282;
+}
+
+.date-divider:before {
+    position: absolute;
+    top:50%;
+    left:0;
+    content: "";
+    width: 45%;
+    height: 1px;
+    margin-left: 1rem;
+    background-color: #828282;
+    margin-bottom: 0.5rem;
+}
+
+.date-divider:after {
+    position: absolute;
+    top:50%;
+    right:0;
+    margin-right: 1rem;
+    content: "";
+    width: 45%;
+    height: 1px;
+    background-color: #828282;
+    margin-bottom: 0.5rem;
+}

@@ -4,8 +4,8 @@ export interface MessageOBJ {
     content:        string
     author:         UserOBJ
     channel_id:     string
-    created_at:     string
-    updated_at:     string
+    created_at:     number
+    updated_at:     number
 }
 
 export interface ChannelOBJ {

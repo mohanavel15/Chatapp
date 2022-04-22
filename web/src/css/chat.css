@@ -24,9 +24,8 @@
 }
 
 .chat-message {
-  width: 98%;
+  width: 100%;
   height: 90%;
-  margin-left: 2rem;
   overflow-x: hidden;
   overflow-y: scroll;
 }
