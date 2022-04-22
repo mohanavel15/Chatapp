@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 )
 
 func Connect(ctx *websocket.Context) {
@@ -24,7 +25,7 @@ func Connect(ctx *websocket.Context) {
 		return
 	}
 
-	is_valid, get_session := restapi.ValidateAccessToken(token, ctx.Db)
+	is_valid, session := restapi.ValidateAccessToken(token, ctx.Db)
 	if is_valid != true {
 		ws_message := websocket.WS_Message{
 			Event: "INVAILD_SESSION",
@@ -34,23 +35,12 @@ func Connect(ctx *websocket.Context) {
 		return
 	}
 
-	get_user := database.Account{
-		ID: get_session.AccountID,
-	}
-
-	ctx.Db.Where(&get_user).First(&get_user)
-
-	if get_user.Uuid == "" {
+	get_user, statusCode := database.GetUser(session.Uuid, ctx.Db)
+	if statusCode != http.StatusOK {
 		return
 	}
 
-	res_user := response.User{
-		Uuid:      get_user.Uuid,
-		Avatar:    get_user.Avatar,
-		Username:  get_user.Username,
-		Status:    1,
-		CreatedAt: get_user.CreatedAt.Unix(),
-	}
+	res_user := response.NewUser(get_user, 1)
 
 	member := response.Member{
 		Uuid:      get_user.Uuid,
@@ -60,12 +50,10 @@ func Connect(ctx *websocket.Context) {
 		CreatedAt: get_user.CreatedAt.String(),
 	}
 
-	ctx.Ws.User = &get_user
+	ctx.Ws.User = get_user
 	log.Println(fmt.Sprintf("%s joined", ctx.Ws.User.Username))
-
 	ctx.Ws.Conns.Users[get_user.Uuid] = ctx.Ws
 
-	channels := []database.Channel{}
 	res_channels := []response.Channel{}
 
 	var member_of []database.Member
@@ -75,10 +63,7 @@ func Connect(ctx *websocket.Context) {
 			ID: channel_id.ChannelID,
 		}
 		ctx.Db.Where(&channel).First(&channel)
-
-		channels = append(channels, channel)
 		res_channels = append(res_channels, response.NewChannel(&channel))
-
 		_, ok := ctx.Ws.Conns.Channels[channel.Uuid]
 		if !ok {
 			ctx.Ws.Conns.Channels[channel.Uuid] = make(map[string]*websocket.Ws)
@@ -89,47 +74,23 @@ func Connect(ctx *websocket.Context) {
 		member.Is_Owner = channel.Owner == get_user.Uuid
 		member.JoinedAt = channel_id.CreatedAt.String()
 
-		ws_msg := websocket.WS_Message{
-			Event: "MEMBER_UPDATE",
-			Data:  member,
-		}
-
-		res_member, err := json.Marshal(ws_msg)
-		if err != nil {
-			return
-		}
-
-		if members, ok := ctx.Ws.Conns.Channels[channel.Uuid]; ok {
-			for _, member := range members {
-				member.Write(res_member)
-			}
-		}
+		websocket.BroadcastToChannel(ctx.Ws.Conns, channel.Uuid, "MEMBER_UPDATE", member)
 	}
 
-	var dm_channels1 []database.DMChannel
-	var dm_channels2 []database.DMChannel
-	ctx.Db.Where("from_user = ?", get_user.ID).Find(&dm_channels1)
-	ctx.Db.Where("to_user = ?", get_user.ID).Find(&dm_channels2)
+	dm_channels := database.GetDMChannels(ctx.Ws.User, ctx.Db)
+	res_dm_channels := []response.DMChannel{}
 
-	var res_dm_channels []response.DMChannel
-	for _, dm_channel := range dm_channels1 {
-		var user database.Account
-		ctx.Db.Where("id = ?", dm_channel.ToUser).First(&user)
-
-		var status int
-		isConnected := ctx.Ws.Conns.Users[user.Uuid]
-		if isConnected == nil {
-			status = 0
+	for _, dm_channel := range dm_channels {
+		var dm_user database.Account
+		if dm_channel.FromUser != ctx.Ws.User.ID {
+			ctx.Db.Where("id = ?", dm_channel.FromUser).First(&dm_user)
 		} else {
-			status = 1
+			ctx.Db.Where("id = ?", dm_channel.ToUser).First(&dm_user)
 		}
 
-		res_user2 := response.NewUser(&user, status)
-		res_dm_channels = append(res_dm_channels, response.DMChannel{
-			Uuid:      dm_channel.Uuid,
-			Recipient: res_user2,
-		})
-		if isConnected != nil {
+		status := 0
+		if dm_user, ok := ctx.Ws.Conns.Users[dm_user.Uuid]; ok {
+			status = 1
 			res_dm_update := websocket.WS_Message{
 				Event: "DM_CHANNEL_MODIFY",
 				Data: response.DMChannel{
@@ -140,41 +101,21 @@ func Connect(ctx *websocket.Context) {
 
 			res_dm_update_json, err := json.Marshal(res_dm_update)
 			if err == nil {
-				isConnected.Write(res_dm_update_json)
+				dm_user.Write(res_dm_update_json)
 			}
 		}
-	}
 
-	for _, dm_channel := range dm_channels2 {
-		var user database.Account
-		ctx.Db.Where("id = ?", dm_channel.FromUser).First(&user)
-		var status int
-		isConnected := ctx.Ws.Conns.Users[user.Uuid]
-		if isConnected == nil {
-			status = 0
-		} else {
-			status = 1
-		}
-		res_user2 := response.NewUser(&user, status)
+		res_user := response.NewUser(&dm_user, status)
 		res_dm_channels = append(res_dm_channels, response.DMChannel{
 			Uuid:      dm_channel.Uuid,
-			Recipient: res_user2,
+			Recipient: res_user,
 		})
 
-		if isConnected != nil {
-			res_dm_update := websocket.WS_Message{
-				Event: "DM_CHANNEL_MODIFY",
-				Data: response.DMChannel{
-					Uuid:      dm_channel.Uuid,
-					Recipient: res_user,
-				},
-			}
-
-			res_dm_update_json, err := json.Marshal(res_dm_update)
-			if err == nil {
-				isConnected.Write(res_dm_update_json)
-			}
+		_, ok := ctx.Ws.Conns.Channels[dm_channel.Uuid]
+		if !ok {
+			ctx.Ws.Conns.Channels[dm_channel.Uuid] = make(map[string]*websocket.Ws)
 		}
+		ctx.Ws.Conns.Channels[dm_channel.Uuid][get_user.Uuid] = ctx.Ws
 	}
 
 	var friendsDB []database.Friend
