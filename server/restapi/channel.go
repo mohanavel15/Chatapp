@@ -141,6 +141,7 @@ func DeleteChannel(ctx *Context) {
 		delete(ctx.Conn.Channels[channel_id], ctx.User.Uuid)
 	}
 
-	res_member := response.NewMember(&ctx.User, channel, member)
+	res_member_user := response.NewUser(&ctx.User, 0)
+	res_member := response.NewMember(&res_member_user, channel, member)
 	websocket.BroadcastToChannel(ctx.Conn, channel.Uuid, "MEMBER_REMOVE", res_member)
 }

@@ -50,18 +50,14 @@ func (ws *Ws) ReadLoop() {
 				var member_of []database.Member
 				ws.Db.Where("account_id = ?", ws.User.ID).Find(&member_of)
 				for _, channel_id := range member_of {
-
 					channel := database.Channel{
 						ID: channel_id.ChannelID,
 					}
-
 					ws.Db.Where(&channel).First(&channel)
-
 					members, ok := ws.Conns.Channels[channel.Uuid]
 					if !ok {
 						continue
 					}
-
 					member.ChannelID = channel.Uuid
 					member.Is_Owner = channel.Owner == ws.User.Uuid
 					member.JoinedAt = channel_id.CreatedAt.String()
@@ -71,44 +67,25 @@ func (ws *Ws) ReadLoop() {
 						Data:  member,
 					}
 
-					res_member, err := json.Marshal(ws_msg)
-					if err != nil {
-						return
+					res, _ := json.Marshal(ws_msg)
+					for _, conn := range members {
+						conn.Write(res)
 					}
-
-					for _, member := range members {
-						member.Write(res_member)
-					}
-
 					delete(members, ws.User.Uuid)
 				}
 
 				res_user := response.NewUser(ws.User, 0)
-				var dm_channels1 []database.DMChannel
-				var dm_channels2 []database.DMChannel
-				ws.Db.Where("from_user = ?", ws.User.ID).Find(&dm_channels1)
-				ws.Db.Where("to_user = ?", ws.User.ID).Find(&dm_channels2)
-
-				var res_dm_channels []response.DMChannel
-				for _, dm_channel := range dm_channels1 {
-					var user database.Account
-					ws.Db.Where("id = ?", dm_channel.ToUser).First(&user)
-
-					var status int
-					isConnected := ws.Conns.Users[user.Uuid]
-					if isConnected == nil {
-						status = 0
+				dm_channels := database.GetDMChannels(ws.User, ws.Db)
+				for _, dm_channel := range dm_channels {
+					var dm_user database.Account
+					if dm_channel.FromUser != ws.User.ID {
+						ws.Db.Where("id = ?", dm_channel.FromUser).First(&dm_user)
 					} else {
-						status = 1
+						ws.Db.Where("id = ?", dm_channel.ToUser).First(&dm_user)
 					}
 
-					res_user2 := response.NewUser(&user, status)
-					res_dm_channels = append(res_dm_channels, response.DMChannel{
-						Uuid:      dm_channel.Uuid,
-						Recipient: res_user2,
-					})
-					if isConnected != nil {
-						res_dm_update := WS_Message{
+					if dm_user, ok := ws.Conns.Users[dm_user.Uuid]; ok {
+						dm_update := WS_Message{
 							Event: "DM_CHANNEL_MODIFY",
 							Data: response.DMChannel{
 								Uuid:      dm_channel.Uuid,
@@ -116,46 +93,13 @@ func (ws *Ws) ReadLoop() {
 							},
 						}
 
-						res_dm_update_json, err := json.Marshal(res_dm_update)
-						if err == nil {
-							isConnected.Write(res_dm_update_json)
-						}
-					}
-				}
-
-				for _, dm_channel := range dm_channels2 {
-					var user database.Account
-					ws.Db.Where("id = ?", dm_channel.FromUser).First(&user)
-					var status int
-					isConnected := ws.Conns.Users[user.Uuid]
-					if isConnected == nil {
-						status = 0
-					} else {
-						status = 1
-					}
-					res_user2 := response.NewUser(&user, status)
-					res_dm_channels = append(res_dm_channels, response.DMChannel{
-						Uuid:      dm_channel.Uuid,
-						Recipient: res_user2,
-					})
-
-					if isConnected != nil {
-						res_dm_update := WS_Message{
-							Event: "DM_CHANNEL_MODIFY",
-							Data: response.DMChannel{
-								Uuid:      dm_channel.Uuid,
-								Recipient: res_user,
-							},
-						}
-
-						res_dm_update_json, err := json.Marshal(res_dm_update)
-						if err == nil {
-							isConnected.Write(res_dm_update_json)
-						}
+						res_dm_update, _ := json.Marshal(dm_update)
+						dm_user.Write(res_dm_update)
 					}
 				}
 				delete(ws.Conns.Users, ws.User.Uuid)
 			}
+			ws.Close()
 			return
 		}
 		ws.HandleWSMessage(data)

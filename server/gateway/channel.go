@@ -59,7 +59,8 @@ func ChannelDelete(ctx *websocket.Context) {
 		return
 	}
 	res_channel := response.NewChannel(channel)
-	res_member := response.NewMember(ctx.Ws.User, channel, member)
+	res_member_user := response.NewUser(ctx.Ws.User, 0)
+	res_member := response.NewMember(&res_member_user, channel, member)
 
 	ws_msg_user := websocket.WS_Message{
 		Event: "CHANNEL_DELETE",

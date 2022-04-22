@@ -13,15 +13,15 @@ type Member struct {
 	CreatedAt string `json:"created_at"`
 }
 
-func NewMember(user *database.Account, channel *database.Channel, member *database.Member) Member {
+func NewMember(user *User, channel *database.Channel, member *database.Member) Member {
 	return Member{
 		Uuid:      user.Uuid,
 		Avatar:    user.Avatar,
 		Username:  user.Username,
 		Is_Owner:  channel.Owner == user.Uuid,
-		Status:    1,
+		Status:    user.Status,
 		ChannelID: channel.Uuid,
 		JoinedAt:  member.CreatedAt.String(),
-		CreatedAt: user.CreatedAt.String(),
+		CreatedAt: string(user.CreatedAt),
 	}
 }

@@ -49,52 +49,44 @@ func JoinInvite(ctx *Context) {
 	member := database.Member{
 		ChannelID: channel.ID,
 		AccountID: user.ID,
+	}
+	db.Where(&member).First(&member)
+	if member.ID == 0 {
+		ctx.Res.WriteHeader(http.StatusContinue)
+		return
+	}
+
+	member = database.Member{
+		ChannelID: channel.ID,
+		AccountID: user.ID,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
 	db.Create(&member)
 
-	res := response.Channel{
-		Uuid:      channel.Uuid,
-		Name:      channel.Name,
-		OwnerID:   channel.Owner,
-		Icon:      channel.Icon,
-		CreatedAt: channel.CreatedAt.String(),
-		UpdatedAt: channel.UpdatedAt.String(),
-	}
+	res_channel := response.NewChannel(&channel)
 
-	res_obj, err := json.Marshal(res)
+	res, err := json.Marshal(res_channel)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(res_obj)
-
-	res_member := response.Member{
-		Uuid:      user.Uuid,
-		Username:  user.Username,
-		Avatar:    user.Avatar,
-		Is_Owner:  channel.Owner == user.Uuid,
-		Status:    1,
-		ChannelID: channel.Uuid,
-		CreatedAt: user.CreatedAt.String(),
-		JoinedAt:  member.CreatedAt.String(),
-	}
-
-	ws_msg := websocket.WS_Message{
-		Event: "MEMBER_JOIN",
-		Data:  res_member,
-	}
-
-	ws_res, _ := json.Marshal(ws_msg)
-
-	if members, ok := ctx.Conn.Channels[channel.Uuid]; ok {
-		for _, member := range members {
-			member.Write(ws_res)
+	res_member_user := response.NewUser(&ctx.User, 0)
+	if user, ok := ctx.Conn.Users[ctx.User.Uuid]; ok {
+		res_member_user.Status = 1
+		_, ok := ctx.Conn.Channels[channel.Uuid]
+		if !ok {
+			ctx.Conn.Channels[channel.Uuid] = make(map[string]*websocket.Ws)
 		}
+		ctx.Conn.Channels[channel.Uuid][ctx.User.Uuid] = user
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(res)
+
+	res_member := response.NewMember(&res_member_user, &channel, &member)
+	websocket.BroadcastToChannel(ctx.Conn, channel.Uuid, "MEMBER_JOIN", res_member)
 }
 
 func GetInvites(ctx *Context) {

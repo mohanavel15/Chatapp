@@ -13,32 +13,30 @@ import (
 )
 
 func GetMembers(ctx *Context) {
-	r, w, db, user := ctx.Req, ctx.Res, ctx.Db, ctx.User
-
-	vars := mux.Vars(r)
+	vars := mux.Vars(ctx.Req)
 	channel_id := vars["id"]
 
 	var channel database.Channel
-	db.Where("uuid = ?", channel_id).First(&channel)
+	ctx.Db.Where("uuid = ?", channel_id).First(&channel)
 	if channel.ID == 0 {
-		w.WriteHeader(http.StatusNotFound)
+		ctx.Res.WriteHeader(http.StatusNotFound)
 		return
 	}
 
 	var member database.Member
-	db.Where("channel_id = ? AND account_id = ?", channel.ID, user.ID).First(&member)
+	ctx.Db.Where("channel_id = ? AND account_id = ?", channel.ID, ctx.User.ID).First(&member)
 	if member.ID == 0 {
-		w.WriteHeader(http.StatusNotFound)
+		ctx.Res.WriteHeader(http.StatusNotFound)
 		return
 	}
 
 	var members []database.Member
 	var res_members []response.Member
 
-	db.Where("channel_id = ?", channel.ID).Find(&members)
+	ctx.Db.Where("channel_id = ?", channel.ID).Find(&members)
 	for _, member := range members {
 		var user database.Account
-		db.Where("id = ?", member.AccountID).First(&user)
+		ctx.Db.Where("id = ?", member.AccountID).First(&user)
 		if user.ID == 0 {
 			continue
 		}
@@ -51,28 +49,19 @@ func GetMembers(ctx *Context) {
 			status = 1
 		}
 
-		res_member := response.Member{
-			Uuid:      user.Uuid,
-			Username:  user.Username,
-			Avatar:    user.Avatar,
-			Is_Owner:  channel.Owner == user.Uuid,
-			Status:    status,
-			ChannelID: channel.Uuid,
-			JoinedAt:  member.CreatedAt.String(),
-			CreatedAt: member.CreatedAt.String(),
-		}
-
+		res_member_user := response.NewUser(&user, status)
+		res_member := response.NewMember(&res_member_user, &channel, &member)
 		res_members = append(res_members, res_member)
 	}
 
 	res_obj, err := json.Marshal(res_members)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		ctx.Res.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(res_obj)
+	ctx.Res.Header().Set("Content-Type", "application/json")
+	ctx.Res.Write(res_obj)
 }
 
 func GetMember(ctx *Context) {

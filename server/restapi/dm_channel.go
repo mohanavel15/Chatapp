@@ -3,6 +3,7 @@ package restapi
 import (
 	"Chatapp/database"
 	"Chatapp/response"
+	"Chatapp/websocket"
 	"encoding/json"
 	"net/http"
 
@@ -74,4 +75,11 @@ func GetDMChannel(ctx *Context) {
 	}
 	ctx.Res.Header().Set("Content-Type", "application/json")
 	ctx.Res.Write(res_)
+	if user, ok := ctx.Conn.Users[ctx.User.Uuid]; ok {
+		_, ok := ctx.Conn.Channels[dm_channel.Uuid]
+		if !ok {
+			ctx.Conn.Channels[dm_channel.Uuid] = make(map[string]*websocket.Ws)
+		}
+		ctx.Conn.Channels[dm_channel.Uuid][ctx.User.Uuid] = user
+	}
 }
