@@ -29,9 +29,23 @@
 #Message-text {
     position: relative;
     top: 0;
-    font-weight: bold;
     margin-left: 0.5rem;
     width: 90%;
+}
+
+.Message-author {
+    display: flex;
+    flex-direction: row;
+}
+.message-author-name {
+    font-size: larger;
+    color: #ffffff;
+}
+
+.message-time {
+    font-size: smaller;
+    color: gray;
+    margin-left: 0.5rem;
 }
 
 .Message-Edit-Action {

@@ -15,6 +15,9 @@ function Message({ message }: {message: MessageOBJ}) {
 
     const [edit, setEdit] = useState(false);
     const [msg, setMsg] = useState('');
+
+    let time = new Date(message.created_at * 1000).toLocaleTimeString();
+
     useEffect(() => {
         setMsg(message.content);
     }, [message]);
@@ -77,7 +80,10 @@ function Message({ message }: {message: MessageOBJ}) {
     <div className="Message" ref={messageElement}>
         <img id="Message-avatar" src={message.author.avatar} alt="Avatar" onError={setDefaultAvatar} />
         <div id="Message-text"> 
-            <p> {message.author.username} </p>
+            <div id="Message-author">
+                <span className="message-author-name"> {message.author.username}</span>
+                <span className="message-time"> {time}</span>
+            </div>
             {edit !== true && <p> {message.content} </p> }
             {edit && 
             <div>
