@@ -107,16 +107,8 @@ func GetMember(ctx *Context) {
 		status = 1
 	}
 
-	res_member := response.Member{
-		Uuid:      member.Uuid,
-		Username:  member.Username,
-		Avatar:    member.Avatar,
-		Is_Owner:  channel.Owner == member.Uuid,
-		Status:    status,
-		ChannelID: channel.Uuid,
-		JoinedAt:  is_member.CreatedAt.String(),
-		CreatedAt: member.CreatedAt.String(),
-	}
+	res_member_user := response.NewUser(&member, status)
+	res_member := response.NewMember(&res_member_user, &channel, &is_member)
 
 	res, err := json.Marshal(res_member)
 	if err != nil {

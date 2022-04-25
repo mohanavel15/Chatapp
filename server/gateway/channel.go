@@ -71,5 +71,3 @@ func ChannelDelete(ctx *websocket.Context) {
 
 	websocket.BroadcastToChannel(ctx.Ws.Conns, channel.Uuid, "MEMBER_REMOVE", res_member)
 }
-
-func ChannelJoin(ctx *websocket.Context) {}

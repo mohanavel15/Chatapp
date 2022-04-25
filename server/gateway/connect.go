@@ -42,14 +42,6 @@ func Connect(ctx *websocket.Context) {
 
 	res_user := response.NewUser(get_user, 1)
 
-	member := response.Member{
-		Uuid:      get_user.Uuid,
-		Avatar:    get_user.Avatar,
-		Username:  get_user.Username,
-		Status:    1,
-		CreatedAt: get_user.CreatedAt.String(),
-	}
-
 	ctx.Ws.User = get_user
 	log.Println(fmt.Sprintf("%s joined", ctx.Ws.User.Username))
 	ctx.Ws.Conns.Users[get_user.Uuid] = ctx.Ws
@@ -70,9 +62,7 @@ func Connect(ctx *websocket.Context) {
 		}
 		ctx.Ws.Conns.Channels[channel.Uuid][get_user.Uuid] = ctx.Ws
 
-		member.ChannelID = channel.Uuid
-		member.Is_Owner = channel.Owner == get_user.Uuid
-		member.JoinedAt = channel_id.CreatedAt.String()
+		member := response.NewMember(&res_user, &channel, &channel_id)
 
 		websocket.BroadcastToChannel(ctx.Ws.Conns, channel.Uuid, "MEMBER_UPDATE", member)
 	}

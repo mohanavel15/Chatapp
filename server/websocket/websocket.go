@@ -40,13 +40,7 @@ func (ws *Ws) ReadLoop() {
 		if err != nil {
 			log.Println(err)
 			if ws.User != nil {
-				member := response.Member{
-					Uuid:      ws.User.Uuid,
-					Avatar:    ws.User.Avatar,
-					Username:  ws.User.Username,
-					Status:    0,
-					CreatedAt: ws.User.CreatedAt.String(),
-				}
+				res_user := response.NewUser(ws.User, 0)
 				var member_of []database.Member
 				ws.Db.Where("account_id = ?", ws.User.ID).Find(&member_of)
 				for _, channel_id := range member_of {
@@ -58,9 +52,7 @@ func (ws *Ws) ReadLoop() {
 					if !ok {
 						continue
 					}
-					member.ChannelID = channel.Uuid
-					member.Is_Owner = channel.Owner == ws.User.Uuid
-					member.JoinedAt = channel_id.CreatedAt.String()
+					member := response.NewMember(&res_user, &channel, &channel_id)
 
 					ws_msg := WS_Message{
 						Event: "MEMBER_UPDATE",
@@ -74,7 +66,6 @@ func (ws *Ws) ReadLoop() {
 					delete(members, ws.User.Uuid)
 				}
 
-				res_user := response.NewUser(ws.User, 0)
 				dm_channels := database.GetDMChannels(ws.User, ws.Db)
 				for _, dm_channel := range dm_channels {
 					var dm_user database.Account

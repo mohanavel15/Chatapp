@@ -9,8 +9,8 @@ type Member struct {
 	Is_Owner  bool   `json:"is_owner"`
 	Status    int    `json:"status"`
 	ChannelID string `json:"channel_id"`
-	JoinedAt  string `json:"joined_at"`
-	CreatedAt string `json:"created_at"`
+	JoinedAt  int64  `json:"joined_at"`
+	CreatedAt int64  `json:"created_at"`
 }
 
 func NewMember(user *User, channel *database.Channel, member *database.Member) Member {
@@ -21,7 +21,7 @@ func NewMember(user *User, channel *database.Channel, member *database.Member) M
 		Is_Owner:  channel.Owner == user.Uuid,
 		Status:    user.Status,
 		ChannelID: channel.Uuid,
-		JoinedAt:  member.CreatedAt.String(),
-		CreatedAt: string(user.CreatedAt),
+		JoinedAt:  member.CreatedAt.Unix(),
+		CreatedAt: user.CreatedAt,
 	}
 }
