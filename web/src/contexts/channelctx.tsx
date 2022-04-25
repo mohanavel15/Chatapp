@@ -29,46 +29,6 @@ export default function ChannelCTX({ children, gateway }: {children: React.React
 	const [members, UpdateMember, DeleteMember] = useDoubleMap<MemberOBJ>(new Map<String, Map<String, MemberOBJ>>());
 	const [messages, UpdateMessage, DeleteMessage] = useDoubleMap<MessageOBJ>(new Map<String, Map<String, MessageOBJ>>());
 
-	useEffect(() => {
-		const dm_channel_keys: String[] =  Array.from(DMChannels.keys())
-		const channel_keys: String[] =  Array.from(channels.keys())
-		const keys: String[] = [...dm_channel_keys, ...channel_keys]
-		keys.forEach(key => {
-			const url = Routes.Channels+`/${key}/messages`
-			fetch(url, {
-				method: "GET",
-				headers: {
-					"Authorization": localStorage.getItem("access_token") || ""
-				}
-			}).then(response => {
-				if (response.status === 200) {
-					response.json().then((msgs: MessageOBJ[]) => {
-						msgs.forEach(msg => UpdateMessage(key, msg.uuid, msg))
-					})
-				}
-			})
-		})
-	} , [channels, DMChannels])
-
-	useEffect(() => {
-		const channel_keys: String[] =  Array.from(channels.keys())
-		channel_keys.forEach(channel => {
-			const url = Routes.Channels+`/${channel}/members`
-			fetch(url, {
-				method: "GET",
-				headers: {
-					"Authorization": localStorage.getItem("access_token") || ""
-				}
-			}).then(response => {
-				if (response.status === 200) {
-					response.json().then((members: MemberOBJ[]) => {
-						members.forEach(member => UpdateMember(channel, member.uuid, member))
-					})
-				}
-			})
-		})
-	} , [channels])
-
 	const context_value: ChannelContext = {
 		DMChannels: DMChannels,
 		setDMChannels: setDMChannels,

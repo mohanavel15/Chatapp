@@ -26,6 +26,7 @@ import { StatesContext, StateContext } from "../contexts/states";
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 import ChannelHome from "../components/channel_home";
 import MessageCTX from '../contexts/messagectx';
+import Routes from '../config';
 
 const delete_channel = (channels: Map<String, ChannelOBJ>, channel: ChannelOBJ) => {
 	channels.delete(channel.uuid);
@@ -60,10 +61,49 @@ function Channel() {
 
 					ready.channels.forEach((channel: ChannelOBJ) => {
 						channel_context.setChannels(prev => new Map(prev.set(channel.uuid, channel)));
+						const url = Routes.Channels+`/${channel.uuid}/messages`
+						fetch(url, {
+							method: "GET",
+							headers: {
+								"Authorization": localStorage.getItem("access_token") || ""
+							}
+						}).then(response => {
+							if (response.status === 200) {
+								response.json().then((msgs: MessageOBJ[]) => {
+									msgs.forEach(msg => channel_context.UpdateMessage(channel.uuid, msg.uuid, msg))
+								})
+							}
+						})
+						const url2 = Routes.Channels+`/${channel.uuid}/members`
+						fetch(url2, {
+							method: "GET",
+							headers: {
+								"Authorization": localStorage.getItem("access_token") || ""
+							}
+						}).then(response => {
+							if (response.status === 200) {
+								response.json().then((members: MemberOBJ[]) => {
+									members.forEach(member => channel_context.UpdateMember(channel.uuid, member.uuid, member))
+								})
+							}
+						})
 					});
 
 					ready.dm_channels.forEach((dm_channel: DMChannelOBJ) => {
 						channel_context.setDMChannels(prev => new Map(prev.set(dm_channel.uuid, dm_channel)));
+						const url = Routes.Channels+`/${dm_channel.uuid}/messages`
+						fetch(url, {
+							method: "GET",
+							headers: {
+								"Authorization": localStorage.getItem("access_token") || ""
+							}
+						}).then(response => {
+							if (response.status === 200) {
+								response.json().then((msgs: MessageOBJ[]) => {
+									msgs.forEach(msg => channel_context.UpdateMessage(dm_channel.uuid, msg.uuid, msg))
+								})
+							}
+						})
 					});
 
 					ready.friends.forEach((friend: FriendOBJ) => {

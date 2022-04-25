@@ -58,8 +58,10 @@ function Chat({ channel_id, dm }: { channel_id: string, dm: boolean }) {
 			msg_channel = new Map<String, MessageOBJ>()
 		}
 
+		const msgs = Array.from(msg_channel.values()).sort((a, b) => { return a.created_at - b.created_at;});
+
 		let preDate: string
-		msg_channel.forEach((message, key) => {
+		msgs.forEach((message) => {
 				if (message.channel_id === channel_id) {
 					let date = new Date(message.created_at * 1000).toLocaleDateString();
 					if (preDate === undefined || preDate !== date) {
