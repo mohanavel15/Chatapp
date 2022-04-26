@@ -27,6 +27,8 @@ import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 import ChannelHome from "../components/channel_home";
 import MessageCTX from '../contexts/messagectx';
 import Routes from '../config';
+import { Refresh } from "../utils/api";
+import { access } from "fs";
 
 const delete_channel = (channels: Map<String, ChannelOBJ>, channel: ChannelOBJ) => {
 	channels.delete(channel.uuid);
@@ -112,8 +114,14 @@ function Channel() {
 				}
 
 				if (payload.event === 'INVAILD_SESSION') {
-					localStorage.removeItem('access_token');
-					window.location.href = '/';
+					Refresh().then(access_token => {
+						if (access_token === undefined) {
+							localStorage.removeItem('access_token');
+							window.location.href = '/';
+						} else {
+							window.location.reload()
+						}
+					})
 				}
 
 				if (payload.event === 'MESSAGE_CREATE' || payload.event === 'MESSAGE_MODIFY') {

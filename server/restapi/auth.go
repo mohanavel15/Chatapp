@@ -168,6 +168,54 @@ func ChangePassword(ctx *Context) {
 	ctx.Res.WriteHeader(http.StatusOK)
 }
 
+func Refresh(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
+	var request request.Refresh
+	_ = json.NewDecoder(r.Body).Decode(&request)
+
+	if request.ClientToken == "" || request.AccessToken == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	session := database.Session{
+		AccessToken: request.AccessToken,
+	}
+
+	db.Where("access_token = ?", request.AccessToken).First(&session)
+	if session.ID == 0 {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	uuid, err := ValidateJWT(request.AccessToken)
+	if err == nil && session.Uuid == uuid {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
+	if err.Error() != "Token is expired" || session.ClientToken != request.ClientToken {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	accessToken, err := GenerateJWT(session.Uuid)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Failed to generate access token"))
+		return
+	}
+
+	session.AccessToken = accessToken
+	db.Save(&session)
+
+	response := response.Signin_Response{
+		AccessToken: accessToken,
+		ClientToken: request.ClientToken,
+	}
+
+	json.NewEncoder(w).Encode(response)
+}
+
 func ValidateAccessToken(AccessToken string, db *gorm.DB) (bool, database.Session) {
 	uuid, err := ValidateJWT(AccessToken)
 	if err != nil {

@@ -33,6 +33,8 @@ function Login() {
 			return;
 		}
 
+		const client_token = localStorage.getItem("client_token") || "";
+
 		fetch(Routes.signin, {
 			method: "POST",
 			headers: {
@@ -40,7 +42,8 @@ function Login() {
 			},
 			body: JSON.stringify({
 				"username": username_text,
-				"password": password_text
+				"password": password_text,
+				"client_token": client_token
 			})
 		}).then(response => {HandleResponse(response)})
   	}

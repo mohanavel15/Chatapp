@@ -6,6 +6,7 @@ class RoutesCls {
     signin = this.host + '/signin';
     signup = this.host + '/signup';
     logout = this.host + '/logout';
+    refresh = this.host + '/refresh';
     signout = this.host + '/signout';
     changePassword = this.host + '/changepassword';
 

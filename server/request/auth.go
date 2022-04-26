@@ -20,3 +20,8 @@ type ChangePassword struct {
 	CurrentPassword string `json:"current_password"`
 	NewPassword     string `json:"new_password"`
 }
+
+type Refresh struct {
+	AccessToken string `json:"access_token"`
+	ClientToken string `json:"client_token"`
+}

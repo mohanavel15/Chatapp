@@ -1,6 +1,7 @@
 import { createContext, useEffect, useState } from "react";
 import { FriendOBJ } from "../models/models";
 import Routes from "../config";
+import { Refresh } from "../utils/api";
 export interface UserContextOBJ {
     uuid: string;
     username: string;
@@ -39,9 +40,6 @@ function UserCTX({ children }: { children: React.ReactChild }) {
                         setAvatar(user.avatar);
                         setAccessToken(token);
                     });
-                } else {
-                    localStorage.removeItem("access_token");
-                    window.location.href = "/";
                 }
             })
         } else {
