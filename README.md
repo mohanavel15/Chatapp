@@ -3,6 +3,23 @@
 ![friends_all](images/friends-all.png)
 ![channel_png](images/channel.png)
 more [images](images)
+
+## Features
+- Authentication
+- Messages
+    - Create
+    - Edit
+    - Delete
+- DMs
+- Channel
+    - Owner can delete other user's message
+    - Create / Delete invites
+    - Kick / Ban Member
+    - Unban
+- Friends
+	- Add / Accept
+	- Remove / Decline
+
 ## Setup Server
 
 In server folder
