@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { useContext, useEffect } from "react";
 import { IMessageEvent } from "websocket";
 
-import { MessageOBJ, ChannelOBJ, MemberOBJ, FriendOBJ, DMChannelOBJ, ReadyOBJ } from "../models/models";
+import { MessageOBJ, ChannelOBJ, MemberOBJ, FriendOBJ, DMChannelOBJ, ReadyOBJ, Status } from "../models/models";
 import Settings from "./settings"; 
 
 import SideBar from "../components/sidebar";
@@ -28,7 +28,6 @@ import ChannelHome from "../components/channel_home";
 import MessageCTX from '../contexts/messagectx';
 import Routes from '../config';
 import { Refresh } from "../utils/api";
-import { access } from "fs";
 
 const delete_channel = (channels: Map<String, ChannelOBJ>, channel: ChannelOBJ) => {
 	channels.delete(channel.uuid);
@@ -167,6 +166,31 @@ function Channel() {
 				if (payload.event === 'FRIEND_DELETE') {
 					const friend: FriendOBJ = payload.data;
 					user_ctx.setFriends(prevFriends => new Map(deleteFriend(prevFriends, friend)));
+				}
+
+				if (payload.event === 'STATUS_UPDATE') {
+					const status: Status = payload.data;
+					if (status.type === 0) {
+						const friend = user_ctx.friends.get(status.user_id);
+						if (friend !== undefined) {
+							friend.status = status.status;
+							user_ctx.setFriends(prevFriends => new Map(prevFriends.set(friend.uuid, friend)));
+						}
+					}
+					if (status.type === 1) {
+						const dm_channel = channel_context.DMChannels.get(status.channel_id);
+						if (dm_channel !== undefined) {
+							dm_channel.recipient.status = status.status;
+							channel_context.setDMChannels(prevChannels => new Map(prevChannels.set(dm_channel.uuid, dm_channel)));
+						}
+					}
+					if (status.type === 2) {
+						const member = channel_context.members.get(status.channel_id)?.get(status.user_id);
+						if (member !== undefined) {
+							member.status = status.status;
+							channel_context.UpdateMember(status.channel_id, status.user_id, member);
+						}
+					}
 				}
 			}
 		};

@@ -71,3 +71,10 @@ export interface ReadyOBJ {
     channels: ChannelOBJ[]
     friends: FriendOBJ[]
 }
+
+export interface Status {
+    user_id: string
+    status: number
+    type: number
+    channel_id: string
+}

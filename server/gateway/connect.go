@@ -62,9 +62,13 @@ func Connect(ctx *websocket.Context) {
 		}
 		ctx.Ws.Conns.Channels[channel.Uuid][get_user.Uuid] = ctx.Ws
 
-		member := response.NewMember(&res_user, &channel, &channel_id)
-
-		websocket.BroadcastToChannel(ctx.Ws.Conns, channel.Uuid, "MEMBER_UPDATE", member)
+		status := response.Status{
+			UserID:    get_user.Uuid,
+			Status:    1,
+			Type:      2,
+			ChannelID: channel.Uuid,
+		}
+		websocket.BroadcastToChannel(ctx.Ws.Conns, channel.Uuid, "STATUS_UPDATE", status)
 	}
 
 	dm_channels := database.GetDMChannels(ctx.Ws.User, ctx.Db)
@@ -81,15 +85,18 @@ func Connect(ctx *websocket.Context) {
 		status := 0
 		if dm_user, ok := ctx.Ws.Conns.Users[dm_user.Uuid]; ok {
 			status = 1
-			res_dm_update := websocket.WS_Message{
-				Event: "DM_CHANNEL_MODIFY",
-				Data: response.DMChannel{
-					Uuid:      dm_channel.Uuid,
-					Recipient: res_user,
+
+			res_status_update := websocket.WS_Message{
+				Event: "STATUS_UPDATE",
+				Data: response.Status{
+					UserID:    res_user.Uuid,
+					Status:    1,
+					Type:      1,
+					ChannelID: dm_channel.Uuid,
 				},
 			}
 
-			res_dm_update_json, err := json.Marshal(res_dm_update)
+			res_dm_update_json, err := json.Marshal(res_status_update)
 			if err == nil {
 				dm_user.Write(res_dm_update_json)
 			}
@@ -126,10 +133,23 @@ func Connect(ctx *websocket.Context) {
 			continue
 		}
 
-		_, ok := ctx.Ws.Conns.Users[friend_user.Uuid]
+		friend_user_ws, ok := ctx.Ws.Conns.Users[friend_user.Uuid]
 		status := 0
 		if ok {
 			status = 1
+			res_status_update := websocket.WS_Message{
+				Event: "STATUS_UPDATE",
+				Data: response.Status{
+					UserID: res_user.Uuid,
+					Status: 1,
+					Type:   0,
+				},
+			}
+
+			res_dm_update_json, err := json.Marshal(res_status_update)
+			if err == nil {
+				friend_user_ws.Write(res_dm_update_json)
+			}
 		}
 
 		res_friend := response.Friend{

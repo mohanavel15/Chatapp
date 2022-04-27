@@ -52,11 +52,15 @@ func (ws *Ws) ReadLoop() {
 					if !ok {
 						continue
 					}
-					member := response.NewMember(&res_user, &channel, &channel_id)
 
 					ws_msg := WS_Message{
-						Event: "MEMBER_UPDATE",
-						Data:  member,
+						Event: "STATUS_UPDATE",
+						Data: response.Status{
+							UserID:    res_user.Uuid,
+							Status:    0,
+							Type:      2,
+							ChannelID: channel.Uuid,
+						},
 					}
 
 					res, _ := json.Marshal(ws_msg)
@@ -68,24 +72,31 @@ func (ws *Ws) ReadLoop() {
 
 				dm_channels := database.GetDMChannels(ws.User, ws.Db)
 				for _, dm_channel := range dm_channels {
-					var dm_user database.Account
-					if dm_channel.FromUser != ws.User.ID {
-						ws.Db.Where("id = ?", dm_channel.FromUser).First(&dm_user)
-					} else {
-						ws.Db.Where("id = ?", dm_channel.ToUser).First(&dm_user)
+					status := response.Status{
+						UserID:    ws.User.Uuid,
+						Status:    0,
+						Type:      1,
+						ChannelID: dm_channel.Uuid,
 					}
+					BroadcastToChannel(ws.Conns, dm_channel.Uuid, "STATUS_UPDATE", status)
+				}
 
-					if dm_user, ok := ws.Conns.Users[dm_user.Uuid]; ok {
-						dm_update := WS_Message{
-							Event: "DM_CHANNEL_MODIFY",
-							Data: response.DMChannel{
-								Uuid:      dm_channel.Uuid,
-								Recipient: res_user,
+				var friends []database.Friend
+				ws.Db.Where("from_user = ?", ws.User.ID).Find(&friends)
+				for _, friend := range friends {
+					var friend_user database.Account
+					ws.Db.Where("id = ?", friend.ToUser).First(&friend_user)
+					if friend_user, ok := ws.Conns.Users[friend_user.Uuid]; ok {
+						ws_message := WS_Message{
+							Event: "STATUS_UPDATE",
+							Data: response.Status{
+								UserID: res_user.Uuid,
+								Status: 0,
+								Type:   0,
 							},
 						}
-
-						res_dm_update, _ := json.Marshal(dm_update)
-						dm_user.Write(res_dm_update)
+						res, _ := json.Marshal(ws_message)
+						friend_user.Write(res)
 					}
 				}
 				delete(ws.Conns.Users, ws.User.Uuid)
