@@ -51,8 +51,8 @@ func JoinInvite(ctx *Context) {
 		AccountID: user.ID,
 	}
 	db.Where(&member).First(&member)
-	if member.ID == 0 {
-		ctx.Res.WriteHeader(http.StatusContinue)
+	if member.ID != 0 {
+		ctx.Res.WriteHeader(http.StatusAccepted)
 		return
 	}
 

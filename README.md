@@ -1,5 +1,8 @@
 # Chatapp
 
+![friends_all](images/friends-all.png)
+![channel_png](images/channel.png)
+more [images](images)
 ## Setup Server
 
 In server folder
