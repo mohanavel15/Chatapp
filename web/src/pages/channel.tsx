@@ -181,11 +181,16 @@ function Channel() {
 						}
 					}
 					if (status.type === 1) {
-						const dm_channel = channel_context.channels.get(status.channel_id);
-						if (dm_channel !== undefined) {
-							dm_channel.recipient.status = status.status;
-							channel_context.setChannels(prevChannels => new Map(prevChannels.set(dm_channel.uuid, dm_channel)));
+						const UpdateChannelStatus = (prevChannels: Map<String, ChannelOBJ>, status: Status) => {
+							const channel = prevChannels.get(status.channel_id)
+							if (channel !== undefined) {
+								channel.recipient.status = status.status;
+								return new Map(prevChannels.set(channel.uuid, channel))
+							} else {
+								return prevChannels
+							}
 						}
+						channel_context.setChannels(prevChannels => new Map(UpdateChannelStatus(prevChannels, status)));
 					}
 					if (status.type === 2) {
 						const member = channel_context.members.get(status.channel_id)?.get(status.user_id);

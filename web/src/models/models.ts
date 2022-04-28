@@ -7,15 +7,6 @@ export interface MessageOBJ {
     created_at:     number
     updated_at:     number
 }
-/*
-export interface ChannelOBJ {
-    uuid:       string
-    name:       string
-    icon:       string
-    owner_id:   string
-    created_at: string
-    updated_at: string
-}*/
 
 export interface WS_Message {
     event:  string
@@ -58,11 +49,6 @@ export interface BanOBJ {
     channel: ChannelOBJ
     reason: string
     created_at: number
-}
-
-export interface DMChannelOBJ {
-    uuid: string
-    recipient: UserOBJ
 }
 
 export interface ChannelOBJ {
