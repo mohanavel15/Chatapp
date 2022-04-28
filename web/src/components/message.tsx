@@ -16,6 +16,9 @@ function Message({ message }: {message: MessageOBJ}) {
     const [edit, setEdit] = useState(false);
     const [msg, setMsg] = useState('');
 
+    const [isBlocked, setIsBlocked] = useState(false);
+    const [ShowMsg, setShowMsg] = useState(true);
+
     let time = new Date(message.created_at * 1000).toLocaleTimeString();
 
     useEffect(() => {
@@ -76,23 +79,43 @@ function Message({ message }: {message: MessageOBJ}) {
         }
     }
 
+    useEffect(() => {
+        const author_id = message.author.uuid;
+        const is_blocked = user_ctx.blocked.has(author_id);
+        setIsBlocked(is_blocked);
+    }, [user_ctx.blocked, message.author])
+
+    useEffect(() => {
+        if (isBlocked) {
+            setShowMsg(false);
+        } else {
+            setShowMsg(true);
+        }
+    }, [isBlocked])
+
     return (
     <div className="Message" ref={messageElement}>
-        <img id="Message-avatar" src={message.author.avatar} alt="Avatar" onError={setDefaultAvatar} />
-        <div id="Message-text"> 
-            <div id="Message-author">
-                <span className="message-author-name"> {message.author.username}</span>
-                <span className="message-time"> {time}</span>
+        { !ShowMsg && <div className="BlockedUserDiv"><p className="message-edit-text BlockedUserMessage">Message From User You Blocked! <button className="Message-Edit-Action BlockedUserMessage" onClick={() => {setShowMsg(true)}}>Reveal</button></p></div> }
+        { ShowMsg && 
+            <>
+            <img id="Message-avatar" src={message.author.avatar} alt="Avatar" onError={setDefaultAvatar} />
+            <div id="Message-text"> 
+                <div id="Message-author">
+                    <span className="message-author-name"> {message.author.username}</span>
+                    <span className="message-time"> {time}</span>
+                </div>
+                {edit !== true && <p> {message.content} </p> }
+                {edit && 
+                <div>
+                <input id="chat-text" type="text" defaultValue={msg} onKeyDown={handleKey} onChange={(ev) => {setMsg(ev.target.value)}} />
+                <p className="message-edit-text">Escape to <button className="Message-Edit-Action" onClick={cancelEdit}>Cancel</button> • Enter to <button className="Message-Edit-Action" onClick={handleEdit}>Save</button></p>
+                </div>
+                }
+                { isBlocked && <button className="Message-Edit-Action" onClick={() => {setShowMsg(false)}}>Hide</button> }
             </div>
-            {edit !== true && <p> {message.content} </p> }
-            {edit && 
-            <div>
-            <input id="chat-text" type="text" defaultValue={msg} onKeyDown={handleKey} onChange={(ev) => {setMsg(ev.target.value)}} />
-            <p className="message-edit-text">Escape to <button className="Message-Edit-Action" onClick={cancelEdit}>Cancel</button> • Enter to <button className="Message-Edit-Action" onClick={handleEdit}>Save</button></p>
-            </div>
-            }
-        </div>
-        {user_ctx.uuid === message.author.uuid && <button id="Message-button" onClick={handleEditBtn}><FontAwesomeIcon icon={faPencil}/></button>}
+            {user_ctx.uuid === message.author.uuid && <button id="Message-button" onClick={handleEditBtn}><FontAwesomeIcon icon={faPencil}/></button>}
+            </>
+        }
     </div>
 );
 }

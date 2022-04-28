@@ -96,3 +96,11 @@
     background-color: #828282;
     margin-bottom: 0.5rem;
 }
+
+.BlockedUserDiv {
+    margin-left: 2rem;
+}
+
+.BlockedUserMessage {
+    font-size: large;
+}

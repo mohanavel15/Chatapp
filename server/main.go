@@ -127,6 +127,10 @@ func main() {
 	router.HandleFunc("/users/@me/friends", Authenticated(restapi.AddOrAcceptFriend)).Methods("POST")
 	router.HandleFunc("/users/@me/friends/{fid}", Authenticated(restapi.GetFriend)).Methods("GET")
 	router.HandleFunc("/users/@me/friends/{fid}", Authenticated(restapi.RemoveOrDeclineFriend)).Methods("DELETE")
+	// Blocks
+	router.HandleFunc("/users/@me/blocks", Authenticated(restapi.GetBlocks)).Methods("GET")
+	router.HandleFunc("/users/@me/blocks", Authenticated(restapi.AddBlock)).Methods("POST")
+	router.HandleFunc("/users/@me/blocks/{bid}", Authenticated(restapi.DeleteBlock)).Methods("DELETE")
 	// DMS
 	router.HandleFunc("/users/@me/dms", Authenticated(restapi.GetDMChannels)).Methods("GET")
 	router.HandleFunc("/dms/{id}", Authenticated(restapi.GetDMChannel)).Methods("GET")

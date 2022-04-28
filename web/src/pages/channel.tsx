@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { useContext, useEffect } from "react";
 import { IMessageEvent } from "websocket";
 
-import { MessageOBJ, ChannelOBJ, MemberOBJ, FriendOBJ, ReadyOBJ, Status } from "../models/models";
+import { MessageOBJ, ChannelOBJ, MemberOBJ, FriendOBJ, ReadyOBJ, Status, UserOBJ } from "../models/models";
 import Settings from "./settings"; 
 
 import SideBar from "../components/sidebar";
@@ -34,9 +34,14 @@ const delete_channel = (channels: Map<String, ChannelOBJ>, channel: ChannelOBJ) 
 	return channels;
 }
 
-const deleteFriend = (prevFriends: Map<String, FriendOBJ>, friend: FriendOBJ) => {
-	prevFriends.delete(friend.uuid);
+const deleteFriend = (prevFriends: Map<String, FriendOBJ>, friend_id: string) => {
+	prevFriends.delete(friend_id);
 	return prevFriends;
+}
+
+const deleteBlocked = (prevBlocked: Map<String, UserOBJ>, user_id: string) => {
+	prevBlocked.delete(user_id);
+	return prevBlocked;
 }
 
 function Channel() {
@@ -168,7 +173,7 @@ function Channel() {
 				
 				if (payload.event === 'FRIEND_DELETE') {
 					const friend: FriendOBJ = payload.data;
-					user_ctx.setFriends(prevFriends => new Map(deleteFriend(prevFriends, friend)));
+					user_ctx.setFriends(prevFriends => new Map(deleteFriend(prevFriends, friend.uuid)));
 				}
 
 				if (payload.event === 'STATUS_UPDATE') {
@@ -199,6 +204,17 @@ function Channel() {
 							channel_context.UpdateMember(status.channel_id, status.user_id, member);
 						}
 					}
+				}
+
+				if (payload.event === 'BLOCK_CREATE') {
+					const blocked_user: UserOBJ = payload.data;
+					user_ctx.setFriends(prevFriends => new Map(deleteFriend(prevFriends, blocked_user.uuid)));
+					user_ctx.setBlocked(prevBlockedUsers => new Map(prevBlockedUsers.set(blocked_user.uuid, blocked_user)));
+				}
+				
+				if (payload.event === 'BLOCK_DELETE') {
+					const blocked_user: UserOBJ = payload.data;
+					user_ctx.setBlocked(prevBlockedUsers => new Map(deleteBlocked(prevBlockedUsers, blocked_user.uuid)));
 				}
 			}
 		};

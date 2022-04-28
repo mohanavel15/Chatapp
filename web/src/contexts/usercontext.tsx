@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState } from "react";
-import { FriendOBJ } from "../models/models";
+import { FriendOBJ, UserOBJ } from "../models/models";
 import Routes from "../config";
 import { Refresh } from "../utils/api";
 export interface UserContextOBJ {
@@ -13,6 +13,8 @@ export interface UserContextOBJ {
     setAccessToken:React.Dispatch<React.SetStateAction<string>>;
     friends: Map<String,FriendOBJ>;
 	setFriends: React.Dispatch<React.SetStateAction<Map<String, FriendOBJ>>>
+    blocked: Map<String,UserOBJ>;
+	setBlocked: React.Dispatch<React.SetStateAction<Map<String, UserOBJ>>>
 }
 
 export const UserContext = createContext<UserContextOBJ>(undefined!);
@@ -22,7 +24,8 @@ function UserCTX({ children }: { children: React.ReactChild }) {
     const [username, setUsername] = useState<string>("");
     const [avatar, setAvatar] = useState<string>("");
     const [accessToken, setAccessToken] = useState<string>("");
-	let [friends, setFriends] = useState<Map<String,FriendOBJ>>(new Map<String,FriendOBJ>());
+	const [friends, setFriends] = useState<Map<String,FriendOBJ>>(new Map<String,FriendOBJ>());
+	const [blocked, setBlocked] = useState<Map<String,UserOBJ>>(new Map<String,UserOBJ>());
 
     useEffect(() => {
         const token = localStorage.getItem("access_token") || "";
@@ -47,6 +50,26 @@ function UserCTX({ children }: { children: React.ReactChild }) {
         }
     }, []);
 
+    useEffect(() => {
+        fetch(Routes.Blocks, {
+            method: "GET",
+            headers: {
+                "Authorization": localStorage.getItem("access_token") || "",
+                "Content-Type": "application/json"
+            }
+        }).then(response => {
+            if (response.status === 200) {
+                response.json().then((blocked: UserOBJ[]) => {
+                    blocked.forEach(user => {
+                        console.log("blocked user", user);
+                        setBlocked(prevBlocked => new Map(prevBlocked.set(user.uuid, user)));
+                        console.log("blocks count", Array(blocked.values()).length);
+                    })
+                });
+            }
+        })
+    }, [accessToken]);
+
     const context_value: UserContextOBJ = {
         uuid: uuid,
         username: username,
@@ -57,7 +80,9 @@ function UserCTX({ children }: { children: React.ReactChild }) {
         setAvatar: setAvatar,
         setAccessToken: setAccessToken,
         friends: friends,
-        setFriends: setFriends
+        setFriends: setFriends,
+        blocked: blocked,
+        setBlocked: setBlocked
     }
     
     return (

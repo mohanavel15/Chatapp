@@ -13,6 +13,7 @@ class RoutesCls {
     users = this.host + '/users';
     currentUser = this.users +'/@me';
     Friends = this.currentUser +'/friends';
+    Blocks = this.currentUser +'/blocks';
 
     Invites = this.host + '/invites';
     Channels = this.host + '/channels';

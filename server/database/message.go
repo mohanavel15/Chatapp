@@ -9,6 +9,33 @@ import (
 )
 
 func CreateMessage(content string, channel_id string, user *Account, db *gorm.DB) (*Message, int) {
+
+	_, dm_user, statusCode := GetDMChannel(channel_id, user, db)
+	if statusCode != http.StatusOK {
+		_, statusCode := GetChannel(channel_id, user, db)
+		if statusCode != http.StatusOK {
+			return nil, statusCode
+		}
+	} else {
+		checkBlock := Block{
+			BlockedBy:   dm_user.ID,
+			BlockedUser: user.ID,
+		}
+		db.Where(checkBlock).First(&checkBlock)
+		if checkBlock.ID != 0 {
+			return nil, http.StatusForbidden
+		}
+
+		checkBlock2 := Block{
+			BlockedBy:   user.ID,
+			BlockedUser: dm_user.ID,
+		}
+		db.Where(checkBlock2).First(&checkBlock2)
+		if checkBlock2.ID != 0 {
+			return nil, http.StatusForbidden
+		}
+	}
+
 	new_message := Message{
 		Uuid:      uuid.New().String(),
 		Content:   content,
@@ -16,14 +43,6 @@ func CreateMessage(content string, channel_id string, user *Account, db *gorm.DB
 		ChannelID: channel_id,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
-	}
-
-	_, _, statusCode := GetDMChannel(channel_id, user, db)
-	if statusCode != http.StatusOK {
-		_, statusCode := GetChannel(channel_id, user, db)
-		if statusCode != http.StatusOK {
-			return nil, statusCode
-		}
 	}
 	db.Create(&new_message)
 	return &new_message, http.StatusOK

@@ -17,7 +17,7 @@ export default function FriendContextMenu(props: propsChannelCtxProps) {
     }
 
     const deleteFriend = () => {
-        const deleteFriend = (prevFriends: Map<String, FriendOBJ>) => {
+        const delete_Friend = (prevFriends: Map<String, FriendOBJ>) => {
             prevFriends.delete(props.value.friend_obj.uuid);
             return prevFriends;
         }
@@ -29,7 +29,7 @@ export default function FriendContextMenu(props: propsChannelCtxProps) {
             }
         }).then(response => {
             if (response.status === 200) {
-                user_ctx.setFriends(prevFriends => new Map(deleteFriend(prevFriends)));
+                user_ctx.setFriends(prevFriends => new Map(delete_Friend(prevFriends)));
             }
         })
     }
