@@ -43,6 +43,10 @@ function ChannelHome() {
 		})
 	}, [TopBarSelected, user_ctx.friends])
 
+	const active_button_style: React.CSSProperties = {
+        backgroundColor: "#393d42",
+    }
+
 	function SendFriendRequest() {
 		if (FriendUserUUID.current !== undefined) {
 			if (FriendUserUUID.current.value !== "") {
@@ -68,10 +72,17 @@ function ChannelHome() {
 	return (
 		<div className="Friends">
 			<div className='Friends-Top-Bar'>
-				<button className='Friends-Top-Bar-Button' onClick={() => {setTopBarSelected(0)}}>Online</button>
-				<button className='Friends-Top-Bar-Button' onClick={() => {setTopBarSelected(1)}}>All</button>
-				<button className='Friends-Top-Bar-Button' onClick={() => {setTopBarSelected(2)}}>Pending</button>
-				<button className='Friends-Top-Bar-Button FTB-AddButton' onClick={() => {setTopBarSelected(3)}}>Add Friend</button>
+				{TopBarSelected === 0 && <button className='Friends-Top-Bar-Button' style={active_button_style} onClick={() => {setTopBarSelected(0)}}>Online</button> }
+				{TopBarSelected !== 0 && <button className='Friends-Top-Bar-Button' onClick={() => {setTopBarSelected(0)}}>Online</button> }
+				
+				{TopBarSelected === 1 && <button className='Friends-Top-Bar-Button' style={active_button_style} onClick={() => {setTopBarSelected(1)}}>All</button> }
+				{TopBarSelected !== 1 && <button className='Friends-Top-Bar-Button' onClick={() => {setTopBarSelected(1)}}>All</button> }
+				
+				{TopBarSelected === 2 && <button className='Friends-Top-Bar-Button' style={active_button_style} onClick={() => {setTopBarSelected(2)}}>Pending</button> }
+				{TopBarSelected !== 2 && <button className='Friends-Top-Bar-Button' onClick={() => {setTopBarSelected(2)}}>Pending</button> }
+				
+				{TopBarSelected === 3 && <button className='Friends-Top-Bar-Button FTB-AddButton' style={active_button_style} onClick={() => {setTopBarSelected(3)}}>Add Friend</button> }
+				{TopBarSelected !== 3 && <button className='Friends-Top-Bar-Button FTB-AddButton' onClick={() => {setTopBarSelected(3)}}>Add Friend</button> }
 			</div>
 				{TopBarSelected === 0 && <h3 className='Friends-List-Title'>Online — {friends.length}</h3>}
 				{TopBarSelected === 1 && <h3 className='Friends-List-Title'>All — {friends.length}</h3>}

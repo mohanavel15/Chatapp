@@ -30,6 +30,9 @@ export default function ChannelContextMenu(props: propsChannelCtxProps) {
         }
         }>Leave Channel</button> }
 
+        { props.location.channel.type === 0 && <button className='CtxBtn'>Add Friend</button> }
+        { props.location.channel.type === 0 && <button className='CtxDelBtn'>Remove Friend</button> }
+
         { props.location.channel.type === 0 && <button className='CtxDelBtn' onClick={() => {
             state_context.setChannelOBJ(props.location.channel);
             state_context.setDeleteChannel(true);

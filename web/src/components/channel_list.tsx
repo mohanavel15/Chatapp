@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { setDefaultIcon, setDefaultAvatar } from '../utils/errorhandle';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle, faDotCircle, faCircleMinus, IconDefinition } from '@fortawesome/free-solid-svg-icons'
@@ -12,6 +12,8 @@ interface ChannelHeaderProps {
 }
 
 export default function ChannelList(props: ChannelHeaderProps) {
+    const parameter  = useParams<string>();
+	let channel_id = parameter.id || "@me";
 
     let style: React.CSSProperties
     let icon: IconDefinition
@@ -32,9 +34,21 @@ export default function ChannelList(props: ChannelHeaderProps) {
         icon = faDotCircle
     }
     
+    const active_channel_style: React.CSSProperties = {}
+
+    if (channel_id === props.id) {
+        active_channel_style.backgroundColor = "#393d42"
+        active_channel_style.borderRadius = "5px"
+    }
+
+    /*= {
+        backgroundColor: "#ffffff27",
+        border-radius: 5px;
+    }*/
+    
     return (
         <Link to={`/channels/${props.id}`} className="linktag" >
-            <div className='channel_list'>
+            <div className='channel_list' style={active_channel_style}>
                 <div className='channel_name'>
                     { props.dm === true && 
                         <div className="dm_avatar">
