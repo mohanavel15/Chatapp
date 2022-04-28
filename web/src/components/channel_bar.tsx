@@ -11,15 +11,6 @@ export default function ChannelBar() {
 
 	useEffect(() => {
 		setChannels_element([])
-		const dmchannels =  Array.from(channel_context.DMChannels.values())
-		dmchannels.forEach(channel => {
-			setChannels_element(prev_channels => [...prev_channels,
-				<div key={channel.uuid}>
-				<ChannelList id={channel.uuid} icon={channel.recipient.avatar} name={channel.recipient.username} status={channel.recipient.status} dm={true} />
-				</div>
-			])
-		})
-
 		const channels =  Array.from(channel_context.channels.values())
 		channels.forEach(channel => {
 			setChannels_element(prevElement => [...prevElement, 
@@ -29,11 +20,12 @@ export default function ChannelBar() {
 					ctx_menu_context.setChannelCtxMenuLocation({x: event.clientX, y: event.clientY, channel: channel})
 					ctx_menu_context.setShowChannelCtxMenu(true);
 				}}>
-				<ChannelList id={channel.uuid} icon={channel.icon} name={channel.name} status={0} dm={false} />
+				{ channel.type === 1  && <ChannelList id={channel.uuid} icon={channel.icon} name={channel.name} status={0} dm={false} /> }
+				{ channel.type === 0  && <ChannelList id={channel.uuid} icon={channel.recipient.avatar} name={channel.recipient.username} status={channel.recipient.status} dm={true} /> }
 				</div>
 		])
 		})
-	}, [channel_context.channels, channel_context.DMChannels])
+	}, [channel_context.channels])
 
 	return (
 		<div className='ChannelBar'>

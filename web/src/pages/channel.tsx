@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { useContext, useEffect } from "react";
 import { IMessageEvent } from "websocket";
 
-import { MessageOBJ, ChannelOBJ, MemberOBJ, FriendOBJ, DMChannelOBJ, ReadyOBJ, Status } from "../models/models";
+import { MessageOBJ, ChannelOBJ, MemberOBJ, FriendOBJ, ReadyOBJ, Status } from "../models/models";
 import Settings from "./settings"; 
 
 import SideBar from "../components/sidebar";
@@ -61,6 +61,7 @@ function Channel() {
 					user_ctx.setAvatar(ready.user.avatar);
 
 					ready.channels.forEach((channel: ChannelOBJ) => {
+						channel.type = 1;
 						channel_context.setChannels(prev => new Map(prev.set(channel.uuid, channel)));
 						const url = Routes.Channels+`/${channel.uuid}/messages`
 						fetch(url, {
@@ -90,8 +91,9 @@ function Channel() {
 						})
 					});
 
-					ready.dm_channels.forEach((dm_channel: DMChannelOBJ) => {
-						channel_context.setDMChannels(prev => new Map(prev.set(dm_channel.uuid, dm_channel)));
+					ready.dm_channels.forEach((dm_channel: ChannelOBJ) => {
+						dm_channel.type = 0;
+						channel_context.setChannels(prev => new Map(prev.set(dm_channel.uuid, dm_channel)));
 						const url = Routes.Channels+`/${dm_channel.uuid}/messages`
 						fetch(url, {
 							method: "GET",
@@ -144,8 +146,9 @@ function Channel() {
 				}
 
 				if (payload.event === 'DM_CHANNEL_CREATE' || payload.event === 'DM_CHANNEL_MODIFY') {
-					const channel: DMChannelOBJ = payload.data;
-					channel_context.setDMChannels(prevChannels => new Map(prevChannels.set(channel.uuid, channel)));
+					const channel: ChannelOBJ = payload.data;
+					channel.type = 0;
+					channel_context.setChannels(prevChannels => new Map(prevChannels.set(channel.uuid, channel)));
 				}
 
 				if (payload.event === 'MEMBER_JOIN' || payload.event === 'MEMBER_UPDATE') {
@@ -178,10 +181,10 @@ function Channel() {
 						}
 					}
 					if (status.type === 1) {
-						const dm_channel = channel_context.DMChannels.get(status.channel_id);
+						const dm_channel = channel_context.channels.get(status.channel_id);
 						if (dm_channel !== undefined) {
 							dm_channel.recipient.status = status.status;
-							channel_context.setDMChannels(prevChannels => new Map(prevChannels.set(dm_channel.uuid, dm_channel)));
+							channel_context.setChannels(prevChannels => new Map(prevChannels.set(dm_channel.uuid, dm_channel)));
 						}
 					}
 					if (status.type === 2) {
@@ -221,18 +224,9 @@ function Channel() {
 		};
 	}, []);
 
-	let dm: boolean = true;
-	let dm_channel: DMChannelOBJ | undefined;
-
-	dm_channel = channel_context.DMChannels.get(channel_id);
-	if (dm_channel === undefined) {
-		dm = false;
-		dm_channel = { uuid: "@me", recipient: { uuid: "@me", username: "@me", avatar: "", status:0, created_at: 0 } };
-	}
-
 	let currentChannel = channel_context.channels.get(channel_id);
 	if (currentChannel === undefined) {
-		currentChannel = { uuid: "@me", name: "@me",icon: "", owner_id: "", created_at: "", updated_at: ""};
+		currentChannel = { uuid: "@me", name: "@me",icon: "", owner_id: "", type: 0, created_at: "", recipient: { uuid: "@me", username: "@me", avatar: "", status:0, created_at: 0 }};
 	}
 
 	useEffect(() => {
@@ -253,15 +247,14 @@ function Channel() {
 					<MessageCTX>
 					<>
 						<SideBar />
-						{ dm && state_context.editChannel !== true && <Chat channel_id={dm_channel.uuid} dm={true} />}
-						{ dm === false && currentChannel.uuid !== "@me" && state_context.editChannel !== true &&
+						{ currentChannel.uuid !== "@me" && state_context.editChannel !== true &&
 							<>
-								<Chat channel_id={currentChannel.uuid} dm={false} />
-								{ state_context.showMembers && <MembersBar channel={currentChannel} /> }
+								<Chat channel_id={currentChannel.uuid} />
+								{ state_context.showMembers && currentChannel.type === 1 && <MembersBar channel={currentChannel} /> }
 							</>
 						}
 
-						{ currentChannel.uuid === "@me" && dm_channel.uuid === "@me" && !state_context.editChannel && <ChannelHome /> }
+						{ currentChannel.uuid === "@me" && !state_context.editChannel && <ChannelHome /> }
 						{ state_context.createChannel && <CreateChannel /> }
 						{ state_context.editChannel && <EditChannel /> }
 						{ state_context.deleteChannel && <DeleteChannel /> }

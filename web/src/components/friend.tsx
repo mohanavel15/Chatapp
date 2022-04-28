@@ -1,5 +1,5 @@
 import React, { useContext } from 'react'
-import { FriendOBJ } from '../models/models';
+import { FriendOBJ, ChannelOBJ } from '../models/models';
 import { UserContextOBJ, UserContext } from "../contexts/usercontext";
 import { setDefaultAvatar } from '../utils/errorhandle';
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
@@ -86,8 +86,10 @@ function Friend({ friend_obj }: { friend_obj: FriendOBJ }) {
         }).then(response => {
             if (response.status === 200) {
                 response.json().then(dm_channel => {
-                    if (!channel_ctx.DMChannels.has(dm_channel.uuid)) {
-                        channel_ctx.setDMChannels(prevChannels => new Map(prevChannels.set(dm_channel.uuid, dm_channel)));
+                    if (!channel_ctx.channels.has(dm_channel.uuid)) {
+                        let channel: ChannelOBJ = dm_channel;
+                        channel.type = 0; 
+                        channel_ctx.setChannels(prevChannels => new Map(prevChannels.set(channel.uuid, channel)));
                     }
                     navigate(`/channels/${dm_channel.uuid}`);
                 })

@@ -7,7 +7,7 @@ export interface MessageOBJ {
     created_at:     number
     updated_at:     number
 }
-
+/*
 export interface ChannelOBJ {
     uuid:       string
     name:       string
@@ -15,7 +15,7 @@ export interface ChannelOBJ {
     owner_id:   string
     created_at: string
     updated_at: string
-}
+}*/
 
 export interface WS_Message {
     event:  string
@@ -65,9 +65,18 @@ export interface DMChannelOBJ {
     recipient: UserOBJ
 }
 
+export interface ChannelOBJ {
+    uuid: string
+    name: string
+    icon: string
+    type: number
+    owner_id: string
+    created_at: string
+    recipient: UserOBJ
+}
 export interface ReadyOBJ {
     user: UserOBJ
-    dm_channels: DMChannelOBJ[]
+    dm_channels: ChannelOBJ[]
     channels: ChannelOBJ[]
     friends: FriendOBJ[]
 }

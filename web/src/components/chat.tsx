@@ -8,7 +8,7 @@ import { Msg_request, MessageOBJ } from '../models/models';
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 import { ContextMenuCtx, ContextMenu } from "../contexts/context_menu_ctx";
 
-function Chat({ channel_id, dm }: { channel_id: string, dm: boolean }) {
+function Chat({ channel_id }: { channel_id: string }) {
     // Emoji picker https://www.cluemediator.com/how-to-add-emoji-picker-in-the-react
 	const channel_context: ChannelContext = useContext(ChannelsContext);
     const [Input_message, setInput_message] = useState('');
@@ -87,7 +87,7 @@ function Chat({ channel_id, dm }: { channel_id: string, dm: boolean }) {
 
     return (
         <div className="Chat">
-			<ChannelHeader channel_id={channel_id} dm={dm} />
+			<ChannelHeader channel_id={channel_id} />
 				<div className="chat-message">
 					{message_jsx}
 				</div>

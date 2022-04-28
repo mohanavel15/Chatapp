@@ -1,5 +1,5 @@
 import React, { useContext } from 'react'
-import { MemberOBJ, ChannelOBJ, DMChannelOBJ } from '../models/models';
+import { MemberOBJ, ChannelOBJ } from '../models/models';
 import { UserContextOBJ, UserContext } from "../contexts/usercontext";
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 import { StatesContext, StateContext } from "../contexts/states";
@@ -52,8 +52,10 @@ export default function MemberContextMenu(props:propsMsgCtxProps) {
         }).then(response => {
             if (response.status === 200) {
                 response.json().then(dm_channel => {
-                    if (!channel_context.DMChannels.has(dm_channel.uuid)) {
-                        channel_context.setDMChannels(prevChannels => new Map(prevChannels.set(dm_channel.uuid, dm_channel)));
+                    if (!channel_context.channels.has(dm_channel.uuid)) {
+                        let channel: ChannelOBJ = dm_channel;
+                        channel.type = 0; 
+                        channel_context.setChannels(prevChannels => new Map(prevChannels.set(channel.uuid, channel)));
                     }
                     navigate(`/channels/${dm_channel.uuid}`);
                 })
