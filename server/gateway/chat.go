@@ -6,6 +6,9 @@ import (
 	"Chatapp/websocket"
 	"encoding/json"
 	"net/http"
+	"time"
+
+	"github.com/google/uuid"
 )
 
 func MessageCreate(ctx *websocket.Context) {
@@ -23,6 +26,23 @@ func MessageCreate(ctx *websocket.Context) {
 
 	new_message, statusCode := database.CreateMessage(message.Content, message.Channel, ctx.Ws.User, ctx.Ws.Db)
 	if statusCode != http.StatusOK {
+		ws_error_msg := websocket.WS_Message{
+			Event: "MESSAGE_CREATE",
+			Data: response.Message{
+				Uuid:      uuid.New().String(),
+				Content:   "Couldn't send message. This message will be deleted in 15 seconds.",
+				Author:    response.ErrorUser(),
+				ChannelID: message.Channel,
+				CreatedAt: time.Now().Unix(),
+				EditedAt:  time.Now().Unix(),
+			},
+		}
+
+		res, _ := json.Marshal(ws_error_msg)
+		err := ctx.Ws.Write(res)
+		if err != nil {
+			return
+		}
 		return
 	}
 

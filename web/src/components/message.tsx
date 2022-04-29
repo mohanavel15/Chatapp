@@ -93,6 +93,14 @@ function Message({ message }: {message: MessageOBJ}) {
         }
     }, [isBlocked])
 
+    useEffect(() => {
+        if (message.author.uuid === "00000000-0000-0000-0000-000000000000" && message.author.username === "System") {
+            setTimeout(() => {
+                channel_context.DeleteMessage(message.channel_id, message.uuid);
+            }, 15000);
+        }
+    }, [message])
+
     return (
     <div className="Message" ref={messageElement}>
         { !ShowMsg && <div className="BlockedUserDiv"><p className="message-edit-text BlockedUserMessage">Message From User You Blocked! <button className="Message-Edit-Action BlockedUserMessage" onClick={() => {setShowMsg(true)}}>Reveal</button></p></div> }
