@@ -87,7 +87,7 @@ func DeleteMessage(uuid string, user *Account, db *gorm.DB) (*Message, int) {
 			return nil, statusCode
 		}
 
-		if message.AccountID != user.ID || channel.Owner != user.Uuid {
+		if message.AccountID != user.ID && channel.Owner != user.Uuid {
 			return nil, http.StatusForbidden
 		}
 	}
