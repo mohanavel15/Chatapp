@@ -143,6 +143,7 @@ function Channel() {
 
 				if (payload.event === 'CHANNEL_CREATE' || payload.event === 'CHANNEL_MODIFY') {
 					const channel: ChannelOBJ = payload.data;
+					channel.type = 1;
 					channel_context.setChannels(prevChannels => new Map(prevChannels.set(channel.uuid, channel)));
 				}
 

@@ -4,6 +4,7 @@ import (
 	"Chatapp/database"
 	"Chatapp/request"
 	"Chatapp/response"
+	"Chatapp/websocket"
 	"encoding/json"
 	"net/http"
 	"time"
@@ -187,4 +188,18 @@ func DeleteMember(ctx *Context) {
 
 	db.Delete(&is_member)
 	w.WriteHeader(http.StatusOK)
+
+	res_user := response.NewUser(&member, 0)
+	res := response.NewMember(&res_user, &channel, &is_member)
+	websocket.BroadcastToChannel(ctx.Conn, channel.Uuid, "MEMBER_REMOVE", res)
+
+	if ws, ok := ctx.Conn.Users[member.Uuid]; ok {
+		ws_msg := websocket.WS_Message{
+			Event: "CHANNEL_DELETE",
+			Data:  response.NewChannel(&channel),
+		}
+
+		res, _ := json.Marshal(ws_msg)
+		ws.Write(res)
+	}
 }
