@@ -14,6 +14,7 @@ import EditChannel from '../components/editchannel';
 import DeleteChannel from "../components/deletechannel";
 import DeleteMessage from "../components/deletemessage";
 import Profile from "../components/profile";
+import KickBan from "../components/kick_ban";
 
 import MessageContextMenu from '../contextmenu/message_context_menu';
 import ChannelContextMenu from "../contextmenu/channel_context_menu";
@@ -281,6 +282,7 @@ function Channel() {
 						{ state_context.deleteChannel && <DeleteChannel /> }
 						{ state_context.deleteMessage && <DeleteMessage /> }
 						{ state_context.showProfile && <Profile /> }
+						{ state_context.showKickBan && <KickBan /> }
 						{ ctx_menu_context.showMsgCtxMenu && <MessageContextMenu location={ctx_menu_context.ctxMsgMenuLocation} /> }
 						{ ctx_menu_context.showChannelCtxMenu && <ChannelContextMenu location={ctx_menu_context.ctxChannelMenuLocation} /> }
 						{ ctx_menu_context.showMemberCtxMenu && <MemberContextMenu location={ctx_menu_context.ctxMemberMenuLocation} /> }

@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { StatesContext, StateContext } from "../contexts/states";
 import { UserContextOBJ, UserContext } from "../contexts/usercontext";
-
+import { BlockUser, UnBlock, AddFriend } from '../utils/api';
 import { ChannelOBJ, FriendOBJ } from '../models/models';
 import Routes from '../config';
 
@@ -13,14 +13,13 @@ export default function ChannelContextMenu(props: propsChannelCtxProps) {
   	const state_context: StateContext = useContext(StatesContext);
   	const user_ctx:UserContextOBJ = useContext(UserContext);
     
-    const [isFriend, setIsFriend] = useState(0);
-    const [isBlocked, setIsBlocked] = useState(false);
-
   	let style: React.CSSProperties
   	style = {
         top: props.location.y,
         left: props.location.x
   	}
+
+    const [isFriend, setIsFriend] = useState(0);
 
     const deleteFriend = () => {
         const delete_Friend = (prevFriends: Map<String, FriendOBJ>) => {
@@ -39,33 +38,6 @@ export default function ChannelContextMenu(props: propsChannelCtxProps) {
             }
         })
     }
-
-    function AddFriend() {
-        fetch(Routes.Friends, {
-            method: "POST",
-            headers: {
-                "Authorization": user_ctx.accessToken,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                "to": props.location.channel.recipient.uuid
-            })
-        })
-	}
-
-    function BlockUser() {
-        fetch(Routes.Blocks, {
-            method: "POST",
-            headers: {
-                "Authorization": user_ctx.accessToken,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                "uuid": props.location.channel.recipient.uuid
-            })
-        })
-	}
-    
     
     useEffect(() => {
         if (props.location.channel.type === 0) {
@@ -82,37 +54,16 @@ export default function ChannelContextMenu(props: propsChannelCtxProps) {
         }
     }, [props.location.channel, user_ctx.friends])
 
-    useEffect(() => {
-        if (props.location.channel.type === 0) {
-            const is_blocked = user_ctx.blocked.has(props.location.channel.recipient.uuid)
-            if (is_blocked === true) {
-                setIsBlocked(true)
-            } else {
-                setIsBlocked(false)
-            }
-        }
-    }, [props.location.channel, user_ctx.blocked])
-
   	return (
     	<div className='ContextMenu' style={style}>
-        { props.location.channel.owner_id === user_ctx.uuid && <button className='CtxBtn' onClick={() =>{
-            state_context.setChannelOBJ(props.location.channel);
-            state_context.setEditChannel(true);
-        }}>Edit Channel</button> }
-
-        { props.location.channel.type === 1 && <button className='CtxDelBtn' onClick={() => {
-            state_context.setChannelOBJ(props.location.channel);
-            state_context.setDeleteChannel(true);
-        }
-        }>Leave Channel</button> }
-
-        { props.location.channel.type === 0 && isFriend === 0 && <button className='CtxBtn' onClick={AddFriend}>Add Friend</button> }
-        { props.location.channel.type === 0 && isFriend === 1 && <button className='CtxDelBtn' onClick={deleteFriend}>Cancel Request</button> }
-        { props.location.channel.type === 0 && isFriend === 2 && <button className='CtxDelBtn' onClick={deleteFriend}>Remove Friend</button> }
-
-        { props.location.channel.type === 0 && <button className='CtxDelBtn' onClick={BlockUser}>Block User</button> }
-
-        <button className='CtxBtn' onClick={() => {navigator.clipboard.writeText(props.location.channel.uuid)}}>Copy ID</button>
-    </div>
+            { props.location.channel.type === 1 && props.location.channel.owner_id === user_ctx.uuid && <button className='CtxBtn' onClick={() =>{state_context.setChannelOBJ(props.location.channel);state_context.setEditChannel(true);}}>Edit Channel</button> }
+            { props.location.channel.type === 1 && <button className='CtxDelBtn' onClick={() => {state_context.setChannelOBJ(props.location.channel);state_context.setDeleteChannel(true);}}>Leave Channel</button> }
+            { props.location.channel.type === 0 && isFriend === 0 && <button className='CtxBtn' onClick={() => AddFriend(user_ctx.accessToken, props.location.channel.recipient.uuid)}>Add Friend</button> }
+            { props.location.channel.type === 0 && isFriend === 1 && <button className='CtxDelBtn' onClick={deleteFriend}>Cancel Request</button> }
+            { props.location.channel.type === 0 && isFriend === 2 && <button className='CtxDelBtn' onClick={deleteFriend}>Remove Friend</button> }
+            { props.location.channel.type === 0 && !user_ctx.blocked.has(props.location.channel.recipient.uuid) && <button className='CtxDelBtn' onClick={() => BlockUser(user_ctx.accessToken, props.location.channel.recipient.uuid)}>Block User</button> }
+            { props.location.channel.type === 0 && user_ctx.blocked.has(props.location.channel.recipient.uuid) && <button className='CtxBtn' onClick={() => UnBlock(user_ctx.accessToken, props.location.channel.recipient.uuid)}>Unblock User</button> }
+            <button className='CtxBtn' onClick={() => {navigator.clipboard.writeText(props.location.channel.uuid)}}>Copy ID</button>
+        </div>
   )
 }

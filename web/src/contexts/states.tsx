@@ -12,6 +12,9 @@ export interface StateContext {
     showProfile: boolean;
     ProfileOBJ: MemberOBJ;
     showMembers: boolean;
+    showKickBan: boolean;
+    isBan: boolean;
+    KickBanMember: MemberOBJ | undefined;
     setSettings: React.Dispatch<React.SetStateAction<boolean>>;
     setCreateChannel: React.Dispatch<React.SetStateAction<boolean>>;
     setEditChannel: React.Dispatch<React.SetStateAction<boolean>>;
@@ -22,6 +25,9 @@ export interface StateContext {
     setShowProfile: React.Dispatch<React.SetStateAction<boolean>>;
     setProfileOBJ: React.Dispatch<React.SetStateAction<MemberOBJ>>;
     setShowMembers: React.Dispatch<React.SetStateAction<boolean>>;
+    setShowKickBan: React.Dispatch<React.SetStateAction<boolean>>;
+    setIsBan: React.Dispatch<React.SetStateAction<boolean>>;
+    setKickBanMember: React.Dispatch<React.SetStateAction<MemberOBJ | undefined>>;
 }
 
 export const StatesContext = createContext<StateContext>(undefined!);
@@ -40,6 +46,10 @@ export function States({ children }: {children: React.ReactChild}) {
     const [showProfile, setShowProfile] = useState(false)
     const [ProfileOBJ, setProfileOBJ] = useState<MemberOBJ>(undefined!)
 
+    const [showKickBan, setShowKickBan] = useState(false)
+    const [isBan, setIsBan] = useState(false)
+    const [KickBanMember, setKickBanMember] = useState<MemberOBJ>()
+
     const [showMembers, setShowMembers] = useState(true)
 
     const context_value: StateContext = {
@@ -53,6 +63,9 @@ export function States({ children }: {children: React.ReactChild}) {
         showProfile: showProfile,
         ProfileOBJ: ProfileOBJ,
         showMembers: showMembers,
+        showKickBan: showKickBan,
+        isBan: isBan,
+        KickBanMember: KickBanMember,
         setSettings: setSettings,
         setCreateChannel: setCreateChannel,
         setEditChannel: setEditChannel,
@@ -62,7 +75,10 @@ export function States({ children }: {children: React.ReactChild}) {
         setMessageOBJ: setMessageOBJ,
         setShowProfile: setShowProfile,
         setProfileOBJ: setProfileOBJ,
-        setShowMembers: setShowMembers
+        setShowMembers: setShowMembers,
+        setShowKickBan: setShowKickBan,
+        setIsBan: setIsBan,
+        setKickBanMember: setKickBanMember,
     }
 
     return (
