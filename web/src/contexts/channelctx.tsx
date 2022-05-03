@@ -1,11 +1,12 @@
-import React, { useState, createContext } from 'react'
+import React, { createContext } from 'react'
 import { ChannelOBJ, MessageOBJ, MemberOBJ } from '../models/models'
 import useDoubleMap from '../hooks/useDoubleMap';
-import Routes from '../config';
+import useMap from '../hooks/useMap';
 
 export interface ChannelContext {
 	channels: Map<String,ChannelOBJ>;
-	setChannels: React.Dispatch<React.SetStateAction<Map<String, ChannelOBJ>>>
+	setChannel: React.Dispatch<React.SetStateAction<Map<String, ChannelOBJ>>>
+	deleteChannel: (key: String) => void
 	
 	messages: Map<String, Map<String, MessageOBJ>>;
 	UpdateMessage: (key1: String, key2: String, value_: MessageOBJ) => void
@@ -21,13 +22,14 @@ export interface ChannelContext {
 export const ChannelsContext = createContext<ChannelContext>(undefined!);
 
 export default function ChannelCTX({ children, gateway }: {children: React.ReactChild, gateway: WebSocket}) {
-	let [channels, setChannels] = useState<Map<String,ChannelOBJ>>(new Map<String,ChannelOBJ>());
+	const [channels, setChannel, deleteChannel] = useMap<ChannelOBJ>(new Map<String, ChannelOBJ>())
 	const [members, UpdateMember, DeleteMember] = useDoubleMap<MemberOBJ>(new Map<String, Map<String, MemberOBJ>>());
 	const [messages, UpdateMessage, DeleteMessage] = useDoubleMap<MessageOBJ>(new Map<String, Map<String, MessageOBJ>>());
 
 	const context_value: ChannelContext = {
 		channels: channels,
-		setChannels: setChannels,
+		setChannel: setChannel,
+		deleteChannel: deleteChannel,
 		messages: messages,
 		UpdateMessage: UpdateMessage,
 		DeleteMessage: DeleteMessage,

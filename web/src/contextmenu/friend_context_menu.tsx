@@ -4,6 +4,7 @@ import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 import Routes from '../config';
 import { useNavigate } from "react-router-dom";
 import { FriendOBJ, ChannelOBJ } from '../models/models';
+import { DeleteFriend } from '../utils/api';
 
 interface propsChannelCtxProps {
     value: { x: number, y: number, friend_obj: FriendOBJ }
@@ -21,19 +22,9 @@ export default function FriendContextMenu(props: propsChannelCtxProps) {
     }
 
     const deleteFriend = () => {
-        const delete_Friend = (prevFriends: Map<String, FriendOBJ>) => {
-            prevFriends.delete(props.value.friend_obj.uuid);
-            return prevFriends;
-        }
-        const url = Routes.Friends + "/" + props.value.friend_obj.uuid;
-        fetch(url, {
-            method: "DELETE",
-            headers: {
-                "Authorization": user_ctx.accessToken,
-            }
-        }).then(response => {
+        DeleteFriend(user_ctx.accessToken, props.value.friend_obj.uuid).then(response => {
             if (response.status === 200) {
-                user_ctx.setFriends(prevFriends => new Map(delete_Friend(prevFriends)));
+                user_ctx.deleteFriend(props.value.friend_obj.uuid)
             }
         })
     }
@@ -51,7 +42,7 @@ export default function FriendContextMenu(props: propsChannelCtxProps) {
                     if (!channel_ctx.channels.has(dm_channel.uuid)) {
                         let channel: ChannelOBJ = dm_channel;
                         channel.type = 0; 
-                        channel_ctx.setChannels(prevChannels => new Map(prevChannels.set(channel.uuid, channel)));
+                        channel_ctx.setChannel(prevChannels => new Map(prevChannels.set(channel.uuid, channel)));
                     }
                     navigate(`/channels/${dm_channel.uuid}`);
                 })

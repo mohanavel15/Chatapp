@@ -1,7 +1,8 @@
 import { createContext, useEffect, useState } from "react";
 import { FriendOBJ, UserOBJ } from "../models/models";
+import useMap from '../hooks/useMap';
 import Routes from "../config";
-import { Refresh } from "../utils/api";
+
 export interface UserContextOBJ {
     uuid: string;
     username: string;
@@ -12,9 +13,11 @@ export interface UserContextOBJ {
     setAvatar:React.Dispatch<React.SetStateAction<string>>;
     setAccessToken:React.Dispatch<React.SetStateAction<string>>;
     friends: Map<String,FriendOBJ>;
-	setFriends: React.Dispatch<React.SetStateAction<Map<String, FriendOBJ>>>
+	setFriend: React.Dispatch<React.SetStateAction<Map<String, FriendOBJ>>>
+    deleteFriend: (key: String) => void
     blocked: Map<String,UserOBJ>;
 	setBlocked: React.Dispatch<React.SetStateAction<Map<String, UserOBJ>>>
+    deleteBlocked: (key: String) => void
 }
 
 export const UserContext = createContext<UserContextOBJ>(undefined!);
@@ -24,8 +27,8 @@ function UserCTX({ children }: { children: React.ReactChild }) {
     const [username, setUsername] = useState<string>("");
     const [avatar, setAvatar] = useState<string>("");
     const [accessToken, setAccessToken] = useState<string>("");
-	const [friends, setFriends] = useState<Map<String,FriendOBJ>>(new Map<String,FriendOBJ>());
-	const [blocked, setBlocked] = useState<Map<String,UserOBJ>>(new Map<String,UserOBJ>());
+    const [friends, setFriend, deleteFriend] = useMap<FriendOBJ>(new Map<String,FriendOBJ>());
+	const [blocked, setBlocked, deleteBlocked] = useMap<UserOBJ>(new Map<String,UserOBJ>());
 
     useEffect(() => {
         const token = localStorage.getItem("access_token") || "";
@@ -80,9 +83,11 @@ function UserCTX({ children }: { children: React.ReactChild }) {
         setAvatar: setAvatar,
         setAccessToken: setAccessToken,
         friends: friends,
-        setFriends: setFriends,
+        setFriend: setFriend,
+        deleteFriend: deleteFriend,
         blocked: blocked,
-        setBlocked: setBlocked
+        setBlocked: setBlocked,
+        deleteBlocked: deleteBlocked
     }
     
     return (

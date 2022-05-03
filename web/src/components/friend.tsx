@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle, faDotCircle, faCircleMinus, IconDefinition, faCheck, faX, faMessage } from '@fortawesome/free-solid-svg-icons';
 import Routes from '../config';
+import { AddFriend, DeleteFriend } from '../utils/api';
 
 function Friend({ friend_obj }: { friend_obj: FriendOBJ }) {
 	const user_ctx:UserContextOBJ = useContext(UserContext);
@@ -42,36 +43,17 @@ function Friend({ friend_obj }: { friend_obj: FriendOBJ }) {
             }
             return prevFriends;
         }
-        fetch(Routes.Friends, {
-            method: "POST",
-            headers: {
-                "Authorization": user_ctx.accessToken,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                "to": friend_obj.uuid
-            })
-        }).then(response => {
+        AddFriend(user_ctx.accessToken, friend_obj.uuid).then(response => {
             if (response.status === 200) {
-                user_ctx.setFriends(prevFriends => new Map(updateFriend(prevFriends)));
+                user_ctx.setFriend(prevFriends => new Map(updateFriend(prevFriends)));
             }
         })
     }
 
     function Decline() {
-        const deleteFriend = (prevFriends: Map<String, FriendOBJ>) => {
-            prevFriends.delete(friend_obj.uuid);
-            return prevFriends;
-        }
-        const url = Routes.Friends + "/" + friend_obj.uuid; 
-        fetch(url, {
-            method: "DELETE",
-            headers: {
-                "Authorization": user_ctx.accessToken,
-            }
-        }).then(response => {
+        DeleteFriend(user_ctx.accessToken, friend_obj.uuid).then(response => {
             if (response.status === 200) {
-                user_ctx.setFriends(prevFriends => new Map(deleteFriend(prevFriends)));
+                user_ctx.deleteFriend(friend_obj.uuid);
             }
         })
     }
@@ -89,7 +71,7 @@ function Friend({ friend_obj }: { friend_obj: FriendOBJ }) {
                     if (!channel_ctx.channels.has(dm_channel.uuid)) {
                         let channel: ChannelOBJ = dm_channel;
                         channel.type = 0; 
-                        channel_ctx.setChannels(prevChannels => new Map(prevChannels.set(channel.uuid, channel)));
+                        channel_ctx.setChannel(prevChannels => new Map(prevChannels.set(channel.uuid, channel)));
                     }
                     navigate(`/channels/${dm_channel.uuid}`);
                 })

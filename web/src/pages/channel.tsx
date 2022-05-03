@@ -30,21 +30,6 @@ import MessageCTX from '../contexts/messagectx';
 import Routes from '../config';
 import { Refresh } from "../utils/api";
 
-const delete_channel = (channels: Map<String, ChannelOBJ>, channel: ChannelOBJ) => {
-	channels.delete(channel.uuid);
-	return channels;
-}
-
-const deleteFriend = (prevFriends: Map<String, FriendOBJ>, friend_id: string) => {
-	prevFriends.delete(friend_id);
-	return prevFriends;
-}
-
-const deleteBlocked = (prevBlocked: Map<String, UserOBJ>, user_id: string) => {
-	prevBlocked.delete(user_id);
-	return prevBlocked;
-}
-
 function Channel() {
 	const parameter  = useParams<string>();
 	let channel_id = parameter.id || "@me";
@@ -68,7 +53,7 @@ function Channel() {
 
 					ready.channels.forEach((channel: ChannelOBJ) => {
 						channel.type = 1;
-						channel_context.setChannels(prev => new Map(prev.set(channel.uuid, channel)));
+						channel_context.setChannel(prev => new Map(prev.set(channel.uuid, channel)));
 						const url = Routes.Channels+`/${channel.uuid}/messages`
 						fetch(url, {
 							method: "GET",
@@ -99,7 +84,7 @@ function Channel() {
 
 					ready.dm_channels.forEach((dm_channel: ChannelOBJ) => {
 						dm_channel.type = 0;
-						channel_context.setChannels(prev => new Map(prev.set(dm_channel.uuid, dm_channel)));
+						channel_context.setChannel(prev => new Map(prev.set(dm_channel.uuid, dm_channel)));
 						const url = Routes.Channels+`/${dm_channel.uuid}/messages`
 						fetch(url, {
 							method: "GET",
@@ -116,7 +101,7 @@ function Channel() {
 					});
 
 					ready.friends.forEach((friend: FriendOBJ) => {
-						user_ctx.setFriends(prev => new Map(prev.set(friend.uuid, friend)));
+						user_ctx.setFriend(prev => new Map(prev.set(friend.uuid, friend)));
 					});
 				}
 
@@ -144,18 +129,18 @@ function Channel() {
 				if (payload.event === 'CHANNEL_CREATE' || payload.event === 'CHANNEL_MODIFY') {
 					const channel: ChannelOBJ = payload.data;
 					channel.type = 1;
-					channel_context.setChannels(prevChannels => new Map(prevChannels.set(channel.uuid, channel)));
+					channel_context.setChannel(prevChannels => new Map(prevChannels.set(channel.uuid, channel)));
 				}
 
 				if (payload.event === 'CHANNEL_DELETE') {
 					const channel: ChannelOBJ = payload.data;
-					channel_context.setChannels(prevChannels => new Map(delete_channel(prevChannels, channel)));
+					channel_context.deleteChannel(channel.uuid)
 				}
 
 				if (payload.event === 'DM_CHANNEL_CREATE' || payload.event === 'DM_CHANNEL_MODIFY') {
 					const channel: ChannelOBJ = payload.data;
 					channel.type = 0;
-					channel_context.setChannels(prevChannels => new Map(prevChannels.set(channel.uuid, channel)));
+					channel_context.setChannel(prevChannels => new Map(prevChannels.set(channel.uuid, channel)));
 				}
 
 				if (payload.event === 'MEMBER_JOIN' || payload.event === 'MEMBER_UPDATE') {
@@ -170,12 +155,12 @@ function Channel() {
 
 				if (payload.event === 'FRIEND_CREATE' || payload.event === 'FRIEND_MODIFY') {
 					const friend: FriendOBJ = payload.data;
-					user_ctx.setFriends(prevFriends => new Map(prevFriends.set(friend.uuid, friend)));
+					user_ctx.setFriend(prevFriends => new Map(prevFriends.set(friend.uuid, friend)));
 				}
 				
 				if (payload.event === 'FRIEND_DELETE') {
 					const friend: FriendOBJ = payload.data;
-					user_ctx.setFriends(prevFriends => new Map(deleteFriend(prevFriends, friend.uuid)));
+					user_ctx.deleteFriend(friend.uuid);
 				}
 
 				if (payload.event === 'STATUS_UPDATE') {
@@ -184,7 +169,7 @@ function Channel() {
 						const friend = user_ctx.friends.get(status.user_id);
 						if (friend !== undefined) {
 							friend.status = status.status;
-							user_ctx.setFriends(prevFriends => new Map(prevFriends.set(friend.uuid, friend)));
+							user_ctx.setFriend(prevFriends => new Map(prevFriends.set(friend.uuid, friend)));
 						}
 					}
 					if (status.type === 1) {
@@ -197,7 +182,7 @@ function Channel() {
 								return prevChannels
 							}
 						}
-						channel_context.setChannels(prevChannels => new Map(UpdateChannelStatus(prevChannels, status)));
+						channel_context.setChannel(prevChannels => new Map(UpdateChannelStatus(prevChannels, status)));
 					}
 					if (status.type === 2) {
 						const member = channel_context.members.get(status.channel_id)?.get(status.user_id);
@@ -210,13 +195,13 @@ function Channel() {
 
 				if (payload.event === 'BLOCK_CREATE') {
 					const blocked_user: UserOBJ = payload.data;
-					user_ctx.setFriends(prevFriends => new Map(deleteFriend(prevFriends, blocked_user.uuid)));
+					user_ctx.deleteFriend(blocked_user.uuid);
 					user_ctx.setBlocked(prevBlockedUsers => new Map(prevBlockedUsers.set(blocked_user.uuid, blocked_user)));
 				}
 				
 				if (payload.event === 'BLOCK_DELETE') {
 					const blocked_user: UserOBJ = payload.data;
-					user_ctx.setBlocked(prevBlockedUsers => new Map(deleteBlocked(prevBlockedUsers, blocked_user.uuid)));
+					user_ctx.deleteBlocked(blocked_user.uuid);
 				}
 			}
 		};
@@ -285,14 +270,13 @@ function Channel() {
 						{ state_context.showProfile && <Profile /> }
 						{ state_context.showKickBan && <KickBan /> }
 						{ ctx_menu_context.showMsgCtxMenu && <MessageContextMenu location={ctx_menu_context.ctxMsgMenuLocation} /> }
-						{ ctx_menu_context.showChannelCtxMenu && <ChannelContextMenu location={ctx_menu_context.ctxChannelMenuLocation} /> }
+						{ ctx_menu_context.showChannelCtxMenu && <ChannelContextMenu {...ctx_menu_context.ctxChannelMenuLocation} /> }
 						{ ctx_menu_context.showMemberCtxMenu && <MemberContextMenu location={ctx_menu_context.ctxMemberMenuLocation} /> }
 						{ ctx_menu_context.showFriendCtxMenu && <FriendContextMenu value={ctx_menu_context.ctxFriendMenuLocation} /> }
 					</>
 					</MessageCTX>
 			}
 			{ state_context.Settings && <Settings /> }
-
 		</div>
 	);
 }

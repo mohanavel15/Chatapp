@@ -1,11 +1,11 @@
 import React, { useContext, useState, useEffect } from 'react'
-import { MemberOBJ, ChannelOBJ, FriendOBJ } from '../models/models';
+import { MemberOBJ, ChannelOBJ } from '../models/models';
 import { UserContextOBJ, UserContext } from "../contexts/usercontext";
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 import { StatesContext, StateContext } from "../contexts/states";
 import { useNavigate } from "react-router-dom";
 import Routes from '../config';
-import { AddFriend } from '../utils/api';
+import { AddFriend, DeleteFriend } from '../utils/api';
 
 interface propsMsgCtxProps {
     location: {event: React.MouseEvent<HTMLDivElement, MouseEvent>, member: MemberOBJ, channel: ChannelOBJ},
@@ -44,7 +44,7 @@ export default function MemberContextMenu(props:propsMsgCtxProps) {
                     if (!channel_context.channels.has(dm_channel.uuid)) {
                         let channel: ChannelOBJ = dm_channel;
                         channel.type = 0; 
-                        channel_context.setChannels(prevChannels => new Map(prevChannels.set(channel.uuid, channel)));
+                        channel_context.setChannel(prevChannels => new Map(prevChannels.set(channel.uuid, channel)));
                     }
                     navigate(`/channels/${dm_channel.uuid}`);
                 })
@@ -53,19 +53,9 @@ export default function MemberContextMenu(props:propsMsgCtxProps) {
     }
 
     const deleteFriend = () => {
-        const delete_Friend = (prevFriends: Map<String, FriendOBJ>) => {
-            prevFriends.delete(props.location.member.uuid);
-            return prevFriends;
-        }
-        const url = Routes.Friends + "/" + props.location.member.uuid;
-        fetch(url, {
-            method: "DELETE",
-            headers: {
-                "Authorization": user_ctx.accessToken,
-            }
-        }).then(response => {
+        DeleteFriend(user_ctx.accessToken, props.location.member.uuid).then(response => {
             if (response.status === 200) {
-                user_ctx.setFriends(prevFriends => new Map(delete_Friend(prevFriends)));
+                user_ctx.deleteFriend(props.location.member.uuid)
             }
         })
     }
