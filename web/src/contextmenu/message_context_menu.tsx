@@ -1,6 +1,5 @@
 import React, { useContext } from 'react'
-
-import { MessageOBJ, ChannelOBJ } from '../models/models';
+import { MessageOBJ } from '../models/models';
 import { UserContextOBJ, UserContext } from "../contexts/usercontext";
 import { StatesContext, StateContext } from "../contexts/states";
 import { MessageContext } from "../contexts/messagectx";
@@ -24,8 +23,6 @@ export default function MessageContextMenu(props:propsMsgCtxProps) {
         top: props.location.y,
         left: props.location.x
     }
-
-    console.log("message:", props.location.message.content);
 
     return (
         <div className='ContextMenu' style={style}>

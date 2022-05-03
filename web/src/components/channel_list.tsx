@@ -40,11 +40,6 @@ export default function ChannelList(props: ChannelHeaderProps) {
         active_channel_style.backgroundColor = "#393d42"
         active_channel_style.borderRadius = "5px"
     }
-
-    /*= {
-        backgroundColor: "#ffffff27",
-        border-radius: 5px;
-    }*/
     
     return (
         <Link to={`/channels/${props.id}`} className="linktag" >

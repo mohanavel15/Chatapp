@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react'
+import { useContext, useState, useEffect } from 'react'
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 import Member from './member';
 import { ChannelOBJ } from '../models/models';
