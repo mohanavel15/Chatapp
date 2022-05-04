@@ -33,7 +33,7 @@ function ChannelHome() {
 					(event) => {
 						event.preventDefault();
 						ctx_menu_context.closeAll();
-						ctx_menu_context.setFriendCtxMenuLocation({x: event.clientX, y: event.clientY, friend_obj: friendOBJ})
+						ctx_menu_context.setFriendCtxMenu({x: event.clientX, y: event.clientY, friend_obj: friendOBJ})
 						ctx_menu_context.setShowFriendCtxMenu(true);
 					}
 				}>

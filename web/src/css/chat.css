@@ -1,4 +1,5 @@
 .Chat {
+  position: relative;
   text-align: left;
   color: aliceblue;
   background-color: #23272a;
@@ -95,7 +96,7 @@
 .EmojiPicker {
   position: absolute;
   bottom: 7rem;
-  right: 13rem;
+  right: 1rem;
   height: 20rem;
   width: 20rem;
   background: none;

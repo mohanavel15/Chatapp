@@ -43,7 +43,7 @@ export default function ChannelBar() {
 				<div key={channel.uuid} onContextMenu={(event) => {
 					event.preventDefault();
 					ctx_menu_context.closeAll();
-					ctx_menu_context.setChannelCtxMenuLocation({x: event.clientX, y: event.clientY, channel: channel})
+					ctx_menu_context.setChannelCtxMenu({x: event.clientX, y: event.clientY, channel: channel})
 					ctx_menu_context.setShowChannelCtxMenu(true);
 				}}>
 				{ channel.type === 1  && <ChannelList id={channel.uuid} icon={channel.icon} name={channel.name} status={0} dm={false} /> }

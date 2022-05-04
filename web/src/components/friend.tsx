@@ -5,9 +5,9 @@ import { setDefaultAvatar } from '../utils/errorhandle';
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircle, faDotCircle, faCircleMinus, IconDefinition, faCheck, faX, faMessage } from '@fortawesome/free-solid-svg-icons';
+import { faCircle, faDotCircle, IconDefinition, faCheck, faX, faMessage } from '@fortawesome/free-solid-svg-icons';
 import Routes from '../config';
-import { AddFriend, DeleteFriend } from '../utils/api';
+import { AddFriend, DeleteFriend, DMUser } from '../utils/api';
 
 function Friend({ friend_obj }: { friend_obj: FriendOBJ }) {
 	const user_ctx:UserContextOBJ = useContext(UserContext);
@@ -21,11 +21,6 @@ function Friend({ friend_obj }: { friend_obj: FriendOBJ }) {
             color: "lime"
         }
         icon = faCircle
-    } else if (friend_obj.status === 2) {
-        style = {
-            color: "red"
-        }
-        icon = faCircleMinus
     } else {
         style = {
             color: "grey"
@@ -59,13 +54,7 @@ function Friend({ friend_obj }: { friend_obj: FriendOBJ }) {
     }
 
     function Message() {
-        const url = Routes.host + "/dms/" + friend_obj.uuid;
-        fetch(url, {
-            method: "GET",
-            headers: {
-                "Authorization": user_ctx.accessToken,
-            }
-        }).then(response => {
+        DMUser(user_ctx.accessToken, friend_obj.uuid).then(response => {
             if (response.status === 200) {
                 response.json().then(dm_channel => {
                     if (!channel_ctx.channels.has(dm_channel.uuid)) {

@@ -43,7 +43,7 @@ export default function EditChannel() {
 					(event) => {
 						event.preventDefault();
 						ctx_menu_context.closeAll();
-						ctx_menu_context.setMemberCtxMenuLocation({event: event, member: member, channel: state_context.ChannelOBJ});
+						ctx_menu_context.setMemberCtxMenu({event: event, member: member, channel: state_context.ChannelOBJ});
 						ctx_menu_context.setShowMemberCtxMenu(true);
 					}
           		}>
@@ -100,7 +100,7 @@ export default function EditChannel() {
                         <div className="bans">
                             <div className="ban-container">
                                 <div className="ban-user-container">
-                                    <img className="ban-avatar" src={ban.banned_user.avatar} onError={setDefaultAvatar} />
+                                    <img className="ban-avatar" src={ban.banned_user.avatar} alt="BannedUserAvatar" onError={setDefaultAvatar} />
                                     <p>{ban.banned_user.username}</p>
                                 </div>
                                 <div className="ban-action">

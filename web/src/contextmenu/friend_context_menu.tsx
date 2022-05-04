@@ -7,7 +7,7 @@ import { FriendOBJ, ChannelOBJ } from '../models/models';
 import { DeleteFriend } from '../utils/api';
 
 interface propsChannelCtxProps {
-    value: { x: number, y: number, friend_obj: FriendOBJ }
+    x: number, y: number, friend_obj: FriendOBJ
 }
 
 export default function FriendContextMenu(props: propsChannelCtxProps) {
@@ -17,20 +17,20 @@ export default function FriendContextMenu(props: propsChannelCtxProps) {
 
     let style: React.CSSProperties
     style = {
-        top: props.value.y,
-        left: props.value.x
+        top: props.y,
+        left: props.x
     }
 
     const deleteFriend = () => {
-        DeleteFriend(user_ctx.accessToken, props.value.friend_obj.uuid).then(response => {
+        DeleteFriend(user_ctx.accessToken, props.friend_obj.uuid).then(response => {
             if (response.status === 200) {
-                user_ctx.deleteFriend(props.value.friend_obj.uuid)
+                user_ctx.deleteFriend(props.friend_obj.uuid)
             }
         })
     }
 
     function Message() {
-        const url = Routes.host + "/dms/" + props.value.friend_obj.uuid;
+        const url = Routes.host + "/dms/" + props.friend_obj.uuid;
         fetch(url, {
             method: "GET",
             headers: {
@@ -52,10 +52,10 @@ export default function FriendContextMenu(props: propsChannelCtxProps) {
 
     return (
         <div className='ContextMenu' style={style}>
-            {props.value.friend_obj.pending === false && <button className='CtxBtn' onClick={Message}>Message</button>}
-            {props.value.friend_obj.pending === false && <button className='CtxDelBtn' onClick={deleteFriend}>Remove Friend</button>}
-            {props.value.friend_obj.pending === true && <button className='CtxDelBtn' onClick={deleteFriend}>Decline</button>}
-            <button className='CtxBtn' onClick={() => { navigator.clipboard.writeText(props.value.friend_obj.uuid) }}>Copy ID</button>
+            {props.friend_obj.pending === false && <button className='CtxBtn' onClick={Message}>Message</button>}
+            {props.friend_obj.pending === false && <button className='CtxDelBtn' onClick={deleteFriend}>Remove Friend</button>}
+            {props.friend_obj.pending === true && <button className='CtxDelBtn' onClick={deleteFriend}>Decline</button>}
+            <button className='CtxBtn' onClick={() => { navigator.clipboard.writeText(props.friend_obj.uuid) }}>Copy ID</button>
         </div>
     )
 }

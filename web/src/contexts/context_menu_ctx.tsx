@@ -3,24 +3,24 @@ import { MessageOBJ, ChannelOBJ, MemberOBJ, FriendOBJ } from '../models/models';
 
 export interface ContextMenuCtx {
     showMsgCtxMenu: boolean;
-    ctxMsgMenuLocation: {x: number, y: number, message:MessageOBJ, channel_id:string};
+    msgCtxMenu: {x: number, y: number, message:MessageOBJ, channel_id:string};
     setShowMsgCtxMenu: React.Dispatch<React.SetStateAction<boolean>>;
-    setMsgCtxMenuLocation: React.Dispatch<React.SetStateAction<{x: number, y: number, message: MessageOBJ, channel_id:string}>>;
+    setMsgCtxMenu: React.Dispatch<React.SetStateAction<{x: number, y: number, message: MessageOBJ, channel_id:string}>>;
 
     showChannelCtxMenu: boolean;
-    ctxChannelMenuLocation: {x: number, y: number, channel: ChannelOBJ};
+    channelCtxMenu: {x: number, y: number, channel: ChannelOBJ};
     setShowChannelCtxMenu: React.Dispatch<React.SetStateAction<boolean>>;
-    setChannelCtxMenuLocation: React.Dispatch<React.SetStateAction<{x: number, y: number, channel: ChannelOBJ}>>;
+    setChannelCtxMenu: React.Dispatch<React.SetStateAction<{x: number, y: number, channel: ChannelOBJ}>>;
 
     showMemberCtxMenu: boolean;
-    ctxMemberMenuLocation: {event: React.MouseEvent<HTMLDivElement, MouseEvent>, member:MemberOBJ, channel:ChannelOBJ};
+    memberCtxMenu: {event: React.MouseEvent<HTMLDivElement, MouseEvent>, member:MemberOBJ, channel:ChannelOBJ};
     setShowMemberCtxMenu: React.Dispatch<React.SetStateAction<boolean>>;
-    setMemberCtxMenuLocation: React.Dispatch<React.SetStateAction<{event: React.MouseEvent<HTMLDivElement, MouseEvent>, member: MemberOBJ, channel:ChannelOBJ}>>;
+    setMemberCtxMenu: React.Dispatch<React.SetStateAction<{event: React.MouseEvent<HTMLDivElement, MouseEvent>, member: MemberOBJ, channel:ChannelOBJ}>>;
 
     showFriendCtxMenu: boolean;
-    ctxFriendMenuLocation: {x: number, y: number, friend_obj: FriendOBJ};
+    friendCtxMenu: {x: number, y: number, friend_obj: FriendOBJ};
     setShowFriendCtxMenu: React.Dispatch<React.SetStateAction<boolean>>;
-    setFriendCtxMenuLocation: React.Dispatch<React.SetStateAction<{x: number, y: number, friend_obj: FriendOBJ}>>;
+    setFriendCtxMenu: React.Dispatch<React.SetStateAction<{x: number, y: number, friend_obj: FriendOBJ}>>;
 
     closeAll: () => void;
 }
@@ -29,16 +29,16 @@ export const ContextMenu = createContext<ContextMenuCtx>(undefined!);
 
 export function CtxMenuCtx({ children }: {children: React.ReactChild}) {
 	const [showMsgCtxMenu, setShowMsgCtxMenu] = useState(false);
-	const [ctxMsgMenuLocation, setMsgCtxMenuLocation] = useState<{x: number, y: number, message:MessageOBJ, channel_id:string}>(undefined!);
+	const [msgCtxMenu, setMsgCtxMenu] = useState<{x: number, y: number, message:MessageOBJ, channel_id:string}>(undefined!);
 
     const [showChannelCtxMenu, setShowChannelCtxMenu] = useState(false);
-    const [ctxChannelMenuLocation, setChannelCtxMenuLocation] = useState<{x: number, y: number, channel:ChannelOBJ}>(undefined!);
+    const [channelCtxMenu, setChannelCtxMenu] = useState<{x: number, y: number, channel:ChannelOBJ}>(undefined!);
 
     const [showMemberCtxMenu, setShowMemberCtxMenu] = useState(false);
-	const [ctxMemberMenuLocation, setMemberCtxMenuLocation] = useState<{event: React.MouseEvent<HTMLDivElement, MouseEvent>, member:MemberOBJ, channel:ChannelOBJ}>(undefined!);
+	const [memberCtxMenu, setMemberCtxMenu] = useState<{event: React.MouseEvent<HTMLDivElement, MouseEvent>, member:MemberOBJ, channel:ChannelOBJ}>(undefined!);
 
     const [showFriendCtxMenu, setShowFriendCtxMenu] = useState(false);
-    const [ctxFriendMenuLocation, setFriendCtxMenuLocation] = useState<{x: number, y: number, friend_obj:FriendOBJ}>(undefined!);
+    const [friendCtxMenu, setFriendCtxMenu] = useState<{x: number, y: number, friend_obj:FriendOBJ}>(undefined!);
 
     function closeAll() {
         setShowMsgCtxMenu(false);
@@ -49,24 +49,24 @@ export function CtxMenuCtx({ children }: {children: React.ReactChild}) {
 
     const context_value: ContextMenuCtx = {
 		showMsgCtxMenu: showMsgCtxMenu,
-		ctxMsgMenuLocation: ctxMsgMenuLocation,
+		msgCtxMenu: msgCtxMenu,
 		setShowMsgCtxMenu: setShowMsgCtxMenu,
-		setMsgCtxMenuLocation: setMsgCtxMenuLocation,
+		setMsgCtxMenu: setMsgCtxMenu,
         
         showChannelCtxMenu: showChannelCtxMenu,
-        ctxChannelMenuLocation: ctxChannelMenuLocation,
+        channelCtxMenu: channelCtxMenu,
         setShowChannelCtxMenu: setShowChannelCtxMenu,
-        setChannelCtxMenuLocation: setChannelCtxMenuLocation,
+        setChannelCtxMenu: setChannelCtxMenu,
 
         showMemberCtxMenu: showMemberCtxMenu,
-        ctxMemberMenuLocation: ctxMemberMenuLocation,
+        memberCtxMenu: memberCtxMenu,
         setShowMemberCtxMenu: setShowMemberCtxMenu,
-        setMemberCtxMenuLocation: setMemberCtxMenuLocation,
-
+        setMemberCtxMenu: setMemberCtxMenu,
+        
         showFriendCtxMenu: showFriendCtxMenu,
-        ctxFriendMenuLocation: ctxFriendMenuLocation,
+        friendCtxMenu: friendCtxMenu,
         setShowFriendCtxMenu: setShowFriendCtxMenu,
-        setFriendCtxMenuLocation: setFriendCtxMenuLocation,
+        setFriendCtxMenu: setFriendCtxMenu,
 
         closeAll: closeAll
     }

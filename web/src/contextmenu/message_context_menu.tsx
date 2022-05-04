@@ -5,7 +5,7 @@ import { StatesContext, StateContext } from "../contexts/states";
 import { MessageContext } from "../contexts/messagectx";
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 interface propsMsgCtxProps {
-    location: {x: number, y: number, message: MessageOBJ, channel_id: string},
+    x: number, y: number, message: MessageOBJ, channel_id: string
 }
 
 export default function MessageContextMenu(props:propsMsgCtxProps) {
@@ -14,19 +14,19 @@ export default function MessageContextMenu(props:propsMsgCtxProps) {
     const channel_ctx:ChannelContext = useContext(ChannelsContext);
     const msgctx = useContext(MessageContext);
 
-    let channel = channel_ctx.channels.get(props.location.channel_id);
+    let channel = channel_ctx.channels.get(props.channel_id);
 
-    const message = props.location.message;
+    const message = props.message;
 
     let style: React.CSSProperties
     style = {
-        top: props.location.y,
-        left: props.location.x
+        top: props.y,
+        left: props.x
     }
 
     return (
         <div className='ContextMenu' style={style}>
-            <button className='CtxBtn' onClick={() => {navigator.clipboard.writeText(props.location.message.content)}}>Copy Text</button>
+            <button className='CtxBtn' onClick={() => {navigator.clipboard.writeText(props.message.content)}}>Copy Text</button>
             { user_ctx.uuid === message.author.uuid && <button className='CtxBtn' onClick={
                 () => {
                     msgctx.setMessage(message);
@@ -39,7 +39,7 @@ export default function MessageContextMenu(props:propsMsgCtxProps) {
                     state_context.setMessageOBJ(message);
             }
             }>Delete Message</button> }
-            <button className='CtxBtn' onClick={() => {navigator.clipboard.writeText(props.location.message.uuid)}}>Copy ID</button>
+            <button className='CtxBtn' onClick={() => {navigator.clipboard.writeText(props.message.uuid)}}>Copy ID</button>
         </div>
     )
 }

@@ -13,7 +13,6 @@ import CreateChannel from "../components/createchannel";
 import EditChannel from '../components/editchannel';
 import DeleteChannel from "../components/deletechannel";
 import DeleteMessage from "../components/deletemessage";
-import Profile from "../components/profile";
 import KickBan from "../components/kick_ban";
 
 import MessageContextMenu from '../contextmenu/message_context_menu';
@@ -267,12 +266,11 @@ function Channel() {
 						{ state_context.editChannel && <EditChannel /> }
 						{ state_context.deleteChannel && <DeleteChannel /> }
 						{ state_context.deleteMessage && <DeleteMessage /> }
-						{ state_context.showProfile && <Profile /> }
 						{ state_context.showKickBan && <KickBan /> }
-						{ ctx_menu_context.showMsgCtxMenu && <MessageContextMenu location={ctx_menu_context.ctxMsgMenuLocation} /> }
-						{ ctx_menu_context.showChannelCtxMenu && <ChannelContextMenu {...ctx_menu_context.ctxChannelMenuLocation} /> }
-						{ ctx_menu_context.showMemberCtxMenu && <MemberContextMenu location={ctx_menu_context.ctxMemberMenuLocation} /> }
-						{ ctx_menu_context.showFriendCtxMenu && <FriendContextMenu value={ctx_menu_context.ctxFriendMenuLocation} /> }
+						{ ctx_menu_context.showMsgCtxMenu && <MessageContextMenu {...ctx_menu_context.msgCtxMenu} /> }
+						{ ctx_menu_context.showChannelCtxMenu && <ChannelContextMenu {...ctx_menu_context.channelCtxMenu} /> }
+						{ ctx_menu_context.showMemberCtxMenu && <MemberContextMenu {...ctx_menu_context.memberCtxMenu} /> }
+						{ ctx_menu_context.showFriendCtxMenu && <FriendContextMenu {...ctx_menu_context.friendCtxMenu} /> }
 					</>
 					</MessageCTX>
 			}

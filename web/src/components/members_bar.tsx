@@ -19,7 +19,7 @@ export default function MembersBar({ channel }: { channel: ChannelOBJ }) {
 					(event) => {
 						event.preventDefault();
 						ctx_menu_context.closeAll();
-						ctx_menu_context.setMemberCtxMenuLocation({event: event, member: member, channel: channel});
+						ctx_menu_context.setMemberCtxMenu({event: event, member: member, channel: channel});
 						ctx_menu_context.setShowMemberCtxMenu(true);
 					}
           		}>
