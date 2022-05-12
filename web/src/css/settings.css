@@ -129,3 +129,15 @@
     font-size: larger;
     text-decoration: solid;
 }
+
+@media only screen and (max-width: 1024px) {
+    .settings-content-item {
+        width: 80%;
+    }
+}
+
+@media only screen and (max-width: 425px) {
+    .settings-content-item {
+        width: 90%;
+    }
+}

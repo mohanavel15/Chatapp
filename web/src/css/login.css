@@ -4,30 +4,21 @@
     bottom: 0;
     left: 0;
     right: 0;
+    display: flex;
+    align-items: center;
     justify-content: center;
 }
 
 .login-container {
-    margin: auto;
-    margin-top: 10rem;
-    height: 30rem;
-    width: 30rem;
-    background-color: #23272a;
-}
-
-.register-container {
-    margin: auto;
-    margin-top: 10rem;
-    height: 35rem;
-    width: 30rem;
+    min-height: 30rem;
     background-color: #23272a;
 }
 
 #login-input{
-    width: 70%;
+    width: 16rem;
     height: 3rem;
-    margin-bottom: 1rem;
     border: none;
+    margin: 0.5rem;
     background-color: #2c2f33;
     color: aliceblue;
     font-size: larger;
@@ -45,4 +36,10 @@
 #login-button:hover {
     opacity: 0.5;
     cursor: pointer;
+}
+
+@media only screen and (max-width: 425px) {
+    .Login {
+        background-color: #23272a;
+    }
 }

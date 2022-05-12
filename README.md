@@ -19,6 +19,7 @@ more [images](images)
 - Friends
 	- Add / Accept
 	- Remove / Decline
+- Block / Unblock Users
 
 ## Setup Server
 
