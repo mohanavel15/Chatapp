@@ -95,3 +95,10 @@ type DMChannel struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
+
+type Pins struct {
+	ID        uint   `gorm:"primarykey"`
+	ChannelID string `gorm:"type:varchar(255);not null"`
+	MessageID string `gorm:"type:varchar(255);not null"`
+	CreatedAt time.Time
+}

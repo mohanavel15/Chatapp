@@ -70,6 +70,7 @@ func main() {
 	db.AutoMigrate(&database.Ban{})
 	db.AutoMigrate(&database.Block{})
 	db.AutoMigrate(&database.DMChannel{})
+	db.AutoMigrate(&database.Pins{})
 
 	handler = &websocket.EventHandler{}
 	handler.Add("CONNECT", gateway.Connect)
@@ -104,6 +105,10 @@ func main() {
 	router.HandleFunc("/channels/{id}/messages/{mid}", Authenticated(restapi.GetMessage)).Methods("GET")
 	router.HandleFunc("/channels/{id}/messages/{mid}", Authenticated(restapi.EditMessage)).Methods("PATCH")
 	router.HandleFunc("/channels/{id}/messages/{mid}", Authenticated(restapi.DeleteMessage)).Methods("DELETE")
+	// Pin Messages
+	router.HandleFunc("/channels/{id}/pins", Authenticated(restapi.GetPins)).Methods("GET")
+	router.HandleFunc("/channels/{id}/pins/{mid}", Authenticated(restapi.PinMsg)).Methods("PUT")
+	router.HandleFunc("/channels/{id}/pins/{mid}", Authenticated(restapi.UnpinMsg)).Methods("DELETE")
 	// Members
 	router.HandleFunc("/channels/{id}/members", Authenticated(restapi.GetMembers)).Methods("GET")
 	router.HandleFunc("/channels/{id}/members/{mid}", Authenticated(restapi.GetMember)).Methods("GET")
