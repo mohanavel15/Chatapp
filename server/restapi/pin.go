@@ -3,6 +3,7 @@ package restapi
 import (
 	"Chatapp/database"
 	"Chatapp/response"
+	"Chatapp/websocket"
 	"encoding/json"
 	"net/http"
 
@@ -62,6 +63,12 @@ func PinMsg(ctx *Context) {
 	}
 
 	ctx.Res.WriteHeader(http.StatusOK)
+
+	var author database.Account
+	ctx.Db.Where("id = ?", message.AccountID).First(&author)
+	author_res := response.NewUser(&author, 0)
+	res := response.NewMessage(message, author_res)
+	websocket.BroadcastToChannel(ctx.Conn, channel_id, "MESSAGE_PINNED", res)
 }
 
 func UnpinMsg(ctx *Context) {
@@ -91,4 +98,10 @@ func UnpinMsg(ctx *Context) {
 	}
 	ctx.Db.Delete(&pin)
 	ctx.Res.WriteHeader(http.StatusOK)
+
+	var author database.Account
+	ctx.Db.Where("id = ?", message.AccountID).First(&author)
+	author_res := response.NewUser(&author, 0)
+	res := response.NewMessage(message, author_res)
+	websocket.BroadcastToChannel(ctx.Conn, channel_id, "MESSAGE_UNPINNED", res)
 }

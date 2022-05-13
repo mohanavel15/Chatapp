@@ -85,7 +85,7 @@ func main() {
 
 	router := mux.NewRouter()
 	headers := handlers.AllowedHeaders([]string{"Content-Type", "Authorization"})
-	methods := handlers.AllowedMethods([]string{"GET", "POST", "PATCH", "DELETE"})
+	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "PATCH", "DELETE"})
 	origins := handlers.AllowedOrigins([]string{"*"})
 
 	// Auth
