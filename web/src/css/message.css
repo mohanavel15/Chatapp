@@ -104,3 +104,8 @@
 .BlockedUserMessage {
     font-size: large;
 }
+
+.Message-content {
+    min-height: 1rem;
+    width: 95%;
+}

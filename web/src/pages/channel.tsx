@@ -66,6 +66,7 @@ function Channel() {
 								})
 							}
 						})
+
 						const url2 = Routes.Channels+`/${channel.uuid}/members`
 						fetch(url2, {
 							method: "GET",
@@ -76,6 +77,20 @@ function Channel() {
 							if (response.status === 200) {
 								response.json().then((members: MemberOBJ[]) => {
 									members.forEach(member => channel_context.UpdateMember(channel.uuid, member.uuid, member))
+								})
+							}
+						})
+
+						const url3 = Routes.Channels+`/${channel.uuid}/pins`
+						fetch(url3, {
+							method: "GET",
+							headers: {
+								"Authorization": localStorage.getItem("access_token") || ""
+							}
+						}).then(response => {
+							if (response.status === 200) {
+								response.json().then((msgs: MessageOBJ[]) => {
+									msgs.forEach(msg => channel_context.UpdatePinnedMessage(channel.uuid, msg.uuid, msg))
 								})
 							}
 						})
@@ -201,6 +216,16 @@ function Channel() {
 				if (payload.event === 'BLOCK_DELETE') {
 					const blocked_user: UserOBJ = payload.data;
 					user_ctx.deleteBlocked(blocked_user.uuid);
+				}
+
+				if (payload.event === 'MESSAGE_PINNED') {
+					const message: MessageOBJ = payload.data;
+					channel_context.UpdatePinnedMessage(message.channel_id, message.uuid, message);
+				}
+
+				if (payload.event === 'MESSAGE_UNPINNED') {
+					const message: MessageOBJ = payload.data;
+					channel_context.DeletePinnedMessage(message.channel_id, message.uuid);
 				}
 			}
 		};

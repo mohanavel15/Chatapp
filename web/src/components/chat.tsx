@@ -86,7 +86,6 @@ function Chat({ channel_id }: { channel_id: string }) {
 
     return (
         <div className="Chat">
-			<ChannelHeader channel_id={channel_id} />
 				<div className="chat-message">
 					{message_jsx}
 				</div>
@@ -97,7 +96,8 @@ function Chat({ channel_id }: { channel_id: string }) {
 				<input id="chat-text" type="text" placeholder="Type a message..." onKeyPress={updateChat} value={Input_message} onChange={onInputChange}/>
 			</div>
 			{showPicker && <div className="EmojiPicker"><Picker onEmojiClick={onEmojiClick} /></div>}
-        </div>
+			<ChannelHeader channel_id={channel_id} />
+		</div>
     );
   }
 

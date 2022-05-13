@@ -112,7 +112,7 @@ function Message({ message }: {message: MessageOBJ}) {
                     <span className="message-author-name"> {message.author.username}</span>
                     <span className="message-time"> {time}</span>
                 </div>
-                {edit !== true && <p> {message.content} </p> }
+                {edit !== true && <p className='Message-content'> {message.content} </p> }
                 {edit && 
                 <div>
                 <input id="chat-text" type="text" defaultValue={msg} onKeyDown={handleKey} onChange={(ev) => {setMsg(ev.target.value)}} />
