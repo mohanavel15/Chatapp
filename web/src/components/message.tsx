@@ -101,6 +101,15 @@ function Message({ message }: {message: MessageOBJ}) {
         }
     }, [message])
 
+    function onInputChange(event: React.ChangeEvent<HTMLInputElement>) {
+		const inputstr = event.target.value;
+		if (inputstr.length <= 2000) {
+			setMsg(inputstr);
+		} else {
+			alert("Message too long");
+		}
+    }
+
     return (
     <div className="Message" ref={messageElement}>
         { !ShowMsg && <div className="BlockedUserDiv"><p className="message-edit-text BlockedUserMessage">Message From User You Blocked! <button className="Message-Edit-Action BlockedUserMessage" onClick={() => {setShowMsg(true)}}>Reveal</button></p></div> }
@@ -115,7 +124,7 @@ function Message({ message }: {message: MessageOBJ}) {
                 {edit !== true && <p className='Message-content'> {message.content} </p> }
                 {edit && 
                 <div>
-                <input id="chat-text" type="text" defaultValue={msg} onKeyDown={handleKey} onChange={(ev) => {setMsg(ev.target.value)}} />
+                <input id="chat-text" type="text" value={msg} onKeyDown={handleKey} onChange={onInputChange} />
                 <p className="message-edit-text">Escape to <button className="Message-Edit-Action" onClick={cancelEdit}>Cancel</button> • Enter to <button className="Message-Edit-Action" onClick={handleEdit}>Save</button></p>
                 </div>
                 }

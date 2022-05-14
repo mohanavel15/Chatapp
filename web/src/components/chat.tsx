@@ -25,7 +25,7 @@ function Chat({ channel_id }: { channel_id: string }) {
 	
     function onInputChange(event: React.ChangeEvent<HTMLInputElement>) {
 		const inputstr = event.target.value;
-		if (inputstr.length <= 150) {
+		if (inputstr.length <= 2000) {
 			setInput_message(inputstr);
 		} else {
 			alert("Message too long");
