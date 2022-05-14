@@ -109,3 +109,41 @@
     min-height: 1rem;
     width: 95%;
 }
+
+.PinnedMessage {
+    background-color: #2c2f33;
+    color: #ffffff;
+    min-width: 95%;
+    margin: 0.5rem;
+    border-radius: 12px;
+}
+
+.PinnedMessage-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+.PinnedMessage-header-actions-btn {
+    background:gray;
+    border:none;
+    padding: 4;
+    margin-right: 0.5rem;
+    font-size: 0.5rem;
+    color: black;
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+.PinnedMessage-header-actions-btn:hover {
+    background:lightgray;
+}
+
+.PinnedMessage-body {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    padding-bottom: 0.5rem;
+}

@@ -4,7 +4,7 @@ import { faUserGroup, faThumbTack } from '@fortawesome/free-solid-svg-icons'
 import { useContext, useState, useEffect } from 'react';
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 import { StatesContext, StateContext } from "../contexts/states";
-import Message from './message';
+import PinnedMessage from './pinned_message';
 
 function ChannelHeader({ channel_id }: { channel_id: string }) {
     const channel_context: ChannelContext = useContext(ChannelsContext);
@@ -22,9 +22,9 @@ function ChannelHeader({ channel_id }: { channel_id: string }) {
         setPinnedMessage([])
         if (showPinnedMessage) {
             const pin_channel = channel_context.pinnedMessages.get(channel_id);
-            if (pin_channel) {
+            if (pin_channel !== undefined && pin_channel.size > 0) {
                 pin_channel.forEach(msg => {
-                    setPinnedMessage(prev => [...prev, <Message key={msg.uuid} message={msg} />])
+                    setPinnedMessage(prev => [...prev, <PinnedMessage key={msg.uuid} message={msg} />])
                 });
             } else {
                 setPinnedMessage([<h1 className='no-pinned-messages'>No Pinned Messages</h1>]);
