@@ -11,7 +11,11 @@
 
 .login-container {
     min-height: 30rem;
+    min-width: 20rem;
     background-color: #23272a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 #login-input{
@@ -42,4 +46,40 @@
     .Login {
         background-color: #23272a;
     }
+}
+
+.error-message-container {
+    position: absolute;
+    top: 0;
+    width: 95%;
+    min-height: 3rem;
+    background-color: rgba(255, 0, 0, 0.707);
+    margin: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1rem;
+}
+
+/* loading from https://www.w3schools.com/howto/howto_css_loader.asp */
+
+.loading-animation {
+    border: 16px solid #2c2f33;
+    border-radius: 50%;
+    border-top: 16px solid #7289da;
+    width: 60px;
+    height: 60px;
+    -webkit-animation: loading_spin 1s linear infinite; /* Safari */
+    animation: loading_spin 1s linear infinite;
+}
+
+/* Safari */
+@-webkit-keyframes loading_spin {
+    0% { -webkit-transform: rotate(0deg); }
+    100% { -webkit-transform: rotate(360deg); }
+}
+  
+@keyframes loading_spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }

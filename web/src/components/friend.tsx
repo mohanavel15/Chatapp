@@ -6,7 +6,6 @@ import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle, faDotCircle, IconDefinition, faCheck, faX, faMessage } from '@fortawesome/free-solid-svg-icons';
-import Routes from '../config';
 import { AddFriend, DeleteFriend, DMUser } from '../utils/api';
 
 function Friend({ friend_obj }: { friend_obj: FriendOBJ }) {

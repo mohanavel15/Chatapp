@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Routes from "../config";
 
@@ -8,15 +8,27 @@ function Register() {
 	const Email = useRef<HTMLInputElement>(undefined!);
 	const Password = useRef<HTMLInputElement>(undefined!);
 
+	const [error, setError] = useState<string>('');
+	const [showError, setShowError] = useState<boolean>(false);
+
+	const [loading, setLoading] = useState<boolean>(false);
+
 	function HandleResponse(response: Response) {
 		if (response.status === 200) {
+			setShowError(false);
 			alert("Successfully registered!")
 			navigate("/login")
+		} else {
+			setShowError(true);
+			response.text().then(text => {
+				setError(text);
+			});
 		}
 	}
 
 	function HandleRegister(event: React.FormEvent<HTMLFormElement>) {
 		event.preventDefault();
+		setLoading(true);
 		const username_text = Username.current.value
 		const password_text = Password.current.value
 		const email_text = Email.current.value
@@ -31,12 +43,15 @@ function Register() {
 				"email": email_text,
 				"password": password_text
 			})
-		}).then(response => { HandleResponse(response) })
+		}).then(response => { HandleResponse(response); setLoading(false)})
 
 	}
 	return (
 		<div className="Login">
+			{ showError && <div className='error-message-container'>{ error }</div> }
 			<div className="login-container">
+				{ loading && <div className="loading-animation"></div> }
+				{ !loading && 
 				<form onSubmit={HandleRegister}>
 					<br />
 					<h1> Create An Account </h1>
@@ -50,6 +65,7 @@ function Register() {
 					<br />
 					<p>Already have an account? <Link to="/login">Login</Link></p>
 				</form>
+				}
 			</div>
 		</div>
 	);
