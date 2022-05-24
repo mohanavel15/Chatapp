@@ -12,6 +12,7 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"strings"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
@@ -25,43 +26,88 @@ func Register(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 	var request request.Signup
 	_ = json.NewDecoder(r.Body).Decode(&request)
 
-	if request.Username == "" || request.Email == "" || request.Password == "" {
+	username := strings.TrimSpace(request.Username)
+	password := strings.TrimSpace(request.Password)
+	email := strings.TrimSpace(request.Email)
+
+	if username == "" || password == "" || email == "" {
 		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Username, Email or Password can't be empty"))
+		return
+	}
+
+	if strings.Contains(username, " ") || strings.Contains(email, " ") {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Username or Email can't have spaces"))
+		return
+	}
+
+	if len(username) < 3 || len(username) > 20 {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Username must be between 3 and 20 characters"))
 		return
 	}
 
 	email_regex := regexp.MustCompile("[a-z]+@[a-z]+\\.[a-z]+")
-	if !email_regex.MatchString(request.Email) {
+	if !email_regex.MatchString(email) {
 		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Invalid Email"))
 		return
+	}
+
+	var account1 database.Account
+	db.Where("email = ?", email).First(&account1)
+	if account1.ID != 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Email already exists"))
+	}
+
+	var account2 database.Account
+	db.Where("username = ?", username).First(&account2)
+	if account2.ID != 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Username already exists"))
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.DefaultCost)
 	if err != nil {
-		log.Fatal(fmt.Sprintf("Password Hashing Failed : %s", err))
+		fmt.Println("Password Hashing Failed :", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Something went Wrong"))
+		return
 	}
 
-	account := database.Account{
+	new_account := database.Account{
 		Uuid:     uuid.New().String(),
 		Username: request.Username,
 		Email:    request.Email,
 		Password: string(hashedPassword),
 	}
-	db.Create(&account)
-	w.Write([]byte("Successfully registered"))
+	db.Create(&new_account)
+	w.WriteHeader(http.StatusOK)
 }
 
 func Login(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 	var request request.Signin
 	_ = json.NewDecoder(r.Body).Decode(&request)
 
-	if request.Username == "" || request.Password == "" {
+	username := strings.TrimSpace(request.Username)
+	password := strings.TrimSpace(request.Password)
+
+	if username == "" || password == "" {
 		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Username or Password can't be empty"))
+		return
+	}
+
+	if strings.Contains(username, " ") {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Username can't have spaces"))
 		return
 	}
 
 	var account database.Account
-	db.Where("username = ?", request.Username).First(&account)
+	db.Where("username = ?", username).First(&account)
 
 	err := bcrypt.CompareHashAndPassword([]byte(account.Password), []byte(request.Password))
 	if err != nil {

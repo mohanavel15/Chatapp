@@ -23,12 +23,37 @@ type Session struct {
 	AccountID   uint   `gorm:"type:int;not null"`
 }
 
+type Friend struct {
+	ID        uint `gorm:"primarykey"`
+	FromUser  uint `gorm:"type:int;not null"`
+	ToUser    uint `gorm:"type:int;not null"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+type Block struct {
+	ID          uint `gorm:"primarykey"`
+	BlockedUser uint `gorm:"type:int;not null"`
+	BlockedBy   uint `gorm:"type:int;not null"`
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+}
+
 type Message struct {
 	ID        uint   `gorm:"primarykey"`
 	Uuid      string `gorm:"type:varchar(255);not null"`
 	Content   string `gorm:"type:varchar(2000);not null"`
 	ChannelID string `gorm:"type:varchar(255);not null"`
 	AccountID uint   `gorm:"type:int;not null"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+type DMChannel struct {
+	ID        uint   `gorm:"primarykey"`
+	Uuid      string `gorm:"type:varchar(255);unique;not null"`
+	FromUser  uint   `gorm:"type:int;not null"`
+	ToUser    uint   `gorm:"type:int;not null"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
@@ -60,14 +85,6 @@ type Invites struct {
 	UpdatedAt  time.Time
 }
 
-type Friend struct {
-	ID        uint `gorm:"primarykey"`
-	FromUser  uint `gorm:"type:int;not null"`
-	ToUser    uint `gorm:"type:int;not null"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-}
-
 type Ban struct {
 	ID         uint   `gorm:"primarykey"`
 	Uuid       string `gorm:"type:varchar(255);unique;not null"`
@@ -77,23 +94,6 @@ type Ban struct {
 	Reason     string `gorm:"type:varchar(255)"`
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
-}
-
-type Block struct {
-	ID          uint `gorm:"primarykey"`
-	BlockedUser uint `gorm:"type:int;not null"`
-	BlockedBy   uint `gorm:"type:int;not null"`
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-}
-
-type DMChannel struct {
-	ID        uint   `gorm:"primarykey"`
-	Uuid      string `gorm:"type:varchar(255);unique;not null"`
-	FromUser  uint   `gorm:"type:int;not null"`
-	ToUser    uint   `gorm:"type:int;not null"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
 }
 
 type Pins struct {
