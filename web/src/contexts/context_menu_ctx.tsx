@@ -27,7 +27,7 @@ export interface ContextMenuCtx {
 
 export const ContextMenu = createContext<ContextMenuCtx>(undefined!);
 
-export function CtxMenuCtx({ children }: {children: React.ReactChild}) {
+export default function CtxMenuCtx({ children }: {children: React.ReactChild}) {
 	const [showMsgCtxMenu, setShowMsgCtxMenu] = useState(false);
 	const [msgCtxMenu, setMsgCtxMenu] = useState<{x: number, y: number, message:MessageOBJ, channel_id:string}>(undefined!);
 

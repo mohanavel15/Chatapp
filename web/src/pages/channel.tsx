@@ -39,6 +39,22 @@ function Channel() {
 	const ctx_menu_context: ContextMenuCtx = useContext(ContextMenu);
 
 	useEffect(() => {
+		const NewGateway = () => {
+			const gateway = new WebSocket(Routes.ws);
+			gateway.onopen = () => {
+				console.log("Connecting to the server");
+				gateway.send(
+					JSON.stringify({
+						event: "CONNECT",
+						data: { token: localStorage.getItem("access_token") }
+					})
+				);
+			}
+			return gateway;
+		}
+
+		let gateway = NewGateway();
+
 		const onMessage = (message: IMessageEvent) => {
 			console.log(message);
 			const data = message.data;
@@ -229,30 +245,18 @@ function Channel() {
 				}
 			}
 		};
-	
-		const onOpen = () => {
-			console.log("Connecting to the server");
-			channel_context.gateway.send(
-				JSON.stringify({
-					event: "CONNECT",
-					data: { token: localStorage.getItem("access_token") }
-				})
-			);
-		};
-	
+		
 		const onClose = () => {
 			console.log("Disconnected from server");
-			setTimeout(function() {
-				window.location.reload()
-			}, 5000);
+			gateway = NewGateway();
 		};
 	
-		channel_context.gateway.onopen = onOpen;
-		channel_context.gateway.onclose = onClose;
-	  	channel_context.gateway.onmessage = onMessage;
+		//gateway.onopen = onOpen;
+		gateway.onclose = onClose;
+	  	gateway.onmessage = onMessage;
   
 		return () => {
-			channel_context.gateway.close();
+			gateway.close();
 		};
 	}, []);
 

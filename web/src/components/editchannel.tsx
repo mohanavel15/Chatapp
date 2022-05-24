@@ -130,16 +130,15 @@ export default function EditChannel() {
         const channel_name_value = channel_name.current.value;
         const channel_icon_value = channel_icon.current.value;
         if (channel_name_value !== "") {
-            channel_context.gateway.send(
-                JSON.stringify({
-                    event: "CHANNEL_MODIFY",
-                    data: {
-                        uuid: state_context.ChannelOBJ.uuid,
-                        name: channel_name_value,
-                        icon: channel_icon_value
-                    }
-                })
-            );
+            const url = Routes.Channels+"/"+state_context.ChannelOBJ.uuid;
+            fetch(url, {
+                method: "PATCH",
+                headers: {
+                    "Authorization": user.accessToken,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ name: channel_name_value, icon: channel_icon_value })
+            })
         }
     }
 

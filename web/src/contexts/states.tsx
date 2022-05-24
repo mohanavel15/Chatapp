@@ -28,7 +28,7 @@ export interface StateContext {
 
 export const StatesContext = createContext<StateContext>(undefined!);
 
-export function States({ children }: {children: React.ReactChild}) {
+export default function States({ children }: {children: React.ReactChild}) {
     const [Settings, setSettings] = useState(false)
 
     const [createChannel, setCreateChannel] = useState(false)

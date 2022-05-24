@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPencil } from '@fortawesome/free-solid-svg-icons'
 import { ChannelsContext, ChannelContext } from '../contexts/channelctx';
 import { UserContextOBJ, UserContext } from "../contexts/usercontext";
+import Routes from "../config";
 
 function Message({ message }: {message: MessageOBJ}) {
     const msgctx = useContext(MessageContext);
@@ -51,15 +52,15 @@ function Message({ message }: {message: MessageOBJ}) {
     }
 
     function handleEdit() {
-        channel_context.gateway.send(
-            JSON.stringify({
-                event: "MESSAGE_MODIFY",
-                data: {
-                    uuid: message.uuid,
-                    content: msg
-                }
-            })
-        );
+        const url = Routes.Channels+"/"+message.channel_id +"/messages/"+message.uuid;
+        fetch(url, {
+            method: "PATCH",
+            headers: {
+                "Authorization": user_ctx.accessToken,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ content: msg })
+        })
         msgctx.setMessageEdit(false);
         setEdit(false);
     }

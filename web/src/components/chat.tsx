@@ -4,9 +4,12 @@ import Message from './message';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFaceLaughBeam } from '@fortawesome/free-solid-svg-icons'
 import ChannelHeader from './channel_header';
-import { Msg_request, MessageOBJ } from '../models/models';
+import { MessageOBJ } from '../models/models';
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 import { ContextMenuCtx, ContextMenu } from "../contexts/context_menu_ctx";
+import { UserContextOBJ, UserContext } from "../contexts/usercontext";
+
+import Routes from '../config';
 
 function Chat({ channel_id }: { channel_id: string }) {
     // Emoji picker https://www.cluemediator.com/how-to-add-emoji-picker-in-the-react
@@ -16,6 +19,7 @@ function Chat({ channel_id }: { channel_id: string }) {
 	const [message_jsx, setMessage_jsx] = useState<JSX.Element[]>([]);
    
 	const ctx_menu_context: ContextMenuCtx = useContext(ContextMenu);
+	const user_ctx:UserContextOBJ = useContext(UserContext);
 
     const onEmojiClick = (_: React.MouseEvent<Element, MouseEvent>, data: IEmojiData) => {
 		setInput_message(prevInput => prevInput + data.emoji);
@@ -35,16 +39,15 @@ function Chat({ channel_id }: { channel_id: string }) {
 		if (event.key === 'Enter') {
 			event.preventDefault();
 			if (Input_message.length > 0) {
-				const message: Msg_request = {
-					channel: channel_id,
-					content: Input_message
-				};
-				channel_context.gateway.send(
-					JSON.stringify({
-						event: "MESSAGE_CREATE",
-						data: message
-					})
-				);
+				const url = Routes.Channels+"/"+channel_id +"/messages"; 
+				fetch(url, {
+					method: "POST",
+					headers: {
+						"Authorization": user_ctx.accessToken,
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({ content: Input_message })
+				})
 			}
 			setInput_message('');
 		}

@@ -1,21 +1,21 @@
 import React, { useContext } from 'react'
 import { StatesContext, StateContext } from "../contexts/states";
-import { ChannelsContext, ChannelContext } from '../contexts/channelctx';
+import { UserContextOBJ, UserContext } from "../contexts/usercontext";
+import Routes from '../config';
 
 export default function DeleteMessage() {
     const state_context: StateContext = useContext(StatesContext);
-    const channel_context: ChannelContext = useContext(ChannelsContext);
+	const user_ctx:UserContextOBJ = useContext(UserContext);
 
     function HandleDeleteMessage(e: React.MouseEvent<Element, MouseEvent>) {
         e.preventDefault();
-        channel_context.gateway.send(
-            JSON.stringify({
-                event: "MESSAGE_DELETE",
-                data: {
-                    uuid: state_context.messageOBJ.uuid,
-                }
-            })
-        );
+        const url = Routes.Channels+"/"+state_context.ChannelOBJ.uuid;
+        fetch(url, {
+            method: "DELETE",
+            headers: {
+                "Authorization": user_ctx.accessToken
+            }
+        })
         state_context.setDeleteMessage(false);
     }
     return (

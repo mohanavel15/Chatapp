@@ -2,6 +2,7 @@ import { useContext, useRef } from "react";
 import { StatesContext, StateContext } from "../contexts/states";
 import { ChannelsContext, ChannelContext } from '../contexts/channelctx';
 import { UserContextOBJ, UserContext } from "../contexts/usercontext";
+import Routes from "../config";
 
 export default function CreateChannel() {
     const user:UserContextOBJ = useContext(UserContext);
@@ -16,15 +17,15 @@ export default function CreateChannel() {
         const channel_name_value = channel_name.current.value;
         const channel_icon_value = channel_icon.current.value;
         if (channel_name_value !== "") {
-            channel_context.gateway.send(
-                JSON.stringify({
-                    event: "CHANNEL_CREATE",
-                    data: {
-                        name: channel_name_value,
-                        icon: channel_icon_value
-                    }
-                })
-            );
+            const url = Routes.currentUser+"/channels";
+            fetch(url, {
+                method: "POST",
+                headers: {
+                    "Authorization": user.accessToken,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ name: channel_name_value, icon: channel_icon_value })
+            })
         }
         state_context.setCreateChannel(false);
     }

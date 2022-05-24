@@ -19,13 +19,11 @@ export interface ChannelContext {
 	members: Map<String, Map<String, MemberOBJ>>;
 	UpdateMember: (key1: String, key2: String, value_: MemberOBJ) => void
 	DeleteMember: (key1: String, key2: String) => void
-	
-	gateway: WebSocket;
 }
 
 export const ChannelsContext = createContext<ChannelContext>(undefined!);
 
-export default function ChannelCTX({ children, gateway }: {children: React.ReactChild, gateway: WebSocket}) {
+export default function ChannelCTX({ children }: {children: React.ReactChild}) {
 	const [channels, setChannel, deleteChannel] = useMap<ChannelOBJ>(new Map<String, ChannelOBJ>())
 	const [members, UpdateMember, DeleteMember] = useDoubleMap<MemberOBJ>(new Map<String, Map<String, MemberOBJ>>());
 	const [messages, UpdateMessage, DeleteMessage] = useDoubleMap<MessageOBJ>(new Map<String, Map<String, MessageOBJ>>());
@@ -44,7 +42,6 @@ export default function ChannelCTX({ children, gateway }: {children: React.React
 		members: members,
 		UpdateMember: UpdateMember,
 		DeleteMember: DeleteMember,
-		gateway: gateway
 	}
 
 	return (
