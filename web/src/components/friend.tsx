@@ -6,7 +6,8 @@ import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle, faDotCircle, IconDefinition, faCheck, faX, faMessage } from '@fortawesome/free-solid-svg-icons';
-import { AddFriend, DeleteFriend, DMUser } from '../utils/api';
+import { DMUser } from '../utils/api';
+import { AddFriend as APIAddFriend, DeleteFriend as APIDeleteFriend } from '../api/friend';
 
 function Friend({ friend_obj }: { friend_obj: FriendOBJ }) {
 	const user_ctx:UserContextOBJ = useContext(UserContext);
@@ -37,7 +38,7 @@ function Friend({ friend_obj }: { friend_obj: FriendOBJ }) {
             }
             return prevFriends;
         }
-        AddFriend(user_ctx.accessToken, friend_obj.uuid).then(response => {
+        APIAddFriend(user_ctx.accessToken, friend_obj.uuid).then(response => {
             if (response.status === 200) {
                 user_ctx.setFriend(prevFriends => new Map(updateFriend(prevFriends)));
             }
@@ -45,7 +46,7 @@ function Friend({ friend_obj }: { friend_obj: FriendOBJ }) {
     }
 
     function Decline() {
-        DeleteFriend(user_ctx.accessToken, friend_obj.uuid).then(response => {
+        APIDeleteFriend(user_ctx.accessToken, friend_obj.uuid).then(response => {
             if (response.status === 200) {
                 user_ctx.deleteFriend(friend_obj.uuid);
             }

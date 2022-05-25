@@ -9,6 +9,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrashCan } from '@fortawesome/free-solid-svg-icons'
 import { setDefaultAvatar } from "../utils/errorhandle";
 import Routes from "../config";
+import { EditChannel as APIEditChannel } from '../api/channel';
 
 function Invite({ invite, onDelete }: { invite: InviteOBJ, onDelete: (invite_code: string) => void }) {
     return (
@@ -127,21 +128,13 @@ export default function EditChannel() {
     const channel_icon = useRef<HTMLInputElement>(undefined!);
     function HandleCreateChannel(e: React.MouseEvent<Element, MouseEvent>) {
         e.preventDefault();
-        const channel_name_value = channel_name.current.value;
-        const channel_icon_value = channel_icon.current.value;
-        if (channel_name_value !== "") {
-            const url = Routes.Channels+"/"+state_context.ChannelOBJ.uuid;
-            fetch(url, {
-                method: "PATCH",
-                headers: {
-                    "Authorization": user.accessToken,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ name: channel_name_value, icon: channel_icon_value })
-            })
+        const channelName = channel_name.current.value;
+        const channelIcon = channel_icon.current.value;
+        if (channelName !== "") {
+            APIEditChannel(user.accessToken, state_context.ChannelOBJ.uuid, channelName, channelIcon);
         }
     }
-
+ 
     function create_invite() {
         const url = Routes.Channels + "/" + state_context.ChannelOBJ.uuid + "/invites";
         fetch(url, {

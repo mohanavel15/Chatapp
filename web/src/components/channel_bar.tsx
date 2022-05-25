@@ -7,7 +7,6 @@ import { ChannelOBJ } from '../models/models';
 export default function ChannelBar() {
 	let [channels_element, setChannels_element] = useState<JSX.Element[]>([])
 	const channel_context: ChannelContext = useContext(ChannelsContext);
-	
 	const ctx_menu_context: ContextMenuCtx = useContext(ContextMenu);
 
 	useEffect(() => {

@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { StatesContext, StateContext } from "../contexts/states";
 import { UserContextOBJ, UserContext } from "../contexts/usercontext";
-import Routes from "../config";
+import { DeleteChannel as APIDeleteChannel } from "../api/channel";
 
 export default function DeleteChannel() {
     const state_context: StateContext = useContext(StatesContext);
@@ -9,16 +9,9 @@ export default function DeleteChannel() {
 
     function HandleDeleteChannel(e: React.MouseEvent<Element, MouseEvent>) {
         e.preventDefault();
-        const url = Routes.Channels+"/"+state_context.ChannelOBJ.uuid;
-        fetch(url, {
-            method: "DELETE",
-            headers: {
-                "Authorization": user_ctx.accessToken,
-            }
-        })
+        APIDeleteChannel(user_ctx.accessToken, state_context.ChannelOBJ.uuid);
         state_context.setDeleteChannel(false);
     }
-       
 
     return (
         <div className="channel-container">

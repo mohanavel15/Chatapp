@@ -4,7 +4,7 @@ import { UserContextOBJ, UserContext } from "../contexts/usercontext";
 import { setDefaultAvatar } from '../utils/errorhandle';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUserXmark } from '@fortawesome/free-solid-svg-icons';
-import Routes from '../config';
+import { UnBlock as APIUnblock } from '../api/block';
 
 function Block({ user }: { user: UserOBJ }) {
 	const user_ctx:UserContextOBJ = useContext(UserContext);
@@ -14,13 +14,7 @@ function Block({ user }: { user: UserOBJ }) {
             prevBlocked.delete(user.uuid);
             return prevBlocked;
         }
-        const url = Routes.Blocks + "/" + user.uuid; 
-        fetch(url, {
-            method: "DELETE",
-            headers: {
-                "Authorization": user_ctx.accessToken,
-            }
-        }).then(response => {
+        APIUnblock(user_ctx.accessToken, user.uuid).then(response => {
             if (response.status === 200) {
                 user_ctx.setBlocked(prevBlocked => new Map(UnBlockUser(prevBlocked)));
             }
