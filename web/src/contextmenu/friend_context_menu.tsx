@@ -4,7 +4,7 @@ import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 import Routes from '../config';
 import { useNavigate } from "react-router-dom";
 import { FriendOBJ, ChannelOBJ } from '../models/models';
-import { DeleteFriend } from '../utils/api';
+import { DeleteFriend } from '../api/friend';
 
 interface propsChannelCtxProps {
     x: number, y: number, friend_obj: FriendOBJ

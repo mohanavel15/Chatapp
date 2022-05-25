@@ -4,8 +4,8 @@ import { UserContextOBJ, UserContext } from "../contexts/usercontext";
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 import { StatesContext, StateContext } from "../contexts/states";
 import { useNavigate } from "react-router-dom";
-import { AddFriend, DeleteFriend, DMUser } from '../utils/api';
-
+import { DMUser } from '../utils/api';
+import { AddFriend, DeleteFriend } from '../api/friend';
 interface propsMsgCtxProps {
     event: React.MouseEvent<HTMLDivElement, MouseEvent>, member: MemberOBJ, channel: ChannelOBJ
 }

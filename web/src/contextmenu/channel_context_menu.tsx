@@ -1,8 +1,10 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { StatesContext, StateContext } from "../contexts/states";
 import { UserContextOBJ, UserContext } from "../contexts/usercontext";
-import { BlockUser, UnBlock, AddFriend, DeleteFriend } from '../utils/api';
 import { ChannelOBJ } from '../models/models';
+
+import { AddFriend, DeleteFriend } from '../api/friend';
+import { BlockUser, UnBlock } from '../api/block';
 
 interface propsChannelCtxProps {
     x: number, y: number, channel: ChannelOBJ
