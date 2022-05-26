@@ -141,6 +141,10 @@ func main() {
 	router.HandleFunc("/dms/{id}", Authenticated(restapi.GetDMChannel)).Methods("GET")
 	// Gateway
 	router.HandleFunc("/ws", Gateway)
+	// Files
+	router.HandleFunc("/avatars/{user_id}/{filename}", restapi.GetAvatars).Methods("GET")
+	router.HandleFunc("/icons/{channel_id}/{filename}", restapi.GetIcons).Methods("GET")
+	router.HandleFunc("/attachments/{channel_id}/{user_id}/{filename}", restapi.GetAttachments).Methods("GET")
 
 	server_uri := fmt.Sprintf("%s:%s", HOST, PORT)
 	log.Println(fmt.Sprintf("Listening on %s", server_uri))
