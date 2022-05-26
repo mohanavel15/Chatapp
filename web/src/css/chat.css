@@ -71,6 +71,7 @@
   background: none;
   border: none;
   border-radius: 50%;
+  color: lightgray;
 }
 
 #chat-file:hover {
@@ -104,4 +105,120 @@
   width: 20rem;
   background: none;
   overflow: hidden;
+}
+
+.input-file-container {
+  position: absolute;
+  bottom: 3rem;
+  right: 0;
+  height: 12rem;
+  width: 100%;
+  background-color: #2c2f33;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  border-radius: 12px 12px 0 0;
+}
+
+.input-file {
+  position: relative;
+  height: 10rem;
+  width: 10rem;
+  margin-left: 1rem;
+  background: #23272a;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4rem;
+}
+
+.input-file-delete {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 24px;
+  background: none;
+  border: none;
+  color: #990000;
+}
+.input-file-delete:hover {
+  color: #6b0000;
+  cursor: pointer;
+}
+
+.input-file p {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  margin: 0;
+  width: 9rem;
+  font-size: 12px;
+  color: #7d7d7d;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.attachment {
+  position: relative;
+  height: 4rem;
+  min-width: 16rem;
+  background-color: #202020;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+}
+
+.attachment-icon {
+  color: #cad0ff;
+  font-size: 2.5rem;
+  margin: 1rem;
+}
+
+.attachment-download {
+  position: absolute;
+  right: 0;
+  font-size: 1.5rem;
+  margin: 1rem;
+  justify-self: end;
+  background: none;
+  border: none;
+}
+
+.attachment-download a {
+  color: gray;
+  text-decoration: none;
+}
+
+.attachment-download a:hover {
+  cursor: pointer;
+  color: rgb(196, 196, 196);
+}
+
+.attachment-name {
+  display: flex;
+  flex-direction: column;
+}
+
+.attachment-filename {
+  margin: 0;
+  color: #00b0f1;
+}
+
+.attachment-filename a {
+  color: #00b0f1;
+  text-decoration: none;
+}
+
+.attachment-filename a:hover {
+  color: #00b0f1;
+  text-decoration: underline;
+}
+
+.attachment-size {
+  font-size: 12px;
+  margin: 0;
 }

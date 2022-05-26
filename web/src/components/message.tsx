@@ -3,7 +3,7 @@ import { setDefaultAvatar } from '../utils/errorhandle';
 import { MessageContext } from "../contexts/messagectx";
 import { MessageOBJ } from "../models/models";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPencil } from '@fortawesome/free-solid-svg-icons'
+import { faPencil, faFile, faDownload } from '@fortawesome/free-solid-svg-icons'
 import { ChannelsContext, ChannelContext } from '../contexts/channelctx';
 import { UserContextOBJ, UserContext } from "../contexts/usercontext";
 import Routes from "../config";
@@ -13,14 +13,42 @@ function Message({ message }: {message: MessageOBJ}) {
     const user_ctx:UserContextOBJ = useContext(UserContext);
     const channel_context: ChannelContext = useContext(ChannelsContext);
     const messageElement = useRef<HTMLDivElement>(null);
+    
 
     const [edit, setEdit] = useState(false);
     const [msg, setMsg] = useState('');
 
     const [isBlocked, setIsBlocked] = useState(false);
     const [ShowMsg, setShowMsg] = useState(true);
+    
+    const [attachmentElement, setAttachmentElement] = useState<JSX.Element>(<></>);
 
     let time = new Date(message.created_at * 1000).toLocaleTimeString();
+
+    useEffect(() => {
+        if (message.attachments.length > 0) { 
+            setAttachmentElement(
+                <div className="attachment">
+                    <div className="attachment-icon">
+                        <FontAwesomeIcon icon={faFile} />
+                    </div>
+                    <div className="attachment-name">
+                        <p className="attachment-filename">
+                            <a href={message.attachments[0].url} target="_blank">
+                            {message.attachments[0].name}
+                            </a>
+                        </p>
+                        <p className="attachment-size">{message.attachments[0].size} bytes</p>
+                    </div>
+                    <button className="attachment-download">
+                    <a href={message.attachments[0].url} target="_blank">
+                        <FontAwesomeIcon icon={faDownload} />
+                    </a>
+                    </button>
+                </div>
+            )
+        }
+    }, []);
 
     useEffect(() => {
         setMsg(message.content);
@@ -129,6 +157,7 @@ function Message({ message }: {message: MessageOBJ}) {
                 <p className="message-edit-text">Escape to <button className="Message-Edit-Action" onClick={cancelEdit}>Cancel</button> • Enter to <button className="Message-Edit-Action" onClick={handleEdit}>Save</button></p>
                 </div>
                 }
+                { attachmentElement }
                 { isBlocked && <button className="Message-Edit-Action" onClick={() => {setShowMsg(false)}}>Hide</button> }
             </div>
             {user_ctx.uuid === message.author.uuid && <button id="Message-button" onClick={handleEditBtn}><FontAwesomeIcon icon={faPencil}/></button>}

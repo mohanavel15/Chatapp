@@ -6,6 +6,15 @@ export interface MessageOBJ {
     channel_id:     string
     created_at:     number
     updated_at:     number
+    attachments:    Attachment[]
+}
+
+export interface Attachment {
+	uuid:           string
+	name:           string
+	size:           number
+	content_type:   string
+	url:            string
 }
 
 export interface WS_Message {

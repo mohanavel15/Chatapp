@@ -1,8 +1,8 @@
 import Picker, { IEmojiData } from 'emoji-picker-react';
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useRef } from 'react';
 import Message from './message';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFaceLaughBeam } from '@fortawesome/free-solid-svg-icons'
+import { faFaceLaughBeam, faCirclePlus, faFile, faCircleXmark } from '@fortawesome/free-solid-svg-icons'
 import ChannelHeader from './channel_header';
 import { MessageOBJ } from '../models/models';
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
@@ -17,7 +17,12 @@ function Chat({ channel_id }: { channel_id: string }) {
     const [Input_message, setInput_message] = useState('');
     const [showPicker, setShowPicker] = useState(false);
 	const [message_jsx, setMessage_jsx] = useState<JSX.Element[]>([]);
-   
+
+    const [hasFile, setHasFile] = useState(false);
+	const file_input = useRef<HTMLInputElement>(undefined!);
+	const [fileJSX, setFileJSX] = useState<JSX.Element>(<></>);
+	//const [fileInput, setFileInput] = useState<File>();
+
 	const ctx_menu_context: ContextMenuCtx = useContext(ContextMenu);
 	const user_ctx:UserContextOBJ = useContext(UserContext);
 
@@ -38,7 +43,8 @@ function Chat({ channel_id }: { channel_id: string }) {
     function updateChat(event: React.KeyboardEvent<HTMLInputElement>) {
 		if (event.key === 'Enter') {
 			event.preventDefault();
-			if (Input_message.length > 0) {
+			console.log(file_input.current.files);
+			if (Input_message.length > 0 && file_input === null || file_input.current.files?.length === 0) {
 				const url = Routes.Channels+"/"+channel_id +"/messages"; 
 				fetch(url, {
 					method: "POST",
@@ -49,7 +55,23 @@ function Chat({ channel_id }: { channel_id: string }) {
 					body: JSON.stringify({ content: Input_message })
 				})
 			}
+
+			if (file_input.current.files && file_input.current.files.length > 0) {
+				const url = Routes.Channels+"/"+channel_id +"/messages";
+				const formData = new FormData();
+				formData.append('content', Input_message);
+				formData.append('file', file_input.current.files[0]);
+				fetch(url, {
+					method: "POST",
+					headers: {
+						"Authorization": user_ctx.accessToken,
+					},
+					body: formData
+				})
+			}
 			setInput_message('');
+			setHasFile(false);
+			file_input.current.value = '';
 		}
     }
 	
@@ -87,12 +109,39 @@ function Chat({ channel_id }: { channel_id: string }) {
 			});
 	}, [channel_context.messages, channel_id]);
 
+	const onFileChange = () => {
+		if (file_input.current.files && file_input.current.files.length > 0) {
+			setHasFile(true);
+			const file = file_input.current.files[0];
+			setFileJSX(
+				<div className='input-file' key={file.name}>
+					<FontAwesomeIcon icon={faFile} />
+					<button className='input-file-delete' onClick={() => {file_input.current.value='';onFileChange();}}>
+						<FontAwesomeIcon icon={faCircleXmark} />
+					</button>
+					<p>{file.name}</p>
+				</div>
+			)
+		} else {
+			setHasFile(false);
+		}
+	}
+
     return (
         <div className="Chat">
 				<div className="chat-message">
 					{message_jsx}
 				</div>
 			<div className="chat-input">
+				{ hasFile && 
+				<div className='input-file-container'>
+					{fileJSX}
+				</div>
+				}
+				<button id="chat-file" onClick={() => { file_input.current.click() }}>
+					<FontAwesomeIcon icon={faCirclePlus} />
+				</button>
+				<input type="file" ref={file_input} name="filename" hidden onChange={onFileChange}></input>
 				<button id="chat-emoji-picker" onClick={() => setShowPicker(val => !val)}>
 					<FontAwesomeIcon icon={faFaceLaughBeam} />
 				</button>

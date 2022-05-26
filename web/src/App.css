@@ -20,3 +20,15 @@ body {
   height: 100%;
   width: 100%;
 }
+
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #292c2f;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #202020;
+}
