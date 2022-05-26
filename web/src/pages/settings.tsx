@@ -2,7 +2,7 @@ import { useContext, useRef } from 'react';
 import { StatesContext, StateContext } from "../contexts/states";
 import ToggleBtn from '../utils/togglebtn';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faX } from '@fortawesome/free-solid-svg-icons';
+import { faX, faCamera } from '@fortawesome/free-solid-svg-icons';
 import { UserContext } from "../contexts/usercontext";
 import { useNavigate } from "react-router-dom";
 import Routes from '../config';
@@ -11,31 +11,33 @@ function Settings() {
     const state_context: StateContext = useContext(StatesContext);
     const user_ctx = useContext(UserContext);
 
-    const avatar_ref = useRef<HTMLInputElement>(undefined!);
-
     const password_ref = useRef<HTMLInputElement>(undefined!);
     const new_password_ref = useRef<HTMLInputElement>(undefined!);
     const confirm_password_ref = useRef<HTMLInputElement>(undefined!);
 
     const who_can_dm_ref = useRef<HTMLInputElement>(undefined!);
 
+    const avatar_input = useRef<HTMLInputElement>(undefined!);
+    const avatar_image = useRef<HTMLImageElement>(undefined!);
+
     const navigate = useNavigate();
 
     function avatar() {
-        fetch(Routes.currentUser, {
-            method: "PATCH",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": user_ctx.accessToken
-            },
-            body: JSON.stringify({
-                "avatar": avatar_ref.current.value
+        if (avatar_input.current.files && avatar_input.current.files.length > 0) {
+            const formData = new FormData();
+            formData.append('file', avatar_input.current.files[0]);
+            fetch(Routes.currentUser, {
+                method: "PATCH",
+                headers: {
+                    "Authorization": user_ctx.accessToken
+                },
+                body: formData
+            }).then(response => {
+                if (response.status === 200) {
+                    alert("Successfully updated avatar!")
+                }
             })
-        }).then(response => {
-            if (response.status === 200) {
-                alert("Successfully updated avatar!")
-            }
-        })
+        }
     }
 
     function logout(signout: boolean) {
@@ -89,6 +91,18 @@ function Settings() {
         alert("not implemented")
     }
 
+    function onIconChange() {
+        if (avatar_input.current.files && avatar_input.current.files.length > 0) {
+            const file = avatar_input.current.files[0];
+            if (file.size > 2097152) {
+                alert("image is bigger than 2MB")
+                avatar_input.current.value=''
+                return
+            }
+            avatar_image.current.src = URL.createObjectURL(file);
+        }
+    }
+
     return (
         <div className='settings'>
             <div className='settings-header'>
@@ -98,7 +112,11 @@ function Settings() {
             <div className='settings-content'>
                 <div className='settings-content-item'>
                 <h3 className='settings-content-item-title'>Profile</h3>
-                <input type="text" placeholder='avatar' defaultValue={user_ctx.avatar} ref={avatar_ref} />
+                <div className="channel-edit-icon-container">
+                    <img className="channel-edit-icon" ref={avatar_image} src={user_ctx.avatar} />
+                    <FontAwesomeIcon icon={faCamera} className="channel-edit-icon-camera" onClick={() => avatar_input.current.click()} />
+				    <input type="file" ref={avatar_input} name="filename" hidden onChange={onIconChange} accept="image/*"></input>
+                </div>
                 <button className='btn-green' onClick={avatar}>Save</button>
                 </div>
                 <div className='settings-content-item'>

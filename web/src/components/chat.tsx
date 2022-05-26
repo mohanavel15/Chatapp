@@ -21,7 +21,6 @@ function Chat({ channel_id }: { channel_id: string }) {
     const [hasFile, setHasFile] = useState(false);
 	const file_input = useRef<HTMLInputElement>(undefined!);
 	const [fileJSX, setFileJSX] = useState<JSX.Element>(<></>);
-	//const [fileInput, setFileInput] = useState<File>();
 
 	const ctx_menu_context: ContextMenuCtx = useContext(ContextMenu);
 	const user_ctx:UserContextOBJ = useContext(UserContext);
@@ -113,15 +112,15 @@ function Chat({ channel_id }: { channel_id: string }) {
 		if (file_input.current.files && file_input.current.files.length > 0) {
 			setHasFile(true);
 			const file = file_input.current.files[0];
-			setFileJSX(
-				<div className='input-file' key={file.name}>
-					<FontAwesomeIcon icon={faFile} />
-					<button className='input-file-delete' onClick={() => {file_input.current.value='';onFileChange();}}>
-						<FontAwesomeIcon icon={faCircleXmark} />
-					</button>
-					<p>{file.name}</p>
-				</div>
-			)
+				setFileJSX(
+					<div className='input-file' key={file.name}>
+						<FontAwesomeIcon icon={faFile} />
+						<button className='input-file-delete' onClick={() => {file_input.current.value='';onFileChange();}}>
+							<FontAwesomeIcon icon={faCircleXmark} />
+						</button>
+						<p>{file.name}</p>
+					</div>
+				)
 		} else {
 			setHasFile(false);
 		}

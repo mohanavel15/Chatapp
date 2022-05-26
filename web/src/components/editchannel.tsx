@@ -6,10 +6,9 @@ import { ContextMenuCtx, ContextMenu } from "../contexts/context_menu_ctx";
 import { InviteOBJ, BanOBJ } from "../models/models";
 import { UserContextOBJ, UserContext } from "../contexts/usercontext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrashCan } from '@fortawesome/free-solid-svg-icons'
+import { faTrashCan, faCamera } from '@fortawesome/free-solid-svg-icons'
 import { setDefaultAvatar } from "../utils/errorhandle";
 import Routes from "../config";
-import { EditChannel as APIEditChannel } from '../api/channel';
 
 function Invite({ invite, onDelete }: { invite: InviteOBJ, onDelete: (invite_code: string) => void }) {
     return (
@@ -33,6 +32,9 @@ export default function EditChannel() {
 
     const [banReload, setBanReload] = useState(false);
     const [InviteReload, setInviteReload] = useState(false);
+
+    const icon_input = useRef<HTMLInputElement>(undefined!);
+    const icon_image = useRef<HTMLImageElement>(undefined!);
 
     useEffect(() => {
         setMembersElement([]);
@@ -125,13 +127,27 @@ export default function EditChannel() {
     }, [banReload]);
 
     const channel_name = useRef<HTMLInputElement>(undefined!);
-    const channel_icon = useRef<HTMLInputElement>(undefined!);
+
     function HandleCreateChannel(e: React.MouseEvent<Element, MouseEvent>) {
         e.preventDefault();
         const channelName = channel_name.current.value;
-        const channelIcon = channel_icon.current.value;
-        if (channelName !== "") {
-            APIEditChannel(user.accessToken, state_context.ChannelOBJ.uuid, channelName, channelIcon);
+
+        if (channelName === "") {
+            return
+        }
+
+        if (icon_input.current.files && icon_input.current.files.length > 0) {
+            const url = Routes.Channels+"/"+state_context.ChannelOBJ.uuid;
+            const formData = new FormData();
+            formData.append('name', channelName);
+            formData.append('file', icon_input.current.files[0]);
+            fetch(url, {
+                method: "PATCH",
+                headers: {
+                    "Authorization": user.accessToken,
+                },
+                body: formData
+            })
         }
     }
  
@@ -165,6 +181,18 @@ export default function EditChannel() {
         })
     }
 
+    function onIconChange() {
+        if (icon_input.current.files && icon_input.current.files.length > 0) {
+            const file = icon_input.current.files[0];
+            if (file.size > 2097152) {
+                alert("image is bigger than 2MB")
+                icon_input.current.value=''
+                return
+            }
+            icon_image.current.src = URL.createObjectURL(file);
+        }
+    }
+
     return (
         <div className="channel-edit">
             <div className="channel-edit-sidebar">
@@ -178,7 +206,11 @@ export default function EditChannel() {
                 { channelEditSection === 0 &&
                     <>
                     <input className="channel-edit-input" ref={channel_name} type="text" placeholder="Channel Name" defaultValue={state_context.ChannelOBJ.name}/>
-                    <input className="channel-edit-input" ref={channel_icon} type="text" placeholder="Url For Channel Icon" defaultValue={state_context.ChannelOBJ.icon}/>
+                    <div className="channel-edit-icon-container">
+                        <img className="channel-edit-icon" ref={icon_image} src={state_context.ChannelOBJ.icon} />
+                        <FontAwesomeIcon icon={faCamera} className="channel-edit-icon-camera" onClick={() => icon_input.current.click()} />
+				        <input type="file" ref={icon_input} name="filename" hidden onChange={onIconChange} accept="image/*"></input>
+                    </div>
                     <button className="create-channel-create-button" onClick={HandleCreateChannel}>Save</button>
                     </>
                 }
