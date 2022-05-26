@@ -1,6 +1,7 @@
 /server/.env
 /server/build
 /server/Chatapp
+/server/files
 
 /web/node_modules
 /web/build
