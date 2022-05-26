@@ -119,7 +119,7 @@ func CreateMessage(ctx *Context) {
 
 		_, err = os.Stat(upload_folder)
 		if os.IsNotExist(err) {
-			err := os.Mkdir(upload_folder, 0750)
+			err := os.MkdirAll(upload_folder, 0750)
 			if err != nil {
 				ctx.Res.WriteHeader(http.StatusInternalServerError)
 				return
