@@ -1,24 +1,22 @@
 package main
 
 import (
-	"Chatapp/database"
 	"Chatapp/gateway"
 	"Chatapp/restapi"
 	"Chatapp/websocket"
+	"context"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var db *gorm.DB
+var db *mongo.Database
 var err error
 var handler *websocket.EventHandler
 
@@ -26,28 +24,15 @@ var onlineUsers = make(map[string]*websocket.Ws)
 var channels = make(map[string]map[string]*websocket.Ws)
 
 var (
-	HOST        = os.Getenv("SERVER_HOST")
-	PORT        = os.Getenv("SERVER_PORT")
-	PG_HOST     = os.Getenv("PG_HOST")
-	PG_PORT     = os.Getenv("PG_PORT")
-	PG_USER     = os.Getenv("PG_USER")
-	PG_PASSWORD = os.Getenv("PG_PASSWORD")
-	PG_DATABASE = os.Getenv("PG_DATABASE")
+	HOST           = os.Getenv("SERVER_HOST")
+	PORT           = os.Getenv("SERVER_PORT")
+	MONGO_URI      = os.Getenv("MONGO_URI")
+	MONGO_DATABASE = os.Getenv("MONGO_DATABASE")
 )
 
 func main() {
-	gorm_logger := logger.New(
-		log.New(os.Stdout, "\r\n", log.LstdFlags),
-		logger.Config{
-			SlowThreshold:             time.Second,
-			LogLevel:                  logger.Silent,
-			IgnoreRecordNotFoundError: true,
-			Colorful:                  false,
-		},
-	)
-
-	dbUri := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable", PG_HOST, PG_PORT, PG_USER, PG_DATABASE, PG_PASSWORD)
-	db, err = gorm.Open(postgres.Open(dbUri), &gorm.Config{Logger: gorm_logger})
+	clientOptions := options.Client().ApplyURI("mongodb://superuser:superpassword@localhost:27017")
+	client, err := mongo.Connect(context.TODO(), clientOptions)
 
 	if err != nil {
 		log.Fatal(fmt.Sprintf("Failed to connect database: %s", err))
@@ -55,22 +40,12 @@ func main() {
 		log.Println("Successfully connected database")
 	}
 
-	psql, err := db.DB()
+	err = client.Ping(context.TODO(), nil)
 	if err != nil {
-		log.Fatal(fmt.Sprintf("Failed to get database connection: %s", err))
+		log.Fatal(fmt.Sprintf("Failed to ping database: %s", err))
 	}
-	defer psql.Close()
-	db.AutoMigrate(&database.Account{})
-	db.AutoMigrate(&database.Session{})
-	db.AutoMigrate(&database.Message{})
-	db.AutoMigrate(&database.Channel{})
-	db.AutoMigrate(&database.Member{})
-	db.AutoMigrate(&database.Invites{})
-	db.AutoMigrate(&database.Friend{})
-	db.AutoMigrate(&database.Ban{})
-	db.AutoMigrate(&database.Block{})
-	db.AutoMigrate(&database.DMChannel{})
-	db.AutoMigrate(&database.Pins{})
+
+	db = client.Database(MONGO_DATABASE)
 
 	handler = &websocket.EventHandler{}
 	handler.Add("CONNECT", gateway.Connect)
