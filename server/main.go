@@ -35,6 +35,7 @@ var (
 	PG_DATABASE = os.Getenv("PG_DATABASE")
 )
 
+//main function
 func main() {
 	gorm_logger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags),
