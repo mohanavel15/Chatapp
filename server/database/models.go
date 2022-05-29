@@ -2,53 +2,53 @@ package database
 
 import (
 	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type Account struct {
-	ID        uint   `gorm:"primarykey"`
-	Uuid      string `gorm:"type:varchar(255);unique;not null"`
-	Avatar    string `gorm:"type:varchar(255)"`
-	Username  string `gorm:"type:varchar(25);unique;not null"`
-	Email     string `gorm:"type:varchar(255);unique;not null"`
-	Password  string `gorm:"type:varchar(255);not null"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
+type User struct {
+	ID        primitive.ObjectID `bson:"_id"`
+	Avatar    string             `bson:"avatar"`
+	Username  string             `bson:"username"`
+	Email     string             `bson:"email"`
+	Password  []byte             `bson:"password"`
+	CreatedAt int64              `bson:"created_at"`
+	UpdatedAt int64              `bson:"updated_at"`
 }
 
 type Session struct {
-	ID          uint   `gorm:"primary_key"`
-	Uuid        string `gorm:"type:varchar(255);not null"`
-	AccessToken string `gorm:"type:varchar(255);unique;not null"`
-	ClientToken string `gorm:"type:varchar(255);unique;not null"`
-	AccountID   uint   `gorm:"type:int;not null"`
+	ID          primitive.ObjectID `bson:"_id"`
+	AccessToken string             `bson:"access_token"`
+	ClientToken string             `bson:"client_token"`
+	AccountID   primitive.ObjectID `bson:"account_id"`
 }
 
 type Friend struct {
-	ID        uint `gorm:"primarykey"`
-	FromUser  uint `gorm:"type:int;not null"`
-	ToUser    uint `gorm:"type:int;not null"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID        primitive.ObjectID `bson:"_id"`
+	FromUser  primitive.ObjectID `bson:"from_user"`
+	ToUser    primitive.ObjectID `bson:"to_user"`
+	CreatedAt time.Time          `bson:"created_at"`
+	UpdatedAt time.Time          `bson:"updated_at"`
 }
 
 type Block struct {
-	ID          uint `gorm:"primarykey"`
-	BlockedUser uint `gorm:"type:int;not null"`
-	BlockedBy   uint `gorm:"type:int;not null"`
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	ID          primitive.ObjectID `bson:"_id"`
+	BlockedUser primitive.ObjectID `bson:"blocked_user"`
+	BlockedBy   primitive.ObjectID `bson:"blocked_by"`
+	CreatedAt   time.Time          `bson:"created_at"`
+	UpdatedAt   time.Time          `bson:"updated_at"`
 }
 
 type Message struct {
-	ID        uint   `gorm:"primarykey"`
-	Uuid      string `gorm:"type:varchar(255);not null"`
-	Content   string `gorm:"type:varchar(2000);not null"`
-	ChannelID string `gorm:"type:varchar(255);not null"`
-	AccountID uint   `gorm:"type:int;not null"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID        primitive.ObjectID `bson:"_id"`
+	Content   string             `bson:"content"`
+	ChannelID primitive.ObjectID `bson:"channel_id"`
+	AccountID primitive.ObjectID `bson:"account_id"`
+	CreatedAt time.Time          `bson:"created_at"`
+	UpdatedAt time.Time          `bson:"updated_at"`
 }
 
+/*
 type DMChannel struct {
 	ID        uint   `gorm:"primarykey"`
 	Uuid      string `gorm:"type:varchar(255);unique;not null"`
@@ -57,48 +57,48 @@ type DMChannel struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
+*/
 
 type Channel struct {
-	ID        uint   `gorm:"primarykey"`
-	Uuid      string `gorm:"type:varchar(255);unique;not null"`
-	Name      string `gorm:"type:varchar(255);not null"`
-	Icon      string `gorm:"type:varchar(255);not null"`
-	Owner     string `gorm:"type:varchar(255);not null"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID        primitive.ObjectID `bson:"_id"`
+	Type      int                `bson:"type"`
+	Name      string             `bson:"name"`
+	Icon      string             `bson:"icon"`
+	OwnerID   primitive.ObjectID `bson:"owner_id"`
+	CreatedAt time.Time          `bson:"created_at"`
+	UpdatedAt time.Time          `bson:"updated_at"`
 }
 
 type Member struct {
-	ID        uint `gorm:"primarykey"`
-	ChannelID uint `gorm:"type:int;not null"`
-	AccountID uint `gorm:"type:int;not null"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID        primitive.ObjectID `bson:"_id"`
+	ChannelID primitive.ObjectID `bson:"channel_id"`
+	AccountID primitive.ObjectID `bson:"account_id"`
+	CreatedAt time.Time          `bson:"created_at"`
+	UpdatedAt time.Time          `bson:"updated_at"`
 }
 
 type Invites struct {
-	ID         uint   `gorm:"primarykey"`
-	InviteCode string `gorm:"type:varchar(255);unique;not null"`
-	ChannelID  uint   `gorm:"type:int;not null"`
-	AccountID  uint   `gorm:"type:int;not null"`
-	CreatedAt  time.Time
-	UpdatedAt  time.Time
+	ID         primitive.ObjectID `bson:"_id"`
+	InviteCode string             `bson:"invite_code"`
+	ChannelID  primitive.ObjectID `bson:"channel_id"`
+	AccountID  primitive.ObjectID `bson:"account_id"`
+	CreatedAt  time.Time          `bson:"created_at"`
+	UpdatedAt  time.Time          `bson:"updated_at"`
 }
 
 type Ban struct {
-	ID         uint   `gorm:"primarykey"`
-	Uuid       string `gorm:"type:varchar(255);unique;not null"`
-	BannedUser uint   `gorm:"type:int;not null"`
-	ChannelID  uint   `gorm:"type:int;not null"`
-	BannedBy   uint   `gorm:"type:int;not null"`
-	Reason     string `gorm:"type:varchar(255)"`
-	CreatedAt  time.Time
-	UpdatedAt  time.Time
+	ID         primitive.ObjectID `bson:"_id"`
+	BannedUser primitive.ObjectID `bson:"banned_user"`
+	ChannelID  primitive.ObjectID `bson:"channel_id"`
+	BannedBy   primitive.ObjectID `bson:"banned_by"`
+	Reason     string             `bson:"reason"`
+	CreatedAt  time.Time          `bson:"created_at"`
+	UpdatedAt  time.Time          `bson:"updated_at"`
 }
 
 type Pins struct {
-	ID        uint   `gorm:"primarykey"`
-	ChannelID string `gorm:"type:varchar(255);not null"`
-	MessageID string `gorm:"type:varchar(255);not null"`
-	CreatedAt time.Time
+	ID        primitive.ObjectID `bson:"_id"`
+	ChannelID primitive.ObjectID `bson:"channel_id"`
+	MessageID primitive.ObjectID `bson:"message_id"`
+	CreatedAt time.Time          `bson:"created_at"`
 }

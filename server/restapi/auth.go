@@ -4,6 +4,7 @@ import (
 	"Chatapp/database"
 	"Chatapp/request"
 	"Chatapp/response"
+	"context"
 	"os"
 	"time"
 
@@ -16,15 +17,17 @@ import (
 
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 )
 
 var JWT_SECRET = os.Getenv("JWT_SECRET")
 
-func Register(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
+func Register(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
 	var request request.Signup
 	_ = json.NewDecoder(r.Body).Decode(&request)
+	collection := db.Collection("users")
 
 	username := strings.TrimSpace(request.Username)
 	password := strings.TrimSpace(request.Password)
@@ -55,18 +58,24 @@ func Register(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 		return
 	}
 
-	var account1 database.Account
-	db.Where("email = ?", email).First(&account1)
-	if account1.ID != 0 {
+	user1 := database.User{
+		Email: email,
+	}
+	err := collection.FindOne(context.TODO(), &user1).Err()
+	if err == nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("Email already exists"))
+		return
 	}
 
-	var account2 database.Account
-	db.Where("username = ?", username).First(&account2)
-	if account2.ID != 0 {
+	user2 := database.User{
+		Username: username,
+	}
+	err = collection.FindOne(context.TODO(), &user2).Err()
+	if err == nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("Username already exists"))
+		return
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.DefaultCost)
@@ -77,22 +86,27 @@ func Register(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 		return
 	}
 
-	new_account := database.Account{
-		Uuid:     uuid.New().String(),
-		Username: request.Username,
-		Email:    request.Email,
-		Password: string(hashedPassword),
+	new_account := database.User{
+		Username:  request.Username,
+		Email:     request.Email,
+		Password:  hashedPassword,
+		CreatedAt: time.Now().Unix(),
+		UpdatedAt: time.Now().Unix(),
 	}
-	db.Create(&new_account)
+
+	collection.InsertOne(context.TODO(), &new_account)
 	w.WriteHeader(http.StatusOK)
 }
 
-func Login(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
+func Login(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
 	var request request.Signin
 	_ = json.NewDecoder(r.Body).Decode(&request)
+	collection := db.Collection("users")
+	sessions := db.Collection("sessions")
 
 	username := strings.TrimSpace(request.Username)
 	password := strings.TrimSpace(request.Password)
+	clientToken := strings.TrimSpace(request.ClientToken)
 
 	if username == "" || password == "" {
 		w.WriteHeader(http.StatusBadRequest)
@@ -106,17 +120,24 @@ func Login(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 		return
 	}
 
-	var account database.Account
-	db.Where("username = ?", username).First(&account)
-
-	err := bcrypt.CompareHashAndPassword([]byte(account.Password), []byte(request.Password))
+	user := database.User{
+		Username: username,
+	}
+	err := collection.FindOne(context.TODO(), &user).Err()
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("Invalid username or password"))
 		return
 	}
 
-	accessToken, err := GenerateJWT(account.Uuid)
+	err = bcrypt.CompareHashAndPassword(user.Password, []byte(request.Password))
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Invalid username or password"))
+		return
+	}
+
+	accessToken, err := GenerateJWT(user.ID.Hex())
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Failed to generate access token"))
@@ -127,30 +148,30 @@ func Login(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 
 	response := response.Signin_Response{
 		AccessToken: accessToken,
-		ClientToken: request.ClientToken,
+		ClientToken: clientToken,
 	}
 
-	if request.ClientToken != "" {
-		result := db.Find(&database.Session{}, "client_token = ?", request.ClientToken)
-		if result.RowsAffected > 0 {
-			db.Model(&database.Session{}).Where("client_token = ?", request.ClientToken).Update("access_token", accessToken)
-			db.Where("client_token = ?", request.ClientToken).First(&session)
+	if clientToken != "" {
+		err := sessions.FindOne(context.TODO(), bson.M{"client_token": clientToken}).Decode(&session)
+		if err == nil {
+			session.AccessToken = accessToken
+			sessions.UpdateByID(context.TODO(), session.ID, &session)
 			json.NewEncoder(w).Encode(response)
 			return
 		}
 	}
+
 	session = database.Session{
-		Uuid:        account.Uuid,
 		AccessToken: accessToken,
 		ClientToken: uuid.New().String(),
-		AccountID:   account.ID,
+		AccountID:   user.ID,
 	}
-	db.Create(&session)
+	collection.InsertOne(context.TODO(), &session)
 	response.ClientToken = session.ClientToken
 	json.NewEncoder(w).Encode(response)
 }
 
-func Logout(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
+func Logout(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
 	access_token := r.Header.Get("Authorization")
 	if access_token == "" {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -163,11 +184,12 @@ func Logout(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 		return
 	}
 
-	db.Delete(&session)
+	collection := db.Collection("sessions")
+	collection.DeleteOne(context.TODO(), bson.M{"_id": session.ID})
 	w.WriteHeader(http.StatusOK)
 }
 
-func Signout(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
+func Signout(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
 	access_token := r.Header.Get("Authorization")
 	if access_token == "" {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -179,23 +201,26 @@ func Signout(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	db.Where("uuid = ?", &session.Uuid).Delete(database.Session{})
+
+	collection := db.Collection("sessions")
+	collection.DeleteOne(context.TODO(), bson.M{"_id": session.ID})
 	w.WriteHeader(http.StatusOK)
 }
 
 func ChangePassword(ctx *Context) {
 	var request request.ChangePassword
 	_ = json.NewDecoder(ctx.Req.Body).Decode(&request)
+	collection := ctx.Db.Collection("users")
 
-	if request.CurrentPassword == "" || request.NewPassword == "" {
+	currentPassword := strings.TrimSpace(request.CurrentPassword)
+	newPassword := strings.TrimSpace(request.NewPassword)
+
+	if currentPassword == "" || newPassword == "" {
 		ctx.Res.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	var account database.Account
-	ctx.Db.Where("uuid = ?", ctx.User.Uuid).First(&account)
-
-	err := bcrypt.CompareHashAndPassword([]byte(account.Password), []byte(request.CurrentPassword))
+	err := bcrypt.CompareHashAndPassword(ctx.User.Password, []byte(request.CurrentPassword))
 	if err != nil {
 		ctx.Res.WriteHeader(http.StatusBadRequest)
 		ctx.Res.Write([]byte("Invalid password"))
@@ -204,37 +229,46 @@ func ChangePassword(ctx *Context) {
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(request.NewPassword), bcrypt.DefaultCost)
 	if err != nil {
-		log.Fatal(fmt.Sprintf("Password Hashing Failed : %s", err))
+		fmt.Println("Password Hashing Failed :", err.Error())
+		ctx.Res.WriteHeader(http.StatusInternalServerError)
+		ctx.Res.Write([]byte("Something went Wrong"))
+		return
 	}
 
-	account.Password = string(hashedPassword)
-	ctx.Db.Save(&account)
+	ctx.User.Password = hashedPassword
+	collection.UpdateOne(context.TODO(), bson.M{"_id": ctx.User.ID}, ctx.User)
 
-	ctx.Db.Where("uuid = ?", account.Uuid).Delete(database.Session{})
 	ctx.Res.WriteHeader(http.StatusOK)
 }
 
-func Refresh(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
+func Refresh(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
 	var request request.Refresh
 	_ = json.NewDecoder(r.Body).Decode(&request)
 
-	if request.ClientToken == "" || request.AccessToken == "" {
+	accessToken := strings.TrimSpace(request.AccessToken)
+	clientToken := strings.TrimSpace(request.ClientToken)
+
+	if accessToken == "" || clientToken == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	session := database.Session{
-		AccessToken: request.AccessToken,
-	}
+	var session database.Session
+	collection := db.Collection("sessions")
+	err := collection.FindOne(context.TODO(), bson.D{{"access_token", accessToken}}).Decode(&session)
 
-	db.Where("access_token = ?", request.AccessToken).First(&session)
-	if session.ID == 0 {
-		w.WriteHeader(http.StatusUnauthorized)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Something went wrong"))
 		return
 	}
 
-	uuid, err := ValidateJWT(request.AccessToken)
-	if err == nil && session.Uuid == uuid {
+	id, err := ValidateJWT(request.AccessToken)
+	if err == nil && session.AccountID.Hex() == id {
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
@@ -244,15 +278,15 @@ func Refresh(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 		return
 	}
 
-	accessToken, err := GenerateJWT(session.Uuid)
+	newAccessToken, err := GenerateJWT(session.AccountID.Hex())
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Failed to generate access token"))
 		return
 	}
 
-	session.AccessToken = accessToken
-	db.Save(&session)
+	session.AccessToken = newAccessToken
+	collection.UpdateOne(context.TODO(), bson.M{"_id": session.ID}, session)
 
 	response := response.Signin_Response{
 		AccessToken: accessToken,
@@ -262,25 +296,29 @@ func Refresh(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 	json.NewEncoder(w).Encode(response)
 }
 
-func ValidateAccessToken(AccessToken string, db *gorm.DB) (bool, database.Session) {
-	uuid, err := ValidateJWT(AccessToken)
+func ValidateAccessToken(AccessToken string, db *mongo.Database) (bool, database.Session) {
+	id, err := ValidateJWT(AccessToken)
 	if err != nil {
 		return false, database.Session{}
 	}
-	var session database.Session
-	db.Where("access_token = ?", AccessToken).First(&session)
-	if session.Uuid == uuid {
+	session := database.Session{
+		AccessToken: AccessToken,
+	}
+	collection := db.Collection("sessions")
+	collection.FindOne(context.TODO(), bson.M{"access_token": AccessToken}).Decode(&session)
+
+	if session.AccountID.Hex() == id {
 		return true, session
 	}
 	return false, database.Session{}
 }
 
-func GenerateJWT(uuid string) (string, error) {
+func GenerateJWT(id string) (string, error) {
 	secret_key := []byte(JWT_SECRET)
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
 
-	claims["uuid"] = uuid
+	claims["id"] = id
 	claims["iat"] = time.Now().Unix()
 	claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
 
@@ -307,7 +345,7 @@ func ValidateJWT(tokenString string) (string, error) {
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		uuid := claims["uuid"].(string)
+		uuid := claims["id"].(string)
 		return uuid, nil
 	} else {
 		return "", fmt.Errorf("Token is invalid")

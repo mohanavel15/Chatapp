@@ -4,12 +4,14 @@ import (
 	"Chatapp/database"
 	"Chatapp/restapi"
 	"Chatapp/websocket"
+	"context"
 	"net/http"
 
-	"gorm.io/gorm"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type IDBFunction func(w http.ResponseWriter, r *http.Request, db *gorm.DB)
+type IDBFunction func(w http.ResponseWriter, r *http.Request, db *mongo.Database)
 type AuthFunction func(ctx *restapi.Context)
 
 func IncludeDB(function IDBFunction) http.HandlerFunc {
@@ -34,10 +36,11 @@ func Authenticated(function AuthFunction) http.HandlerFunc {
 			return
 		}
 
-		var account database.Account
-		db.Where("id = ? ", session.AccountID).First(&account)
+		var user database.User
+		users := db.Collection("users")
 
-		if account.Uuid == "" {
+		err := users.FindOne(context.TODO(), bson.M{"_id": session.AccountID}).Decode(&user)
+		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
@@ -51,7 +54,7 @@ func Authenticated(function AuthFunction) http.HandlerFunc {
 			Res:  w,
 			Req:  r,
 			Db:   db,
-			User: account,
+			User: user,
 			Conn: &conns,
 		}
 
