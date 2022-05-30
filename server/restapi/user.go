@@ -2,6 +2,7 @@ package restapi
 
 import (
 	"Chatapp/response"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -10,6 +11,7 @@ import (
 	"regexp"
 
 	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 func GetUser(ctx *Context) {
@@ -45,7 +47,7 @@ func EditUser(ctx *Context) {
 
 	new_file_id := uuid.New().String()
 	new_file_name := fmt.Sprintf("%s%s", new_file_id, ext)
-	upload_folder := fmt.Sprintf("files/avatars/%s/", ctx.User.Uuid)
+	upload_folder := fmt.Sprintf("files/avatars/%s/", ctx.User.ID.Hex())
 
 	_, err = os.Stat(upload_folder)
 	if os.IsNotExist(err) {
@@ -65,13 +67,14 @@ func EditUser(ctx *Context) {
 	defer new_file.Close()
 	io.Copy(new_file, file)
 
-	url := fmt.Sprintf("http://127.0.0.1:5000/avatars/%s/%s", ctx.User.Uuid, new_file_name)
+	url := fmt.Sprintf("http://127.0.0.1:5000/avatars/%s/%s", ctx.User.ID.Hex(), new_file_name)
 
 	ctx.User.Avatar = url
-	ctx.Db.Save(&ctx.User)
+
+	users := ctx.Db.Collection("users")
+	users.UpdateOne(context.TODO(), bson.M{"id": ctx.User.ID}, bson.M{"$set": bson.M{"avatar": url}})
 
 	user_res := response.NewUser(&ctx.User, 0)
-
 	res, err := json.Marshal(user_res)
 	if err != nil {
 		ctx.Res.WriteHeader(http.StatusInternalServerError)

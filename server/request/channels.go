@@ -1,6 +1,7 @@
 package request
 
 type Channel struct {
-	Name string `json:"name"`
-	Icon string `json:"icon"`
+	Name        string `json:"name"`
+	Icon        string `json:"icon"`
+	RecipientID string `json:"recipient_id"`
 }

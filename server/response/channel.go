@@ -4,22 +4,37 @@ import "Chatapp/database"
 
 type Channel struct {
 	ID         string `json:"id"`
-	Icon       string `json:"icon"`
-	Name       string `json:"name"`
-	OwnerID    string `json:"owner_id"`
+	Type       int    `json:"type"`
+	Icon       string `json:"icon,omitempty"`
+	Name       string `json:"name,omitempty"`
+	OwnerID    string `json:"owner_id,omitempty"`
 	Recipients []User `json:"recipients"`
-	CreatedAt  string `json:"created_at"`
-	UpdatedAt  string `json:"updated_at"`
+	CreatedAt  int64  `json:"created_at"`
+	UpdatedAt  int64  `json:"updated_at"`
 }
 
-func NewChannel(channel *database.Channel) Channel {
-	return Channel{
-		ID:        channel.ID.Hex(),
-		Icon:      channel.Icon,
-		Name:      channel.Name,
-		OwnerID:   channel.OwnerID.Hex(),
-		CreatedAt: channel.CreatedAt.String(),
-		UpdatedAt: channel.UpdatedAt.String(),
+func NewChannel(channel *database.Channel, recipients []User) Channel {
+	if channel.Type == 1 {
+		return Channel{
+			ID:         channel.ID.Hex(),
+			Type:       channel.Type,
+			Recipients: recipients,
+			CreatedAt:  channel.CreatedAt,
+			UpdatedAt:  channel.UpdatedAt,
+		}
+	} else if channel.Type == 2 {
+		return Channel{
+			ID:         channel.ID.Hex(),
+			Type:       channel.Type,
+			Icon:       channel.Icon,
+			Name:       channel.Name,
+			OwnerID:    channel.OwnerID.Hex(),
+			Recipients: recipients,
+			CreatedAt:  channel.CreatedAt,
+			UpdatedAt:  channel.UpdatedAt,
+		}
+	} else {
+		return Channel{}
 	}
 }
 

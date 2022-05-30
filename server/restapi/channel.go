@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
@@ -20,13 +21,30 @@ func CreateChannel(ctx *Context) {
 	var request request.Channel
 	_ = json.NewDecoder(ctx.Req.Body).Decode(&request)
 
-	if request.Name == "" {
+	name := strings.TrimSpace(request.Name)
+	icon := strings.TrimSpace(request.Icon)
+	recipientID := strings.TrimSpace(request.RecipientID)
+
+	if name == "" && recipientID == "" {
 		ctx.Res.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	channel := database.CreateChannel(request.Name, request.Icon, &ctx.User, ctx.Db)
-	response := response.NewChannel(channel)
+	channel, statusCode := database.CreateChannel(name, icon, recipientID, &ctx.User, ctx.Db)
+	if statusCode != http.StatusOK {
+		ctx.Res.WriteHeader(statusCode)
+		return
+	}
+
+	recipients := []response.User{}
+	if channel.Type == 1 {
+		recipient, _ := database.GetUser(recipientID, ctx.Db)
+		recipients = append(recipients, response.NewUser(recipient, 0))
+	} else {
+		recipients = append(recipients, response.NewUser(&ctx.User, 0))
+	}
+
+	response := response.NewChannel(channel, recipients)
 
 	res, err := json.Marshal(response)
 	if err != nil {
@@ -37,7 +55,7 @@ func CreateChannel(ctx *Context) {
 	ctx.Res.Header().Set("Content-Type", "application/json")
 	ctx.Res.Write(res)
 
-	if ws, ok := ctx.Conn.Users[ctx.User.Uuid]; ok {
+	if ws, ok := ctx.Conn.Users[ctx.User.ID.Hex()]; ok {
 		ws_msg := websocket.WS_Message{
 			Event: "CHANNEL_CREATE",
 			Data:  response,
@@ -51,7 +69,16 @@ func GetChannels(ctx *Context) {
 	res_channels := response.Channels{}
 	channels := database.GetChannels(&ctx.User, ctx.Db)
 	for _, channel := range channels {
-		res_channels = append(res_channels, response.NewChannel(&channel))
+		recipients := []response.User{}
+		for _, recipient := range channel.Recipients {
+			if channel.Type == 1 && recipient.Hex() == ctx.User.ID.Hex() {
+				continue
+			}
+			recipient, _ := database.GetUser(recipient.Hex(), ctx.Db)
+			recipients = append(recipients, response.NewUser(recipient, 0))
+		}
+
+		res_channels = append(res_channels, response.NewChannel(&channel, recipients))
 	}
 
 	res, err := json.Marshal(res_channels)
@@ -74,7 +101,16 @@ func GetChannel(ctx *Context) {
 		return
 	}
 
-	res_channel := response.NewChannel(channel)
+	recipients := []response.User{}
+	for _, recipient := range channel.Recipients {
+		if channel.Type == 1 && recipient.Hex() == ctx.User.ID.Hex() {
+			continue
+		}
+		recipient, _ := database.GetUser(recipient.Hex(), ctx.Db)
+		recipients = append(recipients, response.NewUser(recipient, 0))
+	}
+
+	res_channel := response.NewChannel(channel, recipients)
 	res, err := json.Marshal(res_channel)
 	if err != nil {
 		ctx.Res.WriteHeader(http.StatusInternalServerError)
@@ -140,7 +176,13 @@ func EditChannel(ctx *Context) {
 			return
 		}
 
-		res_channel := response.NewChannel(channel)
+		recipients := []response.User{}
+		for _, recipient := range channel.Recipients {
+			recipient, _ := database.GetUser(recipient.Hex(), ctx.Db)
+			recipients = append(recipients, response.NewUser(recipient, 0))
+		}
+
+		res_channel := response.NewChannel(channel, recipients)
 
 		res, err := json.Marshal(res_channel)
 		if err != nil {
@@ -150,20 +192,27 @@ func EditChannel(ctx *Context) {
 		ctx.Res.Header().Set("Content-Type", "application/json")
 		ctx.Res.Write(res)
 
-		websocket.BroadcastToChannel(ctx.Conn, res_channel.Uuid, "CHANNEL_MODIFY", res_channel)
+		websocket.BroadcastToChannel(ctx.Conn, res_channel.ID, "CHANNEL_MODIFY", res_channel)
 	}
 }
+
 func DeleteChannel(ctx *Context) {
 	url_vars := mux.Vars(ctx.Req)
 	channel_id := url_vars["id"]
 
-	channel, member, statusCode := database.DeleteChannel(channel_id, &ctx.User, ctx.Db)
+	channel, statusCode := database.DeleteChannel(channel_id, &ctx.User, ctx.Db)
 	if statusCode != http.StatusOK {
 		ctx.Res.WriteHeader(statusCode)
 		return
 	}
 
-	res_channel := response.NewChannel(channel)
+	recipients := []response.User{}
+	for _, recipient := range channel.Recipients {
+		recipient, _ := database.GetUser(recipient.Hex(), ctx.Db)
+		recipients = append(recipients, response.NewUser(recipient, 0))
+	}
+
+	res_channel := response.NewChannel(channel, recipients)
 	res, err := json.Marshal(res_channel)
 	if err != nil {
 		ctx.Res.WriteHeader(http.StatusInternalServerError)
@@ -173,17 +222,19 @@ func DeleteChannel(ctx *Context) {
 	ctx.Res.Header().Set("Content-Type", "application/json")
 	ctx.Res.Write(res)
 
-	if ws, ok := ctx.Conn.Channels[channel_id][ctx.User.Uuid]; ok {
+	if ws, ok := ctx.Conn.Channels[channel_id][ctx.User.ID.Hex()]; ok {
 		ws_message := websocket.WS_Message{
 			Event: "CHANNEL_DELETE",
 			Data:  res_channel,
 		}
 		ws_res, _ := json.Marshal(ws_message)
 		ws.Write(ws_res)
-		delete(ctx.Conn.Channels[channel_id], ctx.User.Uuid)
+		delete(ctx.Conn.Channels[channel_id], ctx.User.ID.Hex())
 	}
 
-	res_member_user := response.NewUser(&ctx.User, 0)
-	res_member := response.NewMember(&res_member_user, channel, member)
-	websocket.BroadcastToChannel(ctx.Conn, channel.Uuid, "MEMBER_REMOVE", res_member)
+	/*
+		res_member_user := response.NewUser(&ctx.User, 0)
+		res_member := response.NewMember(&res_member_user, channel, member)
+		websocket.BroadcastToChannel(ctx.Conn, channel.ID.Hex(), "MEMBER_REMOVE", res_member)
+	*/
 }
