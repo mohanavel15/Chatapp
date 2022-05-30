@@ -3,7 +3,7 @@ package response
 import "Chatapp/database"
 
 type Message struct {
-	Uuid        string       `json:"uuid"`
+	ID          string       `json:"id"`
 	Content     string       `json:"content"`
 	Author      User         `json:"author"`
 	ChannelID   string       `json:"channel_id"`
@@ -14,12 +14,12 @@ type Message struct {
 
 func NewMessage(message *database.Message, user User) Message {
 	return Message{
-		Uuid:        message.Uuid,
+		ID:          message.ID.Hex(),
 		Content:     message.Content,
 		Author:      user,
-		ChannelID:   message.ChannelID,
-		CreatedAt:   message.CreatedAt.Unix(),
-		EditedAt:    message.UpdatedAt.Unix(),
+		ChannelID:   message.ChannelID.Hex(),
+		CreatedAt:   message.CreatedAt,
+		EditedAt:    message.UpdatedAt,
 		Attachments: []Attachment{},
 	}
 }

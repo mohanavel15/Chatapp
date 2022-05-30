@@ -12,8 +12,8 @@ type Member struct {
 func NewMember(user *User, channel *database.Channel, member *database.Member) Member {
 	return Member{
 		User:      *user,
-		Is_Owner:  channel.Owner == user.Uuid,
-		ChannelID: channel.Uuid,
+		Is_Owner:  channel.OwnerID.Hex() == user.ID,
+		ChannelID: channel.ID.Hex(),
 		JoinedAt:  member.CreatedAt.Unix(),
 	}
 }
