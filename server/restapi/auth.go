@@ -18,6 +18,7 @@ import (
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -29,9 +30,9 @@ func Register(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
 	_ = json.NewDecoder(r.Body).Decode(&request)
 	collection := db.Collection("users")
 
-	username := strings.TrimSpace(request.Username)
+	username := strings.ToLower(strings.TrimSpace(request.Username))
 	password := strings.TrimSpace(request.Password)
-	email := strings.TrimSpace(request.Email)
+	email := strings.ToLower(strings.TrimSpace(request.Email))
 
 	if username == "" || password == "" || email == "" {
 		w.WriteHeader(http.StatusBadRequest)
@@ -58,20 +59,14 @@ func Register(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
 		return
 	}
 
-	user1 := database.User{
-		Email: email,
-	}
-	err := collection.FindOne(context.TODO(), &user1).Err()
+	err := collection.FindOne(context.TODO(), bson.M{"email": email}).Err()
 	if err == nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("Email already exists"))
 		return
 	}
 
-	user2 := database.User{
-		Username: username,
-	}
-	err = collection.FindOne(context.TODO(), &user2).Err()
+	err = collection.FindOne(context.TODO(), bson.M{"username": username}).Err()
 	if err == nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("Username already exists"))
@@ -87,6 +82,7 @@ func Register(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
 	}
 
 	new_account := database.User{
+		ID:        primitive.NewObjectID(),
 		Username:  request.Username,
 		Email:     request.Email,
 		Password:  hashedPassword,
@@ -101,10 +97,10 @@ func Register(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
 func Login(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
 	var request request.Signin
 	_ = json.NewDecoder(r.Body).Decode(&request)
-	collection := db.Collection("users")
+	users := db.Collection("users")
 	sessions := db.Collection("sessions")
 
-	username := strings.TrimSpace(request.Username)
+	username := strings.ToLower(strings.TrimSpace(request.Username))
 	password := strings.TrimSpace(request.Password)
 	clientToken := strings.TrimSpace(request.ClientToken)
 
@@ -120,10 +116,8 @@ func Login(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
 		return
 	}
 
-	user := database.User{
-		Username: username,
-	}
-	err := collection.FindOne(context.TODO(), &user).Err()
+	var user database.User
+	err := users.FindOne(context.TODO(), bson.M{"username": username}).Decode(&user)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("Invalid username or password"))
@@ -144,29 +138,26 @@ func Login(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
 		return
 	}
 
-	var session database.Session
-
 	response := response.Signin_Response{
 		AccessToken: accessToken,
 		ClientToken: clientToken,
 	}
 
 	if clientToken != "" {
-		err := sessions.FindOne(context.TODO(), bson.M{"client_token": clientToken}).Decode(&session)
+		err := sessions.FindOneAndUpdate(context.TODO(), bson.M{"client_token": clientToken}, bson.M{"$set": bson.M{"access_token": accessToken}}).Err()
 		if err == nil {
-			session.AccessToken = accessToken
-			sessions.UpdateByID(context.TODO(), session.ID, &session)
 			json.NewEncoder(w).Encode(response)
 			return
 		}
 	}
 
-	session = database.Session{
+	session := database.Session{
+		ID:          primitive.NewObjectID(),
 		AccessToken: accessToken,
 		ClientToken: uuid.New().String(),
 		AccountID:   user.ID,
 	}
-	collection.InsertOne(context.TODO(), &session)
+	sessions.InsertOne(context.TODO(), &session)
 	response.ClientToken = session.ClientToken
 	json.NewEncoder(w).Encode(response)
 }
@@ -184,8 +175,8 @@ func Logout(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
 		return
 	}
 
-	collection := db.Collection("sessions")
-	collection.DeleteOne(context.TODO(), bson.M{"_id": session.ID})
+	sessions := db.Collection("sessions")
+	sessions.DeleteOne(context.TODO(), bson.M{"_id": session.ID})
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -203,7 +194,7 @@ func Signout(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
 	}
 
 	collection := db.Collection("sessions")
-	collection.DeleteOne(context.TODO(), bson.M{"_id": session.ID})
+	collection.DeleteMany(context.TODO(), bson.M{"account_id": session.AccountID})
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -236,8 +227,7 @@ func ChangePassword(ctx *Context) {
 	}
 
 	ctx.User.Password = hashedPassword
-	collection.UpdateOne(context.TODO(), bson.M{"_id": ctx.User.ID}, ctx.User)
-
+	collection.UpdateOne(context.TODO(), bson.M{"_id": ctx.User.ID}, bson.M{"$set": bson.M{"password": hashedPassword}})
 	ctx.Res.WriteHeader(http.StatusOK)
 }
 
@@ -255,7 +245,7 @@ func Refresh(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
 
 	var session database.Session
 	collection := db.Collection("sessions")
-	err := collection.FindOne(context.TODO(), bson.D{{"access_token", accessToken}}).Decode(&session)
+	err := collection.FindOne(context.TODO(), bson.M{"access_token": accessToken}).Decode(&session)
 
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -286,31 +276,19 @@ func Refresh(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
 	}
 
 	session.AccessToken = newAccessToken
-	collection.UpdateOne(context.TODO(), bson.M{"_id": session.ID}, session)
+	_, err = collection.ReplaceOne(context.TODO(), bson.M{"_id": session.ID}, session)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Something went wrong"))
+		return
+	}
 
 	response := response.Signin_Response{
-		AccessToken: accessToken,
+		AccessToken: newAccessToken,
 		ClientToken: request.ClientToken,
 	}
 
 	json.NewEncoder(w).Encode(response)
-}
-
-func ValidateAccessToken(AccessToken string, db *mongo.Database) (bool, database.Session) {
-	id, err := ValidateJWT(AccessToken)
-	if err != nil {
-		return false, database.Session{}
-	}
-	session := database.Session{
-		AccessToken: AccessToken,
-	}
-	collection := db.Collection("sessions")
-	collection.FindOne(context.TODO(), bson.M{"access_token": AccessToken}).Decode(&session)
-
-	if session.AccountID.Hex() == id {
-		return true, session
-	}
-	return false, database.Session{}
 }
 
 func GenerateJWT(id string) (string, error) {
@@ -329,6 +307,27 @@ func GenerateJWT(id string) (string, error) {
 		return "", err
 	}
 	return tokenString, nil
+}
+
+func ValidateAccessToken(AccessToken string, db *mongo.Database) (bool, database.Session) {
+	id, err := ValidateJWT(AccessToken)
+	if err != nil {
+		return false, database.Session{}
+	}
+
+	var session database.Session
+	collection := db.Collection("sessions")
+	err = collection.FindOne(context.TODO(), bson.M{"access_token": AccessToken}).Decode(&session)
+
+	if err != nil {
+		return false, database.Session{}
+	}
+
+	if session.AccountID.Hex() != id {
+		return false, database.Session{}
+	}
+
+	return true, session
 }
 
 func ValidateJWT(tokenString string) (string, error) {
