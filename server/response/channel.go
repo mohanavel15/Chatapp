@@ -14,28 +14,19 @@ type Channel struct {
 }
 
 func NewChannel(channel *database.Channel, recipients []User) Channel {
-	if channel.Type == 1 {
-		return Channel{
-			ID:         channel.ID.Hex(),
-			Type:       channel.Type,
-			Recipients: recipients,
-			CreatedAt:  channel.CreatedAt,
-			UpdatedAt:  channel.UpdatedAt,
-		}
-	} else if channel.Type == 2 {
-		return Channel{
-			ID:         channel.ID.Hex(),
-			Type:       channel.Type,
-			Icon:       channel.Icon,
-			Name:       channel.Name,
-			OwnerID:    channel.OwnerID.Hex(),
-			Recipients: recipients,
-			CreatedAt:  channel.CreatedAt,
-			UpdatedAt:  channel.UpdatedAt,
-		}
-	} else {
-		return Channel{}
+	res_channel := Channel{
+		ID:         channel.ID.Hex(),
+		Type:       channel.Type,
+		Recipients: recipients,
+		CreatedAt:  channel.CreatedAt,
+		UpdatedAt:  channel.UpdatedAt,
 	}
+	if channel.Type == 2 {
+		res_channel.Icon = channel.Icon
+		res_channel.Name = channel.Name
+		res_channel.OwnerID = channel.OwnerID.Hex()
+	}
+	return res_channel
 }
 
 type Channels []Channel

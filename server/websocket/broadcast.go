@@ -4,7 +4,12 @@ import (
 	"encoding/json"
 )
 
-func BroadcastToChannel(conns *Connections, channel_id string, event string, data interface{}) {
+type Connections struct {
+	Users    map[string]*Ws
+	Channels map[string]map[string]*Ws
+}
+
+func (conns *Connections) BroadcastToChannel(channel_id string, event string, data interface{}) {
 	ws_message := WS_Message{
 		Event: event,
 		Data:  data,

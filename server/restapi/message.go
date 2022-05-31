@@ -4,7 +4,6 @@ import (
 	"Chatapp/database"
 	"Chatapp/request"
 	"Chatapp/response"
-	"Chatapp/websocket"
 	"encoding/json"
 	"net/http"
 	"strings"
@@ -106,7 +105,7 @@ func CreateMessage(ctx *Context) {
 		ctx.Res.Header().Set("Content-Type", "application/json")
 		ctx.Res.Write(res)
 
-		websocket.BroadcastToChannel(ctx.Conn, channel_id, "MESSAGE_CREATE", message_res)
+		ctx.Conn.BroadcastToChannel(channel_id, "MESSAGE_CREATE", message_res)
 	} else {
 		/*
 			content := ctx.Req.FormValue("content")
@@ -162,7 +161,7 @@ func CreateMessage(ctx *Context) {
 				EditedAt:    time.Now().Unix(),
 				Attachments: attachments,
 			}
-			websocket.BroadcastToChannel(ctx.Conn, channel_id, "MESSAGE_CREATE", message_res)
+			ctx.Conn.BroadcastToChannel(channel_id, "MESSAGE_CREATE", message_res)
 		*/
 	}
 }
@@ -201,7 +200,7 @@ func EditMessage(ctx *Context) {
 
 	ctx.Res.Header().Set("Content-Type", "application/json")
 	ctx.Res.Write(res)
-	websocket.BroadcastToChannel(ctx.Conn, message_res.ChannelID, "MESSAGE_MODIFY", message_res)
+	ctx.Conn.BroadcastToChannel(message_res.ChannelID, "MESSAGE_MODIFY", message_res)
 }
 
 func DeleteMessage(ctx *Context) {
@@ -230,5 +229,5 @@ func DeleteMessage(ctx *Context) {
 
 	ctx.Res.Header().Set("Content-Type", "application/json")
 	ctx.Res.Write(res)
-	websocket.BroadcastToChannel(ctx.Conn, message_res.ChannelID, "MESSAGE_DELETE", message_res)
+	ctx.Conn.BroadcastToChannel(message_res.ChannelID, "MESSAGE_DELETE", message_res)
 }

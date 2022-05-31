@@ -3,6 +3,7 @@ package main
 import (
 	"Chatapp/database"
 	"Chatapp/restapi"
+	"Chatapp/utils"
 	"Chatapp/websocket"
 	"context"
 	"net/http"
@@ -30,7 +31,7 @@ func Authenticated(function AuthFunction) http.HandlerFunc {
 			return
 		}
 
-		is_valid, session := restapi.ValidateAccessToken(access_token, db)
+		is_valid, session := utils.ValidateAccessToken(access_token, db)
 		if is_valid != true {
 			w.WriteHeader(http.StatusUnauthorized)
 			return

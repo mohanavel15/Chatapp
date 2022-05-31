@@ -4,26 +4,22 @@ import (
 	"Chatapp/database"
 	"Chatapp/request"
 	"Chatapp/response"
+	"Chatapp/utils"
 	"context"
-	"os"
 	"time"
 
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"regexp"
 	"strings"
 
-	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
-
-var JWT_SECRET = os.Getenv("JWT_SECRET")
 
 func Register(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
 	var request request.Signup
@@ -131,7 +127,7 @@ func Login(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
 		return
 	}
 
-	accessToken, err := GenerateJWT(user.ID.Hex())
+	accessToken, err := utils.GenerateJWT(user.ID.Hex())
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Failed to generate access token"))
@@ -169,7 +165,7 @@ func Logout(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
 		return
 	}
 
-	is_valid, session := ValidateAccessToken(access_token, db)
+	is_valid, session := utils.ValidateAccessToken(access_token, db)
 	if is_valid != true {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
@@ -187,7 +183,7 @@ func Signout(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
 		return
 	}
 
-	is_valid, session := ValidateAccessToken(access_token, db)
+	is_valid, session := utils.ValidateAccessToken(access_token, db)
 	if is_valid != true {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
@@ -257,7 +253,7 @@ func Refresh(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
 		return
 	}
 
-	id, err := ValidateJWT(request.AccessToken)
+	id, err := utils.ValidateJWT(request.AccessToken)
 	if err == nil && session.AccountID.Hex() == id {
 		w.WriteHeader(http.StatusNoContent)
 		return
@@ -268,7 +264,7 @@ func Refresh(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
 		return
 	}
 
-	newAccessToken, err := GenerateJWT(session.AccountID.Hex())
+	newAccessToken, err := utils.GenerateJWT(session.AccountID.Hex())
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Failed to generate access token"))
@@ -289,64 +285,4 @@ func Refresh(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
 	}
 
 	json.NewEncoder(w).Encode(response)
-}
-
-func GenerateJWT(id string) (string, error) {
-	secret_key := []byte(JWT_SECRET)
-	token := jwt.New(jwt.SigningMethodHS256)
-	claims := token.Claims.(jwt.MapClaims)
-
-	claims["id"] = id
-	claims["iat"] = time.Now().Unix()
-	claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
-
-	tokenString, err := token.SignedString(secret_key)
-
-	if err != nil {
-		log.Fatal(fmt.Sprintf("Couldn't sign the token: %s", err))
-		return "", err
-	}
-	return tokenString, nil
-}
-
-func ValidateAccessToken(AccessToken string, db *mongo.Database) (bool, database.Session) {
-	id, err := ValidateJWT(AccessToken)
-	if err != nil {
-		return false, database.Session{}
-	}
-
-	var session database.Session
-	collection := db.Collection("sessions")
-	err = collection.FindOne(context.TODO(), bson.M{"access_token": AccessToken}).Decode(&session)
-
-	if err != nil {
-		return false, database.Session{}
-	}
-
-	if session.AccountID.Hex() != id {
-		return false, database.Session{}
-	}
-
-	return true, session
-}
-
-func ValidateJWT(tokenString string) (string, error) {
-	secret_key := []byte(JWT_SECRET)
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("There was an error")
-		}
-		return secret_key, nil
-	})
-
-	if err != nil {
-		return "", err
-	}
-
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		uuid := claims["id"].(string)
-		return uuid, nil
-	} else {
-		return "", fmt.Errorf("Token is invalid")
-	}
 }

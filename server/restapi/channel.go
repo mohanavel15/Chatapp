@@ -4,7 +4,6 @@ import (
 	"Chatapp/database"
 	"Chatapp/request"
 	"Chatapp/response"
-	"Chatapp/websocket"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -54,15 +53,6 @@ func CreateChannel(ctx *Context) {
 
 	ctx.Res.Header().Set("Content-Type", "application/json")
 	ctx.Res.Write(res)
-
-	if ws, ok := ctx.Conn.Users[ctx.User.ID.Hex()]; ok {
-		ws_msg := websocket.WS_Message{
-			Event: "CHANNEL_CREATE",
-			Data:  response,
-		}
-		ws_res, _ := json.Marshal(ws_msg)
-		ws.Write(ws_res)
-	}
 }
 
 func GetChannels(ctx *Context) {
@@ -192,7 +182,7 @@ func EditChannel(ctx *Context) {
 		ctx.Res.Header().Set("Content-Type", "application/json")
 		ctx.Res.Write(res)
 
-		websocket.BroadcastToChannel(ctx.Conn, res_channel.ID, "CHANNEL_MODIFY", res_channel)
+		ctx.Conn.BroadcastToChannel(res_channel.ID, "CHANNEL_MODIFY", res_channel)
 	}
 }
 
@@ -222,19 +212,10 @@ func DeleteChannel(ctx *Context) {
 	ctx.Res.Header().Set("Content-Type", "application/json")
 	ctx.Res.Write(res)
 
-	if ws, ok := ctx.Conn.Channels[channel_id][ctx.User.ID.Hex()]; ok {
-		ws_message := websocket.WS_Message{
-			Event: "CHANNEL_DELETE",
-			Data:  res_channel,
-		}
-		ws_res, _ := json.Marshal(ws_message)
-		ws.Write(ws_res)
+	if _, ok := ctx.Conn.Channels[channel_id][ctx.User.ID.Hex()]; ok {
 		delete(ctx.Conn.Channels[channel_id], ctx.User.ID.Hex())
 	}
 
-	/*
-		res_member_user := response.NewUser(&ctx.User, 0)
-		res_member := response.NewMember(&res_member_user, channel, member)
-		websocket.BroadcastToChannel(ctx.Conn, channel.ID.Hex(), "MEMBER_REMOVE", res_member)
-	*/
+	res_user := response.NewUser(&ctx.User, 0)
+	ctx.Conn.BroadcastToChannel(channel.ID.Hex(), "MEMBER_REMOVE", res_user)
 }

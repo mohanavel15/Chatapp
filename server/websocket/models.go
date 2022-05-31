@@ -11,11 +11,6 @@ type WS_Message struct {
 	Data  interface{} `json:"data"`
 }
 
-type Connections struct {
-	Users    map[string]*Ws
-	Channels map[string]map[string]*Ws
-}
-
 type Channel struct {
 	Uuid string `json:"uuid"`
 	Name string `json:"name"`
