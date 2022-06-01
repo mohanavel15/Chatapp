@@ -23,20 +23,11 @@ type Session struct {
 	AccountID   primitive.ObjectID `bson:"account_id"`
 }
 
-type Friend struct {
-	ID        primitive.ObjectID `bson:"_id"`
-	FromUser  primitive.ObjectID `bson:"from_user"`
-	ToUser    primitive.ObjectID `bson:"to_user"`
-	CreatedAt time.Time          `bson:"created_at"`
-	UpdatedAt time.Time          `bson:"updated_at"`
-}
-
-type Block struct {
-	ID          primitive.ObjectID `bson:"_id"`
-	BlockedUser primitive.ObjectID `bson:"blocked_user"`
-	BlockedBy   primitive.ObjectID `bson:"blocked_by"`
-	CreatedAt   time.Time          `bson:"created_at"`
-	UpdatedAt   time.Time          `bson:"updated_at"`
+type Relationship struct {
+	ID         primitive.ObjectID `bson:"_id"`
+	Type       int                `bson:"type"`
+	FromUserID primitive.ObjectID `bson:"from_user_id"`
+	ToUserID   primitive.ObjectID `bson:"to_user_id"`
 }
 
 type Message struct {
@@ -44,37 +35,19 @@ type Message struct {
 	Content   string             `bson:"content"`
 	ChannelID primitive.ObjectID `bson:"channel_id"`
 	AccountID primitive.ObjectID `bson:"account_id"`
-	CreatedAt time.Time          `bson:"created_at"`
-	UpdatedAt time.Time          `bson:"updated_at"`
+	CreatedAt int64              `bson:"created_at"`
+	UpdatedAt int64              `bson:"updated_at"`
 }
-
-/*
-type DMChannel struct {
-	ID        uint   `gorm:"primarykey"`
-	Uuid      string `gorm:"type:varchar(255);unique;not null"`
-	FromUser  uint   `gorm:"type:int;not null"`
-	ToUser    uint   `gorm:"type:int;not null"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-}
-*/
 
 type Channel struct {
-	ID        primitive.ObjectID `bson:"_id"`
-	Type      int                `bson:"type"`
-	Name      string             `bson:"name"`
-	Icon      string             `bson:"icon"`
-	OwnerID   primitive.ObjectID `bson:"owner_id"`
-	CreatedAt time.Time          `bson:"created_at"`
-	UpdatedAt time.Time          `bson:"updated_at"`
-}
-
-type Member struct {
-	ID        primitive.ObjectID `bson:"_id"`
-	ChannelID primitive.ObjectID `bson:"channel_id"`
-	AccountID primitive.ObjectID `bson:"account_id"`
-	CreatedAt time.Time          `bson:"created_at"`
-	UpdatedAt time.Time          `bson:"updated_at"`
+	ID         primitive.ObjectID   `bson:"_id,omitempty"`
+	Type       int                  `bson:"type,omitempty"`
+	Name       string               `bson:"name,omitempty"`
+	Icon       string               `bson:"icon,omitempty"`
+	OwnerID    primitive.ObjectID   `bson:"owner_id,omitempty"`
+	Recipients []primitive.ObjectID `bson:"recipients,omitempty"`
+	CreatedAt  int64                `bson:"created_at,omitempty"`
+	UpdatedAt  int64                `bson:"updated_at,omitempty"`
 }
 
 type Invites struct {
