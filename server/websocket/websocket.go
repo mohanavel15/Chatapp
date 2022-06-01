@@ -74,5 +74,8 @@ func (ws *Ws) HandleWSMessage(data []byte) {
 }
 
 func (ws *Ws) Close() {
-	ws.Conn.Close()
+	err := ws.Conn.Close()
+	if err != nil {
+		log.Println(err)
+	}
 }

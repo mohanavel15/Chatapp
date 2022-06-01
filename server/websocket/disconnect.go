@@ -8,6 +8,7 @@ import (
 func Disconnect(ws *Ws) {
 	if ws.User == nil {
 		ws.Close()
+		return
 	}
 
 	channels := database.GetChannels(ws.User, ws.Db)
@@ -18,6 +19,7 @@ func Disconnect(ws *Ws) {
 			Type:      1,
 			ChannelID: channel.ID.Hex(),
 		}
+		ws.Conns.RemoveUserFromChannel(ws.User.ID.Hex(), channel.ID.Hex())
 		ws.Conns.BroadcastToChannel(channel.ID.Hex(), "STATUS_UPDATE", status)
 	}
 

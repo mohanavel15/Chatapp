@@ -65,6 +65,7 @@ func ConnectUser(ctx *Context) {
 			ChannelID: channel.ID.Hex(),
 		}
 		ctx.Ws.Conns.BroadcastToChannel(channel.ID.Hex(), "STATUS_UPDATE", status)
+		ctx.Ws.Conns.AddUserToChannel(get_user.ID.Hex(), channel.ID.Hex(), ctx.Ws)
 	}
 
 	ws_msg := WS_Message{
