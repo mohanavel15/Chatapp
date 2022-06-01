@@ -30,15 +30,6 @@ type Relationship struct {
 	ToUserID   primitive.ObjectID `bson:"to_user_id"`
 }
 
-type Message struct {
-	ID        primitive.ObjectID `bson:"_id"`
-	Content   string             `bson:"content"`
-	ChannelID primitive.ObjectID `bson:"channel_id"`
-	AccountID primitive.ObjectID `bson:"account_id"`
-	CreatedAt int64              `bson:"created_at"`
-	UpdatedAt int64              `bson:"updated_at"`
-}
-
 type Channel struct {
 	ID         primitive.ObjectID   `bson:"_id,omitempty"`
 	Type       int                  `bson:"type,omitempty"`
@@ -48,6 +39,22 @@ type Channel struct {
 	Recipients []primitive.ObjectID `bson:"recipients,omitempty"`
 	CreatedAt  int64                `bson:"created_at,omitempty"`
 	UpdatedAt  int64                `bson:"updated_at,omitempty"`
+}
+
+type Message struct {
+	ID        primitive.ObjectID `bson:"_id"`
+	Content   string             `bson:"content"`
+	ChannelID primitive.ObjectID `bson:"channel_id"`
+	AccountID primitive.ObjectID `bson:"account_id"`
+	CreatedAt int64              `bson:"created_at"`
+	UpdatedAt int64              `bson:"updated_at"`
+}
+
+type Pins struct {
+	ID        primitive.ObjectID `bson:"_id"`
+	ChannelID primitive.ObjectID `bson:"channel_id"`
+	MessageID primitive.ObjectID `bson:"message_id"`
+	CreatedAt int64              `bson:"created_at"`
 }
 
 type Invites struct {
@@ -67,11 +74,4 @@ type Ban struct {
 	Reason     string             `bson:"reason"`
 	CreatedAt  time.Time          `bson:"created_at"`
 	UpdatedAt  time.Time          `bson:"updated_at"`
-}
-
-type Pins struct {
-	ID        primitive.ObjectID `bson:"_id"`
-	ChannelID primitive.ObjectID `bson:"channel_id"`
-	MessageID primitive.ObjectID `bson:"message_id"`
-	CreatedAt time.Time          `bson:"created_at"`
 }

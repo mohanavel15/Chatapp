@@ -3,49 +3,57 @@ package restapi
 import (
 	"Chatapp/database"
 	"Chatapp/response"
+	"context"
 	"encoding/json"
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func GetAllBans(ctx *Context) {
 	url_vars := mux.Vars(ctx.Req)
 	channel_id := url_vars["id"]
+	banCollection := ctx.Db.Collection("bans")
 
-	channel := database.Channel{
-		Uuid: channel_id,
-	}
-	ctx.Db.Where(&channel).First(&channel)
-
-	if channel.ID == 0 {
-		ctx.Res.WriteHeader(http.StatusNotFound)
+	channel, statusCode := database.GetChannel(channel_id, &ctx.User, ctx.Db)
+	if statusCode != http.StatusOK {
+		ctx.Res.WriteHeader(statusCode)
 		return
 	}
 
-	if ctx.User.Uuid != channel.Owner {
+	if channel.Type != 2 || ctx.User.ID != channel.OwnerID {
 		ctx.Res.WriteHeader(http.StatusForbidden)
 		return
 	}
 
-	var bans []database.Ban
-	ctx.Db.Where("channel_id = ?", channel.ID).Find(&bans)
+	cur, err := banCollection.Find(context.TODO(), bson.M{"channel_id": channel.ID})
+	if err != nil {
+		ctx.Res.WriteHeader(http.StatusNotFound)
+		return
+	}
 
-	res_channel := response.NewChannel(&channel)
 	res_bans := []response.Ban{}
 
-	for _, ban := range bans {
-		var user database.Account
-		ctx.Db.Where("id = ?", ban.BannedBy).First(&user)
-		bannedby := response.NewUser(&user, 0)
+	for cur.Next(context.TODO()) {
+		var ban database.Ban
+		err := cur.Decode(&ban)
+		if err != nil {
+			continue
+		}
 
-		var banned_user database.Account
-		ctx.Db.Where("id = ?", ban.BannedUser).First(&banned_user)
+		BannedBy, statusCode := database.GetUser(ban.BannedBy.Hex(), ctx.Db)
+		if statusCode != http.StatusOK {
+			continue
+		}
 
-		banneduser := response.NewUser(&banned_user, 0)
+		BannedUser, statusCode := database.GetUser(ban.BannedUser.Hex(), ctx.Db)
+		if statusCode != http.StatusOK {
+			continue
+		}
 
-		res_ban := response.NewBan(bannedby, banneduser, res_channel, &ban)
-		res_bans = append(res_bans, res_ban)
+		res_bans = append(res_bans, response.NewBan(response.NewUser(BannedBy, 0), response.NewUser(BannedUser, 0), ban.ChannelID.Hex(), &ban))
 	}
 
 	res, err := json.Marshal(res_bans)
@@ -62,45 +70,45 @@ func GetBan(ctx *Context) {
 	url_vars := mux.Vars(ctx.Req)
 	channel_id := url_vars["id"]
 	ban_id := url_vars["bid"]
+	banCollection := ctx.Db.Collection("bans")
 
-	channel := database.Channel{
-		Uuid: channel_id,
-	}
-	ctx.Db.Where(&channel).First(&channel)
-
-	if channel.ID == 0 {
-		ctx.Res.WriteHeader(http.StatusNotFound)
+	ban_object_id, err := primitive.ObjectIDFromHex(ban_id)
+	if err != nil {
+		ctx.Res.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	ban := database.Ban{
-		Uuid: ban_id,
-	}
-	ctx.Db.Where(&ban).First(&ban)
-
-	if ban.ID == 0 {
-		ctx.Res.WriteHeader(http.StatusNotFound)
+	channel, statusCode := database.GetChannel(channel_id, &ctx.User, ctx.Db)
+	if statusCode != http.StatusOK {
+		ctx.Res.WriteHeader(statusCode)
 		return
 	}
 
-	if ctx.User.Uuid != channel.Owner {
+	if channel.Type != 2 || ctx.User.ID != channel.OwnerID {
 		ctx.Res.WriteHeader(http.StatusForbidden)
 		return
 	}
 
-	res_channel := response.NewChannel(&channel)
+	var ban database.Ban
+	err = banCollection.FindOne(context.TODO(), bson.M{"channel_id": channel.ID, "_id": ban_object_id}).Decode(&ban)
+	if err != nil {
+		ctx.Res.WriteHeader(http.StatusNotFound)
+		return
+	}
 
-	var user database.Account
-	ctx.Db.Where("id = ?", ban.BannedBy).First(&user)
+	BannedBy, statusCode := database.GetUser(ban.BannedBy.Hex(), ctx.Db)
+	if statusCode != http.StatusOK {
+		ctx.Res.WriteHeader(http.StatusNotFound)
+		return
+	}
 
-	bannedby := response.NewUser(&user, 0)
+	BannedUser, statusCode := database.GetUser(ban.BannedUser.Hex(), ctx.Db)
+	if statusCode != http.StatusOK {
+		ctx.Res.WriteHeader(http.StatusNotFound)
+		return
+	}
 
-	var banned_user database.Account
-	ctx.Db.Where("id = ?", ban.BannedUser).First(&banned_user)
-
-	banneduser := response.NewUser(&banned_user, 0)
-
-	res_ban := response.NewBan(bannedby, banneduser, res_channel, &ban)
+	res_ban := response.NewBan(response.NewUser(BannedBy, 0), response.NewUser(BannedUser, 0), channel_id, &ban)
 
 	res, err := json.Marshal(res_ban)
 	if err != nil {
@@ -116,33 +124,30 @@ func DeleteBan(ctx *Context) {
 	url_vars := mux.Vars(ctx.Req)
 	channel_id := url_vars["id"]
 	ban_id := url_vars["bid"]
+	banCollection := ctx.Db.Collection("bans")
 
-	channel := database.Channel{
-		Uuid: channel_id,
-	}
-	ctx.Db.Where(&channel).First(&channel)
-
-	if channel.ID == 0 {
-		ctx.Res.WriteHeader(http.StatusNotFound)
+	ban_object_id, err := primitive.ObjectIDFromHex(ban_id)
+	if err != nil {
+		ctx.Res.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	ban := database.Ban{
-		Uuid:      ban_id,
-		ChannelID: channel.ID,
-	}
-	ctx.Db.Where(&ban).First(&ban)
-
-	if ban.ID == 0 {
-		ctx.Res.WriteHeader(http.StatusNotFound)
+	channel, statusCode := database.GetChannel(channel_id, &ctx.User, ctx.Db)
+	if statusCode != http.StatusOK {
+		ctx.Res.WriteHeader(statusCode)
 		return
 	}
 
-	if ctx.User.Uuid != channel.Owner {
+	if channel.Type != 2 || ctx.User.ID != channel.OwnerID {
 		ctx.Res.WriteHeader(http.StatusForbidden)
 		return
 	}
 
-	ctx.Db.Delete(&ban)
+	_, err = banCollection.DeleteOne(context.TODO(), bson.M{"channel_id": channel.ID, "_id": ban_object_id})
+	if err != nil {
+		ctx.Res.WriteHeader(http.StatusNotFound)
+		return
+	}
+
 	ctx.Res.WriteHeader(http.StatusOK)
 }
