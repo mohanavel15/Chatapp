@@ -1,6 +1,6 @@
 
 export interface MessageOBJ {
-    uuid:           string
+    id:           string
     content:        string
     author:         UserOBJ
     channel_id:     string
@@ -10,7 +10,7 @@ export interface MessageOBJ {
 }
 
 export interface Attachment {
-	uuid:           string
+	id:           string
 	name:           string
 	size:           number
 	content_type:   string
@@ -28,22 +28,11 @@ export interface Msg_request {
 }
 
 export interface UserOBJ {
-    uuid:       string
+    id:       string
     username:   string
     avatar:     string
     status: number
     created_at: number
-}
-
-export interface MemberOBJ extends UserOBJ {
-	is_owner:   boolean
-	channel_id:  string
-	joined_at:   string
-}
-
-export interface FriendOBJ extends UserOBJ {
-    incoming: boolean
-    pending: boolean
 }
 
 export interface InviteOBJ {
@@ -52,7 +41,7 @@ export interface InviteOBJ {
 }
 
 export interface BanOBJ {
-    uuid: string
+    id: string
     banned_by: UserOBJ
     banned_user: UserOBJ
     channel: ChannelOBJ
@@ -61,19 +50,17 @@ export interface BanOBJ {
 }
 
 export interface ChannelOBJ {
-    uuid: string
+    id: string
     name: string
     icon: string
     type: number
     owner_id: string
     created_at: string
-    recipient: UserOBJ
+    recipients: UserOBJ[]
 }
 export interface ReadyOBJ {
     user: UserOBJ
-    dm_channels: ChannelOBJ[]
     channels: ChannelOBJ[]
-    friends: FriendOBJ[]
 }
 
 export interface Status {

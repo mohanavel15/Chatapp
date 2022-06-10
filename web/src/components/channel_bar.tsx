@@ -12,8 +12,8 @@ export default function ChannelBar() {
 	useEffect(() => {
 		setChannels_element([])
 		function sortChannel(a: ChannelOBJ, b: ChannelOBJ) {
-			const a_msg = channel_context.messages.get(a.uuid)
-			const b_msg = channel_context.messages.get(b.uuid)
+			const a_msg = channel_context.messages.get(a.id)
+			const b_msg = channel_context.messages.get(b.id)
 			if (a_msg && b_msg) {
 				const a_msgs = Array.from(a_msg.values()).sort((a, b) => { return a.created_at - b.created_at;});
 				const b_msgs = Array.from(b_msg.values()).sort((a, b) => { return a.created_at - b.created_at;});
@@ -39,14 +39,14 @@ export default function ChannelBar() {
 		
 		channels.forEach(channel => {
 			setChannels_element(prevElement => [...prevElement, 
-				<div key={channel.uuid} onContextMenu={(event) => {
+				<div key={channel.id} onContextMenu={(event) => {
 					event.preventDefault();
 					ctx_menu_context.closeAll();
 					ctx_menu_context.setChannelCtxMenu({x: event.clientX, y: event.clientY, channel: channel})
 					ctx_menu_context.setShowChannelCtxMenu(true);
 				}}>
-				{ channel.type === 1  && <ChannelList id={channel.uuid} icon={channel.icon} name={channel.name} status={0} dm={false} /> }
-				{ channel.type === 0  && <ChannelList id={channel.uuid} icon={channel.recipient.avatar} name={channel.recipient.username} status={channel.recipient.status} dm={true} /> }
+				{ channel.type === 1  && <ChannelList id={channel.id} icon={channel.recipients[0].avatar} name={channel.recipients[0].username} status={channel.recipients[0].status} dm={true} /> }
+				{ channel.type === 2  && <ChannelList id={channel.id} icon={channel.icon} name={channel.name} status={0} dm={false} /> }
 				</div>
 		])
 		})

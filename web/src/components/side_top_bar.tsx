@@ -25,8 +25,7 @@ function SideTopBar() {
             }).then(response => {
                 if (response.status === 200) {
                     response.json().then(channel => {
-                        channel.type = 1;
-                        channel_context.setChannel(prevChannels => new Map(prevChannels.set(channel.uuid, channel)));
+                        channel_context.setChannel(prevChannels => new Map(prevChannels.set(channel.id, channel)));
                         navegate(`/channels/${channel.uuid}`)
                     })
                 }

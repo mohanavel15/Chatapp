@@ -11,25 +11,22 @@ export default function MembersBar({ channel }: { channel: ChannelOBJ }) {
 
   	useEffect(() => {
     	setMembers([])
-    	const member_objs = channel_context.members.get(channel.uuid);
-    	if (member_objs) {
-			member_objs.forEach(member => {
-        		setMembers(prevMembers => [...prevMembers, 
-          		<div key={member.uuid} onContextMenu={
-					(event) => {
-						event.preventDefault();
-						ctx_menu_context.closeAll();
-						ctx_menu_context.setMemberCtxMenu({event: event, member: member, channel: channel});
-						ctx_menu_context.setShowMemberCtxMenu(true);
-					}
-          		}>
-          		<Member member_obj={member} />
-          		</div>
-        	])
+		channel.recipients.forEach(recipient => {
+			setMembers(prevMembers => [...prevMembers, 
+			<div key={recipient.id} onContextMenu={
+				(event) => {
+					event.preventDefault();
+					ctx_menu_context.closeAll();
+					ctx_menu_context.setMemberCtxMenu({event: event, member: recipient, channel: channel});
+					ctx_menu_context.setShowMemberCtxMenu(true);
+				}
+			}>
+			<Member member_obj={recipient} channel_obj={channel} />
+			</div>
+		])
       	})
-	}
     
-  }, [channel_context.members, channel])
+  }, [channel])
 
   return (
     <div className='member_bar'>

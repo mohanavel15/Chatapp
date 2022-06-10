@@ -1,9 +1,8 @@
 import { useState, useContext, useEffect, useRef } from 'react'
 import { UserContextOBJ, UserContext } from "../contexts/usercontext";
 import { ContextMenuCtx, ContextMenu } from "../contexts/context_menu_ctx";
-import Friend from './friend';
-import Block from './block';
-import Routes from '../config';
+import Relationship from './relationship';
+import { RelationshipToFriend } from '../api/relationship';
 
 function ChannelHome() {
 	const user_ctx:UserContextOBJ = useContext(UserContext);
@@ -15,47 +14,39 @@ function ChannelHome() {
 
 	useEffect(() => {
 		setElements([])
-		user_ctx.friends.forEach(friendOBJ => {
+		user_ctx.relationships.forEach(relationship => {
 			let add_friend_element: boolean = false;
-			if (TopBarSelected === 0 && friendOBJ.pending === false && friendOBJ.status > 0) {
+			if (TopBarSelected === 0 && relationship.type === 1 && relationship.status > 0) {
 				add_friend_element = true
 			}
-			if (TopBarSelected === 1 && friendOBJ.pending === false) {
+			if (TopBarSelected === 1 && relationship.type === 1) {
 				add_friend_element = true
 			}
 
-			if (friendOBJ.pending === true && TopBarSelected === 2) {
+			if (TopBarSelected === 2 && relationship.type === 3 || relationship.type === 4) {
 				add_friend_element = true
 			}
+
+			if (TopBarSelected === 3 && relationship.type === 2) {
+				add_friend_element = true
+			}
+
 			if (add_friend_element) {
 				setElements(prevElements => [...prevElements, 
-				<div key={friendOBJ.uuid} onContextMenu={
+				<div key={relationship.id} onContextMenu={
 					(event) => {
 						event.preventDefault();
 						ctx_menu_context.closeAll();
-						ctx_menu_context.setFriendCtxMenu({x: event.clientX, y: event.clientY, friend_obj: friendOBJ})
+						ctx_menu_context.setFriendCtxMenu({x: event.clientX, y: event.clientY, friend_obj: relationship})
 						ctx_menu_context.setShowFriendCtxMenu(true);
 					}
 				}>
-				<Friend friend_obj={friendOBJ} />
+				<Relationship relationship_obj={relationship} />
 				</div>
 				])
 			}
 		})
-	}, [TopBarSelected, user_ctx.friends])
-
-	useEffect(() => {
-		if (TopBarSelected === 3) {
-			setElements([])
-			user_ctx.blocked.forEach(blocked_user => {
-				setElements(prevElements => [...prevElements, 
-					<div key={blocked_user.uuid}>
-					<Block user={blocked_user} />
-					</div>
-				])
-			})
-		}
-	}, [TopBarSelected, user_ctx.blocked])
+	}, [TopBarSelected, user_ctx.relationships])
 
 	const active_button_style: React.CSSProperties = {
         backgroundColor: "#393d42",
@@ -64,25 +55,12 @@ function ChannelHome() {
 	function SendFriendRequest() {
 		if (FriendUserUUID.current !== undefined) {
 			if (FriendUserUUID.current.value !== "") {
-				fetch(Routes.Friends, {
-					method: "POST",
-					headers: {
-						"Authorization": user_ctx.accessToken,
-						"Content-Type": "application/json"
-					},
-					body: JSON.stringify({
-						"to": FriendUserUUID.current.value
-					})
-				}).then(response => {
-					if (response.status === 200) {
-						FriendUserUUID.current.value = ""
-					}
-				})
+				RelationshipToFriend(user_ctx.accessToken, FriendUserUUID.current.value)
+				FriendUserUUID.current.value = ""
 			}
 		}
 	}
-
-
+	
 	return (
 		<div className="Friends">
 			<div className='Friends-Top-Bar'>

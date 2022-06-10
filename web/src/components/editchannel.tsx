@@ -38,11 +38,9 @@ export default function EditChannel() {
 
     useEffect(() => {
         setMembersElement([]);
-        const members = channel_context.members.get(state_context.ChannelOBJ.uuid)
-        if (members) {
-            members.forEach(member => {
+        state_context.ChannelOBJ.recipients.forEach(member => {
                 setMembersElement(prevMembers => [...prevMembers,
-                <div key={member.uuid} onContextMenu={
+                <div key={member.id} onContextMenu={
 					(event) => {
 						event.preventDefault();
 						ctx_menu_context.closeAll();
@@ -50,15 +48,14 @@ export default function EditChannel() {
 						ctx_menu_context.setShowMemberCtxMenu(true);
 					}
           		}>
-          		<Member member_obj={member} />
+          		<Member member_obj={member} channel_obj={state_context.ChannelOBJ} />
           		</div>])
             })
-        }
-    }, [channel_context.members]);
+    }, [state_context.ChannelOBJ]);
 
     useEffect(() => {
         setInvites([]);
-        const url = Routes.Channels + "/" + state_context.ChannelOBJ.uuid + "/invites";
+        const url = Routes.Channels + "/" + state_context.ChannelOBJ.id + "/invites";
         fetch(url, {
             method: "GET",
             headers: {
@@ -74,7 +71,7 @@ export default function EditChannel() {
     }, [InviteReload]);
 
     function Unban(ban_id: string) {
-        const url = Routes.Channels + "/" + state_context.ChannelOBJ.uuid + "/bans/" + ban_id;
+        const url = Routes.Channels + "/" + state_context.ChannelOBJ.id + "/bans/" + ban_id;
         fetch(url, {
             method: "DELETE",
             headers: {
@@ -89,7 +86,7 @@ export default function EditChannel() {
 
     useEffect(() => {
         setBans([]);
-        const url = Routes.Channels + "/" + state_context.ChannelOBJ.uuid + "/bans";
+        const url = Routes.Channels + "/" + state_context.ChannelOBJ.id + "/bans";
         fetch(url, {
             method: "GET",
             headers: {
@@ -107,7 +104,7 @@ export default function EditChannel() {
                                     <p>{ban.banned_user.username}</p>
                                 </div>
                                 <div className="ban-action">
-                                    <button className="delete-invite-button" onClick={() => {Unban(ban.uuid)}}><FontAwesomeIcon icon={faTrashCan} /></button>
+                                    <button className="delete-invite-button" onClick={() => {Unban(ban.id)}}><FontAwesomeIcon icon={faTrashCan} /></button>
                                 </div>
                             </div>
                             <div className="ban-container">
@@ -137,7 +134,7 @@ export default function EditChannel() {
         }
 
         if (icon_input.current.files && icon_input.current.files.length > 0) {
-            const url = Routes.Channels+"/"+state_context.ChannelOBJ.uuid;
+            const url = Routes.Channels+"/"+state_context.ChannelOBJ.id;
             const formData = new FormData();
             formData.append('name', channelName);
             formData.append('file', icon_input.current.files[0]);
@@ -152,7 +149,7 @@ export default function EditChannel() {
     }
  
     function create_invite() {
-        const url = Routes.Channels + "/" + state_context.ChannelOBJ.uuid + "/invites";
+        const url = Routes.Channels + "/" + state_context.ChannelOBJ.id + "/invites";
         fetch(url, {
             method: "POST",
             headers: {
@@ -168,7 +165,7 @@ export default function EditChannel() {
     }
 
     function delete_invite(invite_code: string) {
-        const url = Routes.Channels +  `/${state_context.ChannelOBJ.uuid}/invites/${invite_code}`;
+        const url = Routes.Channels +  `/${state_context.ChannelOBJ.id}/invites/${invite_code}`;
         fetch(url, {
             method: 'DELETE',
             headers: {

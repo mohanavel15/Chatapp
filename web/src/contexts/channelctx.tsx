@@ -1,5 +1,5 @@
 import React, { createContext } from 'react'
-import { ChannelOBJ, MessageOBJ, MemberOBJ } from '../models/models'
+import { ChannelOBJ, MessageOBJ } from '../models/models'
 import useDoubleMap from '../hooks/useDoubleMap';
 import useMap from '../hooks/useMap';
 
@@ -15,17 +15,12 @@ export interface ChannelContext {
 	pinnedMessages: Map<String, Map<String, MessageOBJ>>;
 	UpdatePinnedMessage: (key1: String, key2: String, value_: MessageOBJ) => void
 	DeletePinnedMessage: (key1: String, key2: String) => void
-	
-	members: Map<String, Map<String, MemberOBJ>>;
-	UpdateMember: (key1: String, key2: String, value_: MemberOBJ) => void
-	DeleteMember: (key1: String, key2: String) => void
 }
 
 export const ChannelsContext = createContext<ChannelContext>(undefined!);
 
 export default function ChannelCTX({ children }: {children: React.ReactChild}) {
 	const [channels, setChannel, deleteChannel] = useMap<ChannelOBJ>(new Map<String, ChannelOBJ>())
-	const [members, UpdateMember, DeleteMember] = useDoubleMap<MemberOBJ>(new Map<String, Map<String, MemberOBJ>>());
 	const [messages, UpdateMessage, DeleteMessage] = useDoubleMap<MessageOBJ>(new Map<String, Map<String, MessageOBJ>>());
 	const [pinnedMessages, UpdatePinnedMessage, DeletePinnedMessage] = useDoubleMap<MessageOBJ>(new Map<String, Map<String, MessageOBJ>>());
 
@@ -39,9 +34,6 @@ export default function ChannelCTX({ children }: {children: React.ReactChild}) {
 		pinnedMessages: pinnedMessages,
 		UpdatePinnedMessage: UpdatePinnedMessage,
 		DeletePinnedMessage: DeletePinnedMessage,
-		members: members,
-		UpdateMember: UpdateMember,
-		DeleteMember: DeleteMember,
 	}
 
 	return (

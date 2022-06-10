@@ -55,7 +55,7 @@ function Message({ message }: {message: MessageOBJ}) {
     }, [message]);
 
     useEffect(() => {
-        if (msgctx.messageEdit && msgctx.message.uuid === message.uuid) {
+        if (msgctx.messageEdit && msgctx.message.id === message.id) {
             setEdit(true);
         } else {
             setEdit(false);
@@ -80,7 +80,7 @@ function Message({ message }: {message: MessageOBJ}) {
     }
 
     function handleEdit() {
-        const url = Routes.Channels+"/"+message.channel_id +"/messages/"+message.uuid;
+        const url = Routes.Channels+"/"+message.channel_id +"/messages/"+message.id;
         fetch(url, {
             method: "PATCH",
             headers: {
@@ -109,10 +109,14 @@ function Message({ message }: {message: MessageOBJ}) {
     }
 
     useEffect(() => {
-        const author_id = message.author.uuid;
-        const is_blocked = user_ctx.blocked.has(author_id);
-        setIsBlocked(is_blocked);
-    }, [user_ctx.blocked, message.author])
+        const author_id = message.author.id;
+        const relationship = user_ctx.relationships.get(author_id);
+        if (relationship) {
+            if (relationship.type === 2) {
+                setIsBlocked(true);
+            }
+        }
+    }, [user_ctx.relationships, message.author])
 
     useEffect(() => {
         if (isBlocked) {
@@ -123,9 +127,9 @@ function Message({ message }: {message: MessageOBJ}) {
     }, [isBlocked])
 
     useEffect(() => {
-        if (message.author.uuid === "00000000-0000-0000-0000-000000000000" && message.author.username === "System") {
+        if (message.author.id === "00000000-0000-0000-0000-000000000000" && message.author.username === "System") {
             setTimeout(() => {
-                channel_context.DeleteMessage(message.channel_id, message.uuid);
+                channel_context.DeleteMessage(message.channel_id, message.id);
             }, 15000);
         }
     }, [message])
@@ -160,7 +164,7 @@ function Message({ message }: {message: MessageOBJ}) {
                 { attachmentElement }
                 { isBlocked && <button className="Message-Edit-Action" onClick={() => {setShowMsg(false)}}>Hide</button> }
             </div>
-            {user_ctx.uuid === message.author.uuid && <button id="Message-button" onClick={handleEditBtn}><FontAwesomeIcon icon={faPencil}/></button>}
+            {user_ctx.id === message.author.id && <button id="Message-button" onClick={handleEditBtn}><FontAwesomeIcon icon={faPencil}/></button>}
             </>
         }
     </div>

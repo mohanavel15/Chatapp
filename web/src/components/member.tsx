@@ -1,10 +1,10 @@
 import React from 'react'
-import { MemberOBJ } from '../models/models';
+import { UserOBJ, ChannelOBJ } from '../models/models';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCrown, faCircle, faDotCircle, faCircleMinus, IconDefinition } from '@fortawesome/free-solid-svg-icons'
 import { setDefaultAvatar } from '../utils/errorhandle';
 
-function Member({ member_obj }: {member_obj: MemberOBJ}) {
+function Member({ member_obj, channel_obj }: {member_obj: UserOBJ, channel_obj: ChannelOBJ }) {
     if (!member_obj.avatar) {
         member_obj.avatar = "/assets/default_avatar.jpeg";
     }
@@ -35,7 +35,7 @@ function Member({ member_obj }: {member_obj: MemberOBJ}) {
             <FontAwesomeIcon className='status_icon' style={style} icon={icon} />
             </div>
             <p>{member_obj.username}</p>
-            {member_obj.is_owner && <div className='owner-icon'><FontAwesomeIcon icon={faCrown} /></div>}
+            {member_obj.id === channel_obj.owner_id && <div className='owner-icon'><FontAwesomeIcon icon={faCrown} /></div> }
         </div>
     )
 }
