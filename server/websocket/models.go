@@ -18,7 +18,7 @@ type Channel struct {
 }
 
 type Ready struct {
-	User     response.User      `json:"user"`
-	Channels []response.Channel `json:"channels"`
-	Friends  []response.Friend  `json:"friends"`
+	User         response.User           `json:"user"`
+	Channels     []response.Channel      `json:"channels"`
+	Relationship []response.Relationship `json:"relationship"`
 }

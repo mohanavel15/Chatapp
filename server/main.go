@@ -90,11 +90,11 @@ func main() {
 	router.HandleFunc("/users/@me/channels", Authenticated(restapi.GetChannels)).Methods("GET")
 	router.HandleFunc("/users/@me/channels", Authenticated(restapi.CreateChannel)).Methods("POST")
 	// Relationship
-	router.HandleFunc("/users/@me/relationship", Authenticated(restapi.GetRelationships)).Methods("GET")
-	router.HandleFunc("/users/@me/relationship/{fid}", Authenticated(restapi.GetRelationship)).Methods("GET")
-	router.HandleFunc("/users/@me/relationship/{fid}/default", Authenticated(restapi.ChangeRelationshipToDefault)).Methods("PUT")
-	router.HandleFunc("/users/@me/relationship/{fid}/friend", Authenticated(restapi.ChangeRelationshipToFriend)).Methods("PUT")
-	router.HandleFunc("/users/@me/relationship/{fid}/block", Authenticated(restapi.ChangeRelationshipToBlock)).Methods("PUT")
+	router.HandleFunc("/users/@me/relationships", Authenticated(restapi.GetRelationships)).Methods("GET")
+	router.HandleFunc("/users/@me/relationships/{rid}", Authenticated(restapi.GetRelationship)).Methods("GET")
+	router.HandleFunc("/users/@me/relationships/{rid}/default", Authenticated(restapi.ChangeRelationshipToDefault)).Methods("PUT")
+	router.HandleFunc("/users/@me/relationships/{rid}/friend", Authenticated(restapi.ChangeRelationshipToFriend)).Methods("PUT")
+	router.HandleFunc("/users/@me/relationships/{rid}/block", Authenticated(restapi.ChangeRelationshipToBlock)).Methods("PUT")
 	// Gateway
 	router.HandleFunc("/ws", Gateway)
 	// Files

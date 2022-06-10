@@ -54,13 +54,13 @@ func ConnectUser(ctx *Context) {
 				continue
 			}
 			recipient, _ := database.GetUser(recipient.Hex(), ctx.Db)
-			recipients = append(recipients, response.NewUser(recipient, 0))
+			recipients = append(recipients, response.NewUser(recipient, ctx.Ws.Conns.GetUserStatus(recipient.ID.Hex())))
 		}
 		res_channels = append(res_channels, response.NewChannel(&channel, recipients))
 
 		status := response.Status{
 			UserID:    get_user.ID.Hex(),
-			Status:    0,
+			Status:    1,
 			Type:      1,
 			ChannelID: channel.ID.Hex(),
 		}
@@ -73,7 +73,6 @@ func ConnectUser(ctx *Context) {
 		Data: Ready{
 			User:     res_user,
 			Channels: res_channels,
-			Friends:  []response.Friend{},
 		},
 	}
 

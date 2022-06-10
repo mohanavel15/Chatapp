@@ -85,7 +85,7 @@ func GetInvites(ctx *Context) {
 		return
 	}
 
-	var invites []response.Invite
+	invites := []response.Invite{}
 	for cur.Next(context.TODO()) {
 		var invite database.Invites
 		err := cur.Decode(&invite)

@@ -32,7 +32,7 @@ func GetRelationships(ctx *Context) {
 			continue
 		}
 
-		res_user := response.NewUser(user, 0)
+		res_user := response.NewUser(user, ctx.Conn.GetUserStatus(user.ID.Hex()))
 		relationships = append(relationships, response.NewRelationship(res_user, relationship.Type))
 	}
 
@@ -65,7 +65,7 @@ func GetRelationship(ctx *Context) {
 		return
 	}
 
-	res_user := response.NewUser(user, 0)
+	res_user := response.NewUser(user, ctx.Conn.GetUserStatus(user.ID.Hex()))
 	res_relationship := response.NewRelationship(res_user, relationship.Type)
 
 	res, err := json.Marshal(res_relationship)
@@ -137,7 +137,7 @@ func ChangeRelationshipToDefault(ctx *Context) {
 		}
 	}
 
-	res := response.NewRelationship(response.NewUser(relationship_user, 0), 0)
+	res := response.NewRelationship(response.NewUser(relationship_user, ctx.Conn.GetUserStatus(relationship_user.ID.Hex())), 0)
 	res_json, err := json.Marshal(res)
 	if err != nil {
 		ctx.Res.WriteHeader(http.StatusInternalServerError)
@@ -221,7 +221,7 @@ func ChangeRelationshipToFriend(ctx *Context) {
 		}
 	}
 
-	res := response.NewRelationship(response.NewUser(relationship_user, 0), relationship_type)
+	res := response.NewRelationship(response.NewUser(relationship_user, ctx.Conn.GetUserStatus(relationship_user.ID.Hex())), relationship_type)
 	res_json, err := json.Marshal(res)
 	if err != nil {
 		ctx.Res.WriteHeader(http.StatusInternalServerError)
@@ -291,7 +291,7 @@ func ChangeRelationshipToBlock(ctx *Context) {
 		}
 	}
 
-	res := response.NewRelationship(response.NewUser(relationship_user, 0), 2)
+	res := response.NewRelationship(response.NewUser(relationship_user, ctx.Conn.GetUserStatus(relationship_user.ID.Hex())), 2)
 	res_json, err := json.Marshal(res)
 	if err != nil {
 		ctx.Res.WriteHeader(http.StatusInternalServerError)
