@@ -1,13 +1,13 @@
 import React, { useContext, useState, useEffect } from 'react'
-import { MemberOBJ, ChannelOBJ } from '../models/models';
+import { ChannelOBJ, UserOBJ } from '../models/models';
 import { UserContextOBJ, UserContext } from "../contexts/usercontext";
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 import { StatesContext, StateContext } from "../contexts/states";
 import { useNavigate } from "react-router-dom";
 import { DMUser } from '../utils/api';
-import { AddFriend, DeleteFriend } from '../api/friend';
+import { RelationshipToDefault, RelationshipToFriend } from '../api/relationship'
 interface propsMsgCtxProps {
-    event: React.MouseEvent<HTMLDivElement, MouseEvent>, member: MemberOBJ, channel: ChannelOBJ
+    event: React.MouseEvent<HTMLDivElement, MouseEvent>, member: UserOBJ, channel: ChannelOBJ
 }
 
 export default function MemberContextMenu(props:propsMsgCtxProps) {
@@ -31,13 +31,13 @@ export default function MemberContextMenu(props:propsMsgCtxProps) {
     }
 
     function Message() {
-        DMUser(user_ctx.accessToken, props.member.uuid).then(response => {
+        DMUser(user_ctx.accessToken, props.member.id).then(response => {
             if (response.status === 200) {
                 response.json().then(dm_channel => {
                     if (!channel_context.channels.has(dm_channel.uuid)) {
                         let channel: ChannelOBJ = dm_channel;
                         channel.type = 0; 
-                        channel_context.setChannel(prevChannels => new Map(prevChannels.set(channel.uuid, channel)));
+                        channel_context.setChannel(prevChannels => new Map(prevChannels.set(channel.id, channel)));
                     }
                     navigate(`/channels/${dm_channel.uuid}`);
                 })
@@ -46,36 +46,35 @@ export default function MemberContextMenu(props:propsMsgCtxProps) {
     }
 
     const deleteFriend = () => {
-        DeleteFriend(user_ctx.accessToken, props.member.uuid).then(response => {
-            if (response.status === 200) {
-                user_ctx.deleteFriend(props.member.uuid)
-            }
-        })
+        RelationshipToDefault(user_ctx.accessToken, props.member.id).then(relationship => {
+            user_ctx.setRelationships(prevRelationships => new Map(prevRelationships.set(props.member.id, relationship)));
+            setIsFriend(0);
+        });
     }
     
 
     useEffect(() => {
-        const is_friend = user_ctx.friends.get(props.member.uuid)
+        const is_friend = user_ctx.relationships.get(props.member.id)
         if (is_friend === undefined) {
             setIsFriend(0)
         } else {
-            if (is_friend.pending === true) {
+            if (is_friend.type === 1) {
                 setIsFriend(1)
             } else {
                 setIsFriend(2)
             }
         }
-    }, [props.member, user_ctx.friends])
+    }, [props.member, user_ctx.relationships])
 
     return (
         <div className='ContextMenu' style={style}>
-            { props.member.uuid !== user_ctx.uuid && <button className='CtxBtn' onClick={Message}>Message</button> }
-            { props.member.uuid !== user_ctx.uuid && isFriend === 0 && <button className='CtxBtn' onClick={() => AddFriend(user_ctx.accessToken, props.member.uuid)}>Add Friend</button> }
-            { props.member.uuid !== user_ctx.uuid && isFriend === 1 && <button className='CtxDelBtn' onClick={deleteFriend}>Cancel Request</button> }
-            { props.member.uuid !== user_ctx.uuid && isFriend === 2 && <button className='CtxDelBtn' onClick={deleteFriend}>Remove Friend</button> }
-            { channel.owner_id === user_ctx.uuid && props.member.uuid !== user_ctx.uuid && <button className='CtxDelBtn' onClick={() =>{ handleKickOrBan(false) }}>Kick {props.member.username}</button> }
-            { channel.owner_id === user_ctx.uuid && props.member.uuid !== user_ctx.uuid && <button className='CtxDelBtn' onClick={() =>{ handleKickOrBan(true) }}>Ban {props.member.username}</button> }
-            <button className='CtxBtn' onClick={() => {navigator.clipboard.writeText(props.member.uuid)}}>Copy ID</button>
+            { props.member.id !== user_ctx.id && <button className='CtxBtn' onClick={Message}>Message</button> }
+            { props.member.id !== user_ctx.id && isFriend === 0 && <button className='CtxBtn' onClick={() => RelationshipToFriend(user_ctx.accessToken, props.member.id)}>Add Friend</button> }
+            { props.member.id !== user_ctx.id && isFriend === 1 && <button className='CtxDelBtn' onClick={deleteFriend}>Cancel Request</button> }
+            { props.member.id !== user_ctx.id && isFriend === 2 && <button className='CtxDelBtn' onClick={deleteFriend}>Remove Friend</button> }
+            { channel.owner_id === user_ctx.id && props.member.id !== user_ctx.id && <button className='CtxDelBtn' onClick={() =>{ handleKickOrBan(false) }}>Kick {props.member.username}</button> }
+            { channel.owner_id === user_ctx.id && props.member.id !== user_ctx.id && <button className='CtxDelBtn' onClick={() =>{ handleKickOrBan(true) }}>Ban {props.member.username}</button> }
+            <button className='CtxBtn' onClick={() => {navigator.clipboard.writeText(props.member.id)}}>Copy ID</button>
         </div>
     )
 }

@@ -2,9 +2,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import { StatesContext, StateContext } from "../contexts/states";
 import { UserContextOBJ, UserContext } from "../contexts/usercontext";
 import { ChannelOBJ } from '../models/models';
-
-import { AddFriend, DeleteFriend } from '../api/friend';
-import { BlockUser, UnBlock } from '../api/block';
+import { RelationshipToDefault, RelationshipToFriend, RelationshipToBlock } from '../api/relationship';
 
 interface propsChannelCtxProps {
     x: number, y: number, channel: ChannelOBJ
@@ -20,41 +18,36 @@ export default function ChannelContextMenu(props: propsChannelCtxProps) {
         left: props.x
   	}
 
-    const [isFriend, setIsFriend] = useState(0);
+    const [relationshipStatus, setRelationshipStatus] = useState(0);
 
-    const deleteFriend = () => {
-        DeleteFriend(user_ctx.accessToken, props.channel.recipient.uuid).then(response => {
-            if (response.status === 200) {
-                user_ctx.deleteFriend(props.channel.recipient.uuid)
-            }
+    const relationshipToDefault = () => {
+        RelationshipToDefault(user_ctx.accessToken, props.channel.recipients[0].id).then(relationship => {
+            user_ctx.setRelationships(prevRel => new Map(prevRel.set(relationship.id, relationship)))
         })
     }
     
     useEffect(() => {
-        if (props.channel.type === 0) {
-            const is_friend = user_ctx.friends.get(props.channel.recipient.uuid)
-            if (is_friend === undefined) {
-                setIsFriend(0)
+        if (props.channel.type === 1) {
+            const relationship = user_ctx.relationships.get(props.channel.recipients[0].id)
+            if (relationship === undefined) {
+                setRelationshipStatus(0)
             } else {
-                if (is_friend.pending === true) {
-                    setIsFriend(1)
-                } else {
-                    setIsFriend(2)
-                }
+                setRelationshipStatus(relationship.type)
             }
         }
-    }, [props.channel, user_ctx.friends])
+    }, [props.channel, user_ctx.relationships])
 
-  	return (
+    return (
     	<div className='ContextMenu' style={style}>
-            { props.channel.type === 1 && props.channel.owner_id === user_ctx.uuid && <button className='CtxBtn' onClick={() =>{state_context.setChannelOBJ(props.channel);state_context.setEditChannel(true);}}>Edit Channel</button> }
-            { props.channel.type === 1 && <button className='CtxDelBtn' onClick={() => {state_context.setChannelOBJ(props.channel);state_context.setDeleteChannel(true);}}>Leave Channel</button> }
-            { props.channel.type === 0 && isFriend === 0 && <button className='CtxBtn' onClick={() => AddFriend(user_ctx.accessToken, props.channel.recipient.uuid)}>Add Friend</button> }
-            { props.channel.type === 0 && isFriend === 1 && <button className='CtxDelBtn' onClick={deleteFriend}>Cancel Request</button> }
-            { props.channel.type === 0 && isFriend === 2 && <button className='CtxDelBtn' onClick={deleteFriend}>Remove Friend</button> }
-            { props.channel.type === 0 && !user_ctx.blocked.has(props.channel.recipient.uuid) && <button className='CtxDelBtn' onClick={() => BlockUser(user_ctx.accessToken, props.channel.recipient.uuid)}>Block User</button> }
-            { props.channel.type === 0 && user_ctx.blocked.has(props.channel.recipient.uuid) && <button className='CtxBtn' onClick={() => UnBlock(user_ctx.accessToken, props.channel.recipient.uuid)}>Unblock User</button> }
-            <button className='CtxBtn' onClick={() => {navigator.clipboard.writeText(props.channel.uuid)}}>Copy ID</button>
+            { props.channel.type === 2 && props.channel.owner_id === user_ctx.id && <button className='CtxBtn' onClick={() =>{state_context.setChannelOBJ(props.channel);state_context.setEditChannel(true);}}>Edit Channel</button> }
+            { props.channel.type === 2 && <button className='CtxDelBtn' onClick={() => {state_context.setChannelOBJ(props.channel);state_context.setDeleteChannel(true);}}>Leave Channel</button> }
+            { props.channel.type === 1 && relationshipStatus === 0 && <button className='CtxBtn' onClick={() => RelationshipToFriend(user_ctx.accessToken, props.channel.recipients[0].id)}>Add Friend</button> }
+            { props.channel.type === 1 && relationshipStatus === 3 && <button className='CtxDelBtn' onClick={relationshipToDefault}>Cancel Request</button> }
+            { props.channel.type === 1 && relationshipStatus === 4 && <button className='CtxDelBtn' onClick={relationshipToDefault}>Decline Request</button> }
+            { props.channel.type === 1 && relationshipStatus === 1 && <button className='CtxDelBtn' onClick={relationshipToDefault}>Remove Friend</button> }
+            { props.channel.type === 1 && relationshipStatus === 2 && <button className='CtxDelBtn' onClick={() => RelationshipToBlock(user_ctx.accessToken, props.channel.recipients[0].id)}>Block User</button> }
+            { props.channel.type === 1 && relationshipStatus !== 2 && <button className='CtxBtn' onClick={relationshipToDefault}>Unblock User</button> }
+            <button className='CtxBtn' onClick={() => {navigator.clipboard.writeText(props.channel.id)}}>Copy ID</button>
         </div>
   )
 }

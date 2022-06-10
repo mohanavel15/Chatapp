@@ -3,11 +3,13 @@ import { UserContextOBJ, UserContext } from "../contexts/usercontext";
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 import Routes from '../config';
 import { useNavigate } from "react-router-dom";
-import { FriendOBJ, ChannelOBJ } from '../models/models';
-import { DeleteFriend } from '../api/friend';
+import { ChannelOBJ } from '../models/models';
+import { Relationship } from '../models/relationship'
+import { RelationshipToDefault } from '../api/relationship';
+
 
 interface propsChannelCtxProps {
-    x: number, y: number, friend_obj: FriendOBJ
+    x: number, y: number, friend_obj: Relationship
 }
 
 export default function FriendContextMenu(props: propsChannelCtxProps) {
@@ -22,15 +24,13 @@ export default function FriendContextMenu(props: propsChannelCtxProps) {
     }
 
     const deleteFriend = () => {
-        DeleteFriend(user_ctx.accessToken, props.friend_obj.uuid).then(response => {
-            if (response.status === 200) {
-                user_ctx.deleteFriend(props.friend_obj.uuid)
-            }
+        RelationshipToDefault(user_ctx.accessToken, props.friend_obj.id).then(res_relationship => {
+            user_ctx.setRelationships(prevRelationships => new Map(prevRelationships.set(res_relationship.id, res_relationship)));
         })
     }
 
     function Message() {
-        const url = Routes.host + "/dms/" + props.friend_obj.uuid;
+        const url = Routes.host + "/dms/" + props.friend_obj.id;
         fetch(url, {
             method: "GET",
             headers: {
@@ -42,7 +42,7 @@ export default function FriendContextMenu(props: propsChannelCtxProps) {
                     if (!channel_ctx.channels.has(dm_channel.uuid)) {
                         let channel: ChannelOBJ = dm_channel;
                         channel.type = 0; 
-                        channel_ctx.setChannel(prevChannels => new Map(prevChannels.set(channel.uuid, channel)));
+                        channel_ctx.setChannel(prevChannels => new Map(prevChannels.set(channel.id, channel)));
                     }
                     navigate(`/channels/${dm_channel.uuid}`);
                 })
@@ -52,10 +52,10 @@ export default function FriendContextMenu(props: propsChannelCtxProps) {
 
     return (
         <div className='ContextMenu' style={style}>
-            {props.friend_obj.pending === false && <button className='CtxBtn' onClick={Message}>Message</button>}
-            {props.friend_obj.pending === false && <button className='CtxDelBtn' onClick={deleteFriend}>Remove Friend</button>}
-            {props.friend_obj.pending === true && <button className='CtxDelBtn' onClick={deleteFriend}>Decline</button>}
-            <button className='CtxBtn' onClick={() => { navigator.clipboard.writeText(props.friend_obj.uuid) }}>Copy ID</button>
+            <button className='CtxBtn' onClick={Message}>Message</button>
+            {props.friend_obj.type === 1 && <button className='CtxDelBtn' onClick={deleteFriend}>Remove Friend</button>}
+            {props.friend_obj.type === 4 && <button className='CtxDelBtn' onClick={deleteFriend}>Decline</button>}
+            <button className='CtxBtn' onClick={() => { navigator.clipboard.writeText(props.friend_obj.id) }}>Copy ID</button>
         </div>
     )
 }
