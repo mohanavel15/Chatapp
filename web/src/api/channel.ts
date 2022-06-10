@@ -1,4 +1,20 @@
 import Routes from "../config";
+import { ChannelOBJ } from "../models/models";
+
+export async function GetChannels(access_token: string) {
+    const response = await fetch(Routes.Channels, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${access_token}`
+        }
+    });
+    if (!response.ok) {
+        return [] as ChannelOBJ[];
+    }
+
+    const channels: ChannelOBJ[] = await response.json();
+    return channels;
+}
 
 export async function CreateChannel(access_token: string, name: string, icon: string) {
     const url = Routes.currentUser+"/channels";

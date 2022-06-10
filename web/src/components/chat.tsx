@@ -94,7 +94,7 @@ function Chat({ channel_id }: { channel_id: string }) {
 					}
 
 					setMessage_jsx(prevMessage =>  [...prevMessage, 
-					<div key={message.uuid} onContextMenu={(event) => {
+					<div key={message.id} onContextMenu={(event) => {
 							event.preventDefault();
 							ctx_menu_context.closeAll();
 							ctx_menu_context.setMsgCtxMenu({x: event.clientX, y: event.clientY, message: message, channel_id: channel_id});

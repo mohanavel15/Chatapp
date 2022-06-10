@@ -3,8 +3,8 @@ class RoutesCls {
     host = 'http://' + this.ip;
     ws = 'ws://' + this.ip + '/ws';
 
-    signin = this.host + '/signin';
-    signup = this.host + '/signup';
+    signin = this.host + '/login';
+    signup = this.host + '/register';
     logout = this.host + '/logout';
     refresh = this.host + '/refresh';
     signout = this.host + '/signout';
@@ -12,8 +12,7 @@ class RoutesCls {
 
     users = this.host + '/users';
     currentUser = this.users +'/@me';
-    Friends = this.currentUser +'/friends';
-    Blocks = this.currentUser +'/blocks';
+    Relationships = this.currentUser + '/relationships';
 
     Invites = this.host + '/invites';
     Channels = this.host + '/channels';

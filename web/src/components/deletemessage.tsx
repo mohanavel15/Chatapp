@@ -9,7 +9,7 @@ export default function DeleteMessage() {
 
     function HandleDeleteMessage(e: React.MouseEvent<Element, MouseEvent>) {
         e.preventDefault();
-        const url = Routes.Channels+"/"+state_context.ChannelOBJ.uuid;
+        const url = Routes.Channels+"/"+state_context.ChannelOBJ.id;
         fetch(url, {
             method: "DELETE",
             headers: {
