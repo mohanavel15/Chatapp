@@ -1,6 +1,5 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { StatesContext, StateContext } from "../contexts/states";
-import { ChannelsContext, ChannelContext } from '../contexts/channelctx';
 import Member from "./member";
 import { ContextMenuCtx, ContextMenu } from "../contexts/context_menu_ctx";
 import { InviteOBJ, BanOBJ } from "../models/models";
@@ -22,7 +21,6 @@ function Invite({ invite, onDelete }: { invite: InviteOBJ, onDelete: (invite_cod
 export default function EditChannel() {
     const user:UserContextOBJ = useContext(UserContext);
     const state_context: StateContext = useContext(StatesContext);
-    const channel_context: ChannelContext = useContext(ChannelsContext);
     const ctx_menu_context: ContextMenuCtx = useContext(ContextMenu);
     
     const [channelEditSection, setChannelEditSection] = useState(0);
@@ -204,7 +202,7 @@ export default function EditChannel() {
                     <>
                     <input className="channel-edit-input" ref={channel_name} type="text" placeholder="Channel Name" defaultValue={state_context.ChannelOBJ.name}/>
                     <div className="channel-edit-icon-container">
-                        <img className="channel-edit-icon" ref={icon_image} src={state_context.ChannelOBJ.icon} />
+                        <img className="channel-edit-icon" ref={icon_image} alt="icon" src={state_context.ChannelOBJ.icon} />
                         <FontAwesomeIcon icon={faCamera} className="channel-edit-icon-camera" onClick={() => icon_input.current.click()} />
 				        <input type="file" ref={icon_input} name="filename" hidden onChange={onIconChange} accept="image/*"></input>
                     </div>

@@ -43,7 +43,7 @@ function Chat({ channel_id }: { channel_id: string }) {
 		if (event.key === 'Enter') {
 			event.preventDefault();
 			console.log(file_input.current.files);
-			if (Input_message.length > 0 && file_input === null || file_input.current.files?.length === 0) {
+			if (Input_message.length > 0 && (file_input === null || file_input.current.files?.length === 0)) {
 				const url = Routes.Channels+"/"+channel_id +"/messages"; 
 				fetch(url, {
 					method: "POST",

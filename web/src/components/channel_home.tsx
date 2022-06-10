@@ -23,7 +23,7 @@ function ChannelHome() {
 				add_friend_element = true
 			}
 
-			if (TopBarSelected === 2 && relationship.type === 3 || relationship.type === 4) {
+			if (TopBarSelected === 2 && (relationship.type === 3 || relationship.type === 4)) {
 				add_friend_element = true
 			}
 

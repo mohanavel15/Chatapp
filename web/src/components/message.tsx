@@ -34,21 +34,21 @@ function Message({ message }: {message: MessageOBJ}) {
                     </div>
                     <div className="attachment-name">
                         <p className="attachment-filename">
-                            <a href={message.attachments[0].url} target="_blank">
+                            <a href={message.attachments[0].url} rel="noreferrer" target="_blank">
                             {message.attachments[0].name}
                             </a>
                         </p>
                         <p className="attachment-size">{message.attachments[0].size} bytes</p>
                     </div>
                     <button className="attachment-download">
-                    <a href={message.attachments[0].url} target="_blank">
+                    <a href={message.attachments[0].url} rel="noreferrer" target="_blank">
                         <FontAwesomeIcon icon={faDownload} />
                     </a>
                     </button>
                 </div>
             )
         }
-    }, []);
+    }, [message.attachments]);
 
     useEffect(() => {
         setMsg(message.content);
@@ -60,7 +60,7 @@ function Message({ message }: {message: MessageOBJ}) {
         } else {
             setEdit(false);
         }
-    }, [msgctx.messageEdit, msgctx.message]);
+    }, [msgctx.messageEdit, msgctx.message.id]);
 
     useEffect(() => {
         if (messageElement.current !== null) {

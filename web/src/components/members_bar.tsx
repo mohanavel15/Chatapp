@@ -1,11 +1,9 @@
 import { useContext, useState, useEffect } from 'react'
-import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 import Member from './member';
 import { ChannelOBJ } from '../models/models';
 import { ContextMenuCtx, ContextMenu } from "../contexts/context_menu_ctx";
 
 export default function MembersBar({ channel }: { channel: ChannelOBJ }) {
-	const channel_context: ChannelContext = useContext(ChannelsContext);
 	const ctx_menu_context: ContextMenuCtx = useContext(ContextMenu);
 	const [members, setMembers] = useState<JSX.Element[]>([]);
 
