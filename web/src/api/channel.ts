@@ -52,3 +52,15 @@ export async function DeleteChannel(access_token: string, channel_id: string) {
     })
     return response;
 }
+
+export async function GetDMChannel(access_token: string, user_id: string) {
+    const response = await fetch(Routes.Channels, {
+        method: "POST",
+        headers: {
+            "Authorization": access_token,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ recipient_id: user_id })
+    })
+    return response;
+}

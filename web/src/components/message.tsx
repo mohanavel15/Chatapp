@@ -60,7 +60,7 @@ function Message({ message }: {message: MessageOBJ}) {
         } else {
             setEdit(false);
         }
-    }, [msgctx.messageEdit, msgctx.message.id]);
+    }, [msgctx.messageEdit, msgctx.message]);
 
     useEffect(() => {
         if (messageElement.current !== null) {

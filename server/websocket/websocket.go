@@ -20,8 +20,11 @@ type Ws struct {
 	Conns   *Connections
 }
 
-func (ws *Ws) Write(data []byte) error {
-	return ws.Conn.WriteMessage(websocket.TextMessage, data)
+func (ws *Ws) Write(data []byte) {
+	err := ws.Conn.WriteMessage(websocket.TextMessage, data)
+	if err != nil {
+		Disconnect(ws)
+	}
 }
 
 func (ws *Ws) Read() ([]byte, error) {

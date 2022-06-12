@@ -11,7 +11,8 @@ function KickBan() {
     const reasonRef = useRef<HTMLTextAreaElement>(null);
 
     function handleKickOrBan() {
-        const url = Routes.Channels + "/" + "" + "/members/" + state_context.KickBanMember?.id;
+        /*
+        const url = Routes.Channels + "/" + "/members/" + state_context.KickBanMember?.id;
         fetch(url, {
             method: "DELETE",
             headers: {
@@ -23,6 +24,7 @@ function KickBan() {
                 "reason": reasonRef.current?.value
             })
         })
+        */
         cancelBan();
     }
 

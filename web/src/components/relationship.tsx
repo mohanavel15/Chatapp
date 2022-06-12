@@ -8,7 +8,7 @@ import { setDefaultAvatar } from '../utils/errorhandle';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle, faDotCircle, IconDefinition, faCheck, faX, faMessage } from '@fortawesome/free-solid-svg-icons';
 import { RelationshipToDefault, RelationshipToFriend } from '../api/relationship';
-import { DMUser } from '../utils/api';
+import { GetDMChannel } from '../api/channel';
 
 export default function Relationship({ relationship_obj }: { relationship_obj: RelationshipOBJ }) {
   const user_ctx: UserContextOBJ = useContext(UserContext);
@@ -42,12 +42,11 @@ export default function Relationship({ relationship_obj }: { relationship_obj: R
   }
 
   function Message() {
-    DMUser(user_ctx.accessToken, relationship_obj.id).then(response => {
+    GetDMChannel(user_ctx.accessToken, relationship_obj.id).then(response => {
       if (response.status === 200) {
         response.json().then(dm_channel => {
           if (!channel_ctx.channels.has(dm_channel.uuid)) {
             let channel: ChannelOBJ = dm_channel;
-            channel.type = 0;
             channel_ctx.setChannel(prevChannels => new Map(prevChannels.set(channel.id, channel)));
           }
           navigate(`/channels/${dm_channel.uuid}`);

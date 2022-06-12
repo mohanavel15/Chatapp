@@ -24,19 +24,23 @@ function Settings() {
 
     function avatar() {
         if (avatar_input.current.files && avatar_input.current.files.length > 0) {
-            const formData = new FormData();
-            formData.append('file', avatar_input.current.files[0]);
-            fetch(Routes.currentUser, {
-                method: "PATCH",
-                headers: {
-                    "Authorization": user_ctx.accessToken
-                },
-                body: formData
-            }).then(response => {
-                if (response.status === 200) {
-                    alert("Successfully updated avatar!")
-                }
-            })
+            let reader = new FileReader();
+            reader.readAsDataURL(avatar_input.current.files[0]);
+            reader.onload = () => {
+                console.log(reader.result);
+                fetch(Routes.currentUser, {
+                    method: "PATCH",
+                    headers: {
+                        "Authorization": user_ctx.accessToken,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ avatar: reader.result })
+                }).then(response => {
+                    if (response.status === 200) {
+                        alert("Successfully updated avatar!")
+                    }
+                })
+            }
         }
     }
 

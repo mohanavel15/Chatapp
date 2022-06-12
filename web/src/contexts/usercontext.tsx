@@ -1,5 +1,4 @@
 import { createContext, useEffect, useState } from "react";
-import { UserOBJ } from "../models/models";
 import useMap from '../hooks/useMap';
 import Routes from "../config";
 import { Relationship } from "../models/relationship";

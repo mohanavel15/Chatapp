@@ -4,7 +4,7 @@ import { UserContextOBJ, UserContext } from "../contexts/usercontext";
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 import { StatesContext, StateContext } from "../contexts/states";
 import { useNavigate } from "react-router-dom";
-import { DMUser } from '../utils/api';
+import { GetDMChannel } from '../api/channel';
 import { RelationshipToDefault, RelationshipToFriend } from '../api/relationship'
 interface propsMsgCtxProps {
     event: React.MouseEvent<HTMLDivElement, MouseEvent>, member: UserOBJ, channel: ChannelOBJ
@@ -31,12 +31,11 @@ export default function MemberContextMenu(props:propsMsgCtxProps) {
     }
 
     function Message() {
-        DMUser(user_ctx.accessToken, props.member.id).then(response => {
+        GetDMChannel(user_ctx.accessToken, props.member.id).then(response => {
             if (response.status === 200) {
                 response.json().then(dm_channel => {
                     if (!channel_context.channels.has(dm_channel.uuid)) {
                         let channel: ChannelOBJ = dm_channel;
-                        channel.type = 0; 
                         channel_context.setChannel(prevChannels => new Map(prevChannels.set(channel.id, channel)));
                     }
                     navigate(`/channels/${dm_channel.uuid}`);
@@ -60,8 +59,12 @@ export default function MemberContextMenu(props:propsMsgCtxProps) {
         } else {
             if (is_friend.type === 1) {
                 setIsFriend(1)
-            } else {
+            } else if (is_friend.type === 2) {
                 setIsFriend(2)
+            } else if (is_friend.type === 3) {
+                setIsFriend(3)
+            } else if (is_friend.type === 4) {
+                setIsFriend(4)
             }
         }
     }, [props.member, user_ctx.relationships])
@@ -70,8 +73,10 @@ export default function MemberContextMenu(props:propsMsgCtxProps) {
         <div className='ContextMenu' style={style}>
             { props.member.id !== user_ctx.id && <button className='CtxBtn' onClick={Message}>Message</button> }
             { props.member.id !== user_ctx.id && isFriend === 0 && <button className='CtxBtn' onClick={() => RelationshipToFriend(user_ctx.accessToken, props.member.id)}>Add Friend</button> }
-            { props.member.id !== user_ctx.id && isFriend === 1 && <button className='CtxDelBtn' onClick={deleteFriend}>Cancel Request</button> }
-            { props.member.id !== user_ctx.id && isFriend === 2 && <button className='CtxDelBtn' onClick={deleteFriend}>Remove Friend</button> }
+            { props.member.id !== user_ctx.id && isFriend === 3 && <button className='CtxBtn' onClick={() => RelationshipToFriend(user_ctx.accessToken, props.member.id)}>Accept Request</button> }
+            { props.member.id !== user_ctx.id && isFriend === 3 && <button className='CtxDelBtn' onClick={deleteFriend}>Decline Request</button> }
+            { props.member.id !== user_ctx.id && isFriend === 4 && <button className='CtxDelBtn' onClick={deleteFriend}>Cancel Request</button> }
+            { props.member.id !== user_ctx.id && isFriend === 1 && <button className='CtxDelBtn' onClick={deleteFriend}>Remove Friend</button> }
             { channel.owner_id === user_ctx.id && props.member.id !== user_ctx.id && <button className='CtxDelBtn' onClick={() =>{ handleKickOrBan(false) }}>Kick {props.member.username}</button> }
             { channel.owner_id === user_ctx.id && props.member.id !== user_ctx.id && <button className='CtxDelBtn' onClick={() =>{ handleKickOrBan(true) }}>Ban {props.member.username}</button> }
             <button className='CtxBtn' onClick={() => {navigator.clipboard.writeText(props.member.id)}}>Copy ID</button>

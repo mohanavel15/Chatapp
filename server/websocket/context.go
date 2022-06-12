@@ -10,6 +10,6 @@ type Context struct {
 	Db    *mongo.Database
 }
 
-func (ctx *Context) Send(data []byte) error {
-	return ctx.Ws.Write(data)
+func (ctx *Context) Send(data []byte) {
+	ctx.Ws.Write(data)
 }
