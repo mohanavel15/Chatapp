@@ -20,7 +20,19 @@ func CreateChannel(name string, icon string, recipient_id string, user *User, db
 			return nil, statusCode
 		}
 
-		channel := Channel{
+		var channel Channel
+		err := channels.FindOne(context.TODO(), bson.M{
+			"type": 1,
+			"$or": []bson.M{
+				{"recipients": []primitive.ObjectID{user.ID, recipient.ID}},
+				{"recipients": []primitive.ObjectID{recipient.ID, user.ID}},
+			},
+		}).Decode(&channel)
+		if err == nil {
+			return &channel, http.StatusOK
+		}
+
+		channel = Channel{
 			ID:   primitive.NewObjectID(),
 			Type: 1,
 			Recipients: []primitive.ObjectID{
@@ -31,7 +43,7 @@ func CreateChannel(name string, icon string, recipient_id string, user *User, db
 			UpdatedAt: time.Now().Unix(),
 		}
 
-		_, err := channels.InsertOne(context.TODO(), channel)
+		_, err = channels.InsertOne(context.TODO(), channel)
 		if err != nil {
 			return nil, http.StatusInternalServerError
 		}
