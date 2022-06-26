@@ -1,6 +1,9 @@
 package response
 
-import "Chatapp/database"
+import (
+	"Chatapp/database"
+	"fmt"
+)
 
 type User struct {
 	ID        string `json:"id"`
@@ -10,10 +13,16 @@ type User struct {
 	CreatedAt int64  `json:"created_at"`
 }
 
+func GetUrl(user *database.User) string {
+	url := fmt.Sprint(user.ID.Hex(), "/", user.Avatar.ID.Hex(), "/unknown."+user.Avatar.Ext)
+	fullUrl := fmt.Sprint("http://localhost:5000/avatars/", url)
+	return fullUrl
+}
+
 func NewUser(user *database.User, status int) User {
 	return User{
 		ID:        user.ID.Hex(),
-		Avatar:    user.Avatar,
+		Avatar:    GetUrl(user),
 		Username:  user.Username,
 		Status:    status,
 		CreatedAt: user.CreatedAt,

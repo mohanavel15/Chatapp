@@ -8,12 +8,19 @@ import (
 
 type User struct {
 	ID        primitive.ObjectID `bson:"_id"`
-	Avatar    string             `bson:"avatar"`
+	Avatar    Avatar             `bson:"avatar"`
 	Username  string             `bson:"username"`
 	Email     string             `bson:"email"`
 	Password  []byte             `bson:"password"`
 	CreatedAt int64              `bson:"created_at"`
 	UpdatedAt int64              `bson:"updated_at"`
+}
+
+type Avatar struct {
+	ID     primitive.ObjectID `bson:"_id"`
+	Avatar string             `bson:"avatar"`
+	Type   string             `bson:"type"`
+	Ext    string             `bson:"ext"`
 }
 
 type Session struct {
