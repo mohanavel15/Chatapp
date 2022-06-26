@@ -17,7 +17,27 @@ func CreateMessage(content string, channel_id string, user *User, db *mongo.Data
 	}
 
 	if channel.Type == 1 {
-		// If the channel is a DM channel, we need to check if the user is blocked
+		for _, recipient := range channel.Recipients {
+			if recipient.Hex() == user.ID.Hex() {
+				continue
+			}
+
+			relationship1, statusCode := GetRelationship(recipient, user.ID, db)
+			if statusCode == http.StatusNotFound {
+				continue
+			}
+			if relationship1.Type == 2 {
+				return nil, http.StatusForbidden
+			}
+
+			relationship2, statusCode := GetRelationship(user.ID, recipient, db)
+			if statusCode == http.StatusNotFound {
+				continue
+			}
+			if relationship2.Type == 2 {
+				return nil, http.StatusForbidden
+			}
+		}
 	}
 
 	messages := db.Collection("messages")

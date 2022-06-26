@@ -48,12 +48,18 @@ func GetRelationships(ctx *Context) {
 
 func GetRelationship(ctx *Context) {
 	url_vars := mux.Vars(ctx.Req)
-	relationship_id := url_vars["rid"]
+	rid := url_vars["rid"]
+
+	relationship_id, err := primitive.ObjectIDFromHex(rid)
+	if err != nil {
+		ctx.Res.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
 	relationshipsCollection := ctx.Db.Collection("relationships")
 
 	var relationship database.Relationship
-	err := relationshipsCollection.FindOne(context.TODO(), bson.M{"fom_user_id": ctx.User.ID, "to_user_id": relationship_id}).Decode(&relationship)
+	err = relationshipsCollection.FindOne(context.TODO(), bson.M{"from_user_id": ctx.User.ID, "to_user_id": relationship_id}).Decode(&relationship)
 	if err != nil {
 		ctx.Res.WriteHeader(http.StatusNotFound)
 		return
@@ -129,7 +135,7 @@ func ChangeRelationshipToDefault(ctx *Context) {
 		}
 	} else {
 		if relationship2.Type != 2 {
-			_, err := relationshipsCollection.UpdateByID(context.TODO(), relationship1.ID, bson.M{"$set": bson.M{"type": 0}})
+			_, err := relationshipsCollection.UpdateByID(context.TODO(), relationship2.ID, bson.M{"$set": bson.M{"type": 0}})
 			if err != nil {
 				ctx.Res.WriteHeader(http.StatusInternalServerError)
 				return
@@ -283,7 +289,7 @@ func ChangeRelationshipToBlock(ctx *Context) {
 		}
 	} else {
 		if relationship2.Type != 2 {
-			_, err := relationshipsCollection.UpdateByID(context.TODO(), relationship1.ID, bson.M{"$set": bson.M{"type": 0}})
+			_, err := relationshipsCollection.UpdateByID(context.TODO(), relationship2.ID, bson.M{"$set": bson.M{"type": 0}})
 			if err != nil {
 				ctx.Res.WriteHeader(http.StatusInternalServerError)
 				return
