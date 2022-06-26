@@ -25,6 +25,18 @@ export default function ChannelContextMenu(props: propsChannelCtxProps) {
             user_ctx.setRelationships(prevRel => new Map(prevRel.set(relationship.id, relationship)))
         })
     }
+
+    const relationshipToFriend = () => {
+        RelationshipToFriend(user_ctx.accessToken, props.channel.recipients[0].id).then(relationship => {
+            user_ctx.setRelationships(prevRel => new Map(prevRel.set(relationship.id, relationship)))
+        })
+    }
+
+    const relationshipToBlock = () => {
+        RelationshipToBlock(user_ctx.accessToken, props.channel.recipients[0].id).then(relationship => {
+            user_ctx.setRelationships(prevRel => new Map(prevRel.set(relationship.id, relationship)))
+        })
+    }
     
     useEffect(() => {
         if (props.channel.type === 1) {
@@ -41,12 +53,12 @@ export default function ChannelContextMenu(props: propsChannelCtxProps) {
     	<div className='ContextMenu' style={style}>
             { props.channel.type === 2 && props.channel.owner_id === user_ctx.id && <button className='CtxBtn' onClick={() =>{state_context.setChannelOBJ(props.channel);state_context.setEditChannel(true);}}>Edit Channel</button> }
             { props.channel.type === 2 && <button className='CtxDelBtn' onClick={() => {state_context.setChannelOBJ(props.channel);state_context.setDeleteChannel(true);}}>Leave Channel</button> }
-            { props.channel.type === 1 && relationshipStatus === 0 && <button className='CtxBtn' onClick={() => RelationshipToFriend(user_ctx.accessToken, props.channel.recipients[0].id)}>Add Friend</button> }
+            { props.channel.type === 1 && relationshipStatus === 0 && <button className='CtxBtn' onClick={relationshipToFriend}>Add Friend</button> }
             { props.channel.type === 1 && relationshipStatus === 3 && <button className='CtxDelBtn' onClick={relationshipToDefault}>Cancel Request</button> }
             { props.channel.type === 1 && relationshipStatus === 4 && <button className='CtxDelBtn' onClick={relationshipToDefault}>Decline Request</button> }
             { props.channel.type === 1 && relationshipStatus === 1 && <button className='CtxDelBtn' onClick={relationshipToDefault}>Remove Friend</button> }
-            { props.channel.type === 1 && relationshipStatus === 2 && <button className='CtxDelBtn' onClick={() => RelationshipToBlock(user_ctx.accessToken, props.channel.recipients[0].id)}>Block User</button> }
-            { props.channel.type === 1 && relationshipStatus !== 2 && <button className='CtxBtn' onClick={relationshipToDefault}>Unblock User</button> }
+            { props.channel.type === 1 && relationshipStatus !== 2 && <button className='CtxDelBtn' onClick={relationshipToBlock}>Block User</button> }
+            { props.channel.type === 1 && relationshipStatus === 2 && <button className='CtxBtn' onClick={relationshipToDefault}>Unblock User</button> }
             <button className='CtxBtn' onClick={() => {navigator.clipboard.writeText(props.channel.id)}}>Copy ID</button>
         </div>
   )

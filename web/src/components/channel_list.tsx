@@ -47,11 +47,11 @@ export default function ChannelList(props: ChannelHeaderProps) {
                 <div className='channel_name'>
                     { props.dm === true && 
                         <div className="dm_avatar">
-                            <img src={props.icon} onError={setDefaultAvatar} alt={"Icon"} />
+                            <img src={props.icon} onError={setDefaultAvatar} alt={"Avatar"} />
                             <FontAwesomeIcon className='dm_status_icon' style={style} icon={icon} />
                         </div>
                     }
-                    { props.dm === false && <img className='channel_avatar' src={props.icon} alt="Avatar" onError={setDefaultIcon}/> }
+                    { props.dm === false && <img className='channel_avatar' src={props.icon} alt={"Icon"} onError={setDefaultIcon}/> }
                     <p>{props.name}</p>
                 </div>
             </div>

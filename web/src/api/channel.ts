@@ -54,7 +54,8 @@ export async function DeleteChannel(access_token: string, channel_id: string) {
 }
 
 export async function GetDMChannel(access_token: string, user_id: string) {
-    const response = await fetch(Routes.Channels, {
+    const url = Routes.currentUser+"/channels"
+    const response = await fetch(url, {
         method: "POST",
         headers: {
             "Authorization": access_token,

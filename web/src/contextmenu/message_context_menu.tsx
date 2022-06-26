@@ -6,7 +6,7 @@ import { MessageContext } from "../contexts/messagectx";
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 import Routes from '../config'
 interface propsMsgCtxProps {
-    x: number, y: number, message: MessageOBJ, channel_id: string
+    x: number, y: number, message: MessageOBJ
 }
 
 export default function MessageContextMenu(props:propsMsgCtxProps) {
@@ -15,7 +15,7 @@ export default function MessageContextMenu(props:propsMsgCtxProps) {
     const state_context: StateContext = useContext(StatesContext);
     const channel_ctx:ChannelContext = useContext(ChannelsContext);
     const msgctx = useContext(MessageContext);
-    const channel = channel_ctx.channels.get(props.channel_id);
+    const channel = channel_ctx.channels.get(props.message.channel_id);
 
     const [isPinned, setIsPinned] = useState(false);
     useEffect(() => {

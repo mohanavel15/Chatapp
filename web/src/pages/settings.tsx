@@ -133,6 +133,7 @@ function Settings() {
                 <div className='settings-content-item'>
                 <h3 className='settings-content-item-title'>DMs</h3>
                 <ToggleBtn input_ref={who_can_dm_ref}> Only Friends Can Dm </ToggleBtn>
+                <ToggleBtn input_ref={who_can_dm_ref}> Only Friends Add To Channel </ToggleBtn>
                 <button className='btn-green' onClick={who_can_dm}>Save</button>
                 </div>
                 <div className='settings-content-item'>

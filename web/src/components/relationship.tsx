@@ -45,11 +45,11 @@ export default function Relationship({ relationship_obj }: { relationship_obj: R
     GetDMChannel(user_ctx.accessToken, relationship_obj.id).then(response => {
       if (response.status === 200) {
         response.json().then(dm_channel => {
-          if (!channel_ctx.channels.has(dm_channel.uuid)) {
+          if (!channel_ctx.channels.has(dm_channel.id)) {
             let channel: ChannelOBJ = dm_channel;
             channel_ctx.setChannel(prevChannels => new Map(prevChannels.set(channel.id, channel)));
           }
-          navigate(`/channels/${dm_channel.uuid}`);
+          navigate(`/channels/${dm_channel.id}`);
         })
       }
     })
@@ -66,9 +66,8 @@ export default function Relationship({ relationship_obj }: { relationship_obj: R
       </div>
       <div className='Friend-Actions-Container'>
         {relationship_obj.type === 3 && <button className='Friend-Actions Friend-Actions-Accept' onClick={Accept}><FontAwesomeIcon icon={faCheck} /></button>}
-        {relationship_obj.type === 4 && <button className='Friend-Actions Friend-Actions-Decline' onClick={Decline}><FontAwesomeIcon icon={faX} /></button>}
-        {relationship_obj.type === 1 && <button className='Friend-Actions Friend-Actions-Decline' onClick={Decline}><FontAwesomeIcon icon={faX} /></button>}
         {relationship_obj.type === 1 && <button className='Friend-Actions Friend-Actions-Accept' onClick={Message}><FontAwesomeIcon icon={faMessage} /></button>}
+        <button className='Friend-Actions Friend-Actions-Decline' onClick={Decline}><FontAwesomeIcon icon={faX} /></button>
       </div>
     </div>
   )

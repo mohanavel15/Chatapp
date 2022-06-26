@@ -34,11 +34,12 @@ export default function MemberContextMenu(props:propsMsgCtxProps) {
         GetDMChannel(user_ctx.accessToken, props.member.id).then(response => {
             if (response.status === 200) {
                 response.json().then(dm_channel => {
-                    if (!channel_context.channels.has(dm_channel.uuid)) {
+                    if (!channel_context.channels.has(dm_channel.id)) {
+                        console.log("channel not found");
                         let channel: ChannelOBJ = dm_channel;
                         channel_context.setChannel(prevChannels => new Map(prevChannels.set(channel.id, channel)));
                     }
-                    navigate(`/channels/${dm_channel.uuid}`);
+                    navigate(`/channels/${dm_channel.id}`);
                 })
             }
         })
