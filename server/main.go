@@ -30,7 +30,7 @@ var (
 )
 
 func main() {
-	clientOptions := options.Client().ApplyURI("mongodb://superuser:superpassword@localhost:27017")
+	clientOptions := options.Client().ApplyURI(MONGO_URI)
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 
 	if err != nil {
@@ -98,9 +98,9 @@ func main() {
 	// Gateway
 	router.HandleFunc("/ws", Gateway)
 	// Files
-	router.HandleFunc("/avatars/{user_id}/{filename}", restapi.GetAvatars).Methods("GET")
-	router.HandleFunc("/icons/{channel_id}/{filename}", restapi.GetIcons).Methods("GET")
-	router.HandleFunc("/attachments/{channel_id}/{user_id}/{filename}", restapi.GetAttachments).Methods("GET")
+	router.HandleFunc("/avatars/{user_id}/{avatar_id}/{filename}", IncludeDB(restapi.GetAvatars)).Methods("GET")
+	router.HandleFunc("/icons/{channel_id}/{filename}", IncludeDB(restapi.GetIcons)).Methods("GET")
+	router.HandleFunc("/attachments/{channel_id}/{user_id}/{file_id}/{filename}", IncludeDB(restapi.GetAttachments)).Methods("GET")
 
 	server_uri := fmt.Sprintf("%s:%s", HOST, PORT)
 	log.Println(fmt.Sprintf("Listening on %s", server_uri))
