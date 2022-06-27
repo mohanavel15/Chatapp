@@ -65,6 +65,9 @@ func main() {
 	router.HandleFunc("/channels/{id}", Authenticated(restapi.GetChannel)).Methods("GET")
 	router.HandleFunc("/channels/{id}", Authenticated(restapi.EditChannel)).Methods("PATCH")
 	router.HandleFunc("/channels/{id}", Authenticated(restapi.DeleteChannel)).Methods("DELETE")
+	// Recipients
+	router.HandleFunc("/channels/{id}/recipients/{uid}", Authenticated(restapi.AddRecipient)).Methods("PUT")
+	router.HandleFunc("/channels/{id}/recipients/{uid}", Authenticated(restapi.RemoveRecipient)).Methods("DELETE")
 	// Messages
 	router.HandleFunc("/channels/{id}/messages", Authenticated(restapi.GetMessages)).Methods("GET")
 	router.HandleFunc("/channels/{id}/messages", Authenticated(restapi.CreateMessage)).Methods("POST")
