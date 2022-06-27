@@ -32,7 +32,7 @@ func Authenticated(function AuthFunction) http.HandlerFunc {
 		}
 
 		is_valid, session := utils.ValidateAccessToken(access_token, db)
-		if is_valid != true {
+		if !is_valid {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}

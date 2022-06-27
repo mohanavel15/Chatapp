@@ -16,7 +16,6 @@ import (
 )
 
 var db *mongo.Database
-var err error
 var handler *websocket.EventHandler
 
 var onlineUsers = make(map[string]*websocket.Ws)
@@ -34,14 +33,14 @@ func main() {
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 
 	if err != nil {
-		log.Fatal(fmt.Sprintf("Failed to connect database: %s", err))
+		log.Fatalf("Failed to connect database: %s", err)
 	} else {
 		log.Println("Successfully connected database")
 	}
 
 	err = client.Ping(context.TODO(), nil)
 	if err != nil {
-		log.Fatal(fmt.Sprintf("Failed to ping database: %s", err))
+		log.Fatalf("Failed to ping database: %s", err)
 	}
 
 	db = client.Database(MONGO_DATABASE)
@@ -105,7 +104,10 @@ func main() {
 	router.HandleFunc("/icons/{channel_id}/{filename}", IncludeDB(restapi.GetIcons)).Methods("GET")
 	router.HandleFunc("/attachments/{channel_id}/{user_id}/{file_id}/{filename}", IncludeDB(restapi.GetAttachments)).Methods("GET")
 
+	after_cors := handlers.CORS(headers, methods, origins)(router)
+	after_recovery := handlers.RecoveryHandler()(after_cors)
+
 	server_uri := fmt.Sprintf("%s:%s", HOST, PORT)
-	log.Println(fmt.Sprintf("Listening on %s", server_uri))
-	http.ListenAndServe(server_uri, handlers.CORS(headers, methods, origins)(router))
+	log.Printf("Listening on %s", server_uri)
+	http.ListenAndServe(server_uri, after_recovery)
 }

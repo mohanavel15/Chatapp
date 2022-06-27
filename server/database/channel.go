@@ -73,15 +73,10 @@ func CreateChannel(name string, icon string, recipient_id string, user *User, db
 
 func ModifyChannel(id string, name string, icon string, user *User, db *mongo.Database) (*Channel, int) {
 	channels := db.Collection("channels")
-	object_id, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return nil, http.StatusBadRequest
-	}
 
-	var channel Channel
-	err = channels.FindOne(context.TODO(), bson.M{"id": object_id}).Decode(&channel)
-	if err != nil {
-		return nil, http.StatusNotFound
+	channel, statusCode := GetChannel(id, user, db)
+	if statusCode != http.StatusOK {
+		return nil, statusCode
 	}
 
 	if channel.Type == 1 || channel.OwnerID != user.ID {
@@ -98,45 +93,32 @@ func ModifyChannel(id string, name string, icon string, user *User, db *mongo.Da
 
 	channel.UpdatedAt = time.Now().Unix()
 
-	_, err = channels.ReplaceOne(context.TODO(), bson.M{"id": object_id}, channel)
+	_, err := channels.ReplaceOne(context.TODO(), bson.M{"_id": channel.ID}, channel)
 	if err != nil {
 		return nil, http.StatusInternalServerError
 	}
 
-	return &channel, http.StatusOK
+	return channel, http.StatusOK
 }
 
 func DeleteChannel(id string, user *User, db *mongo.Database) (*Channel, int) {
 	channelsCollection := db.Collection("channels")
-	object_id, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return nil, http.StatusBadRequest
-	}
 
-	var channel Channel
-	err = channelsCollection.FindOne(context.TODO(), bson.M{"id": object_id}).Decode(&channel)
-	if err != nil {
-		return nil, http.StatusNotFound
+	channel, statusCode := GetChannel(id, user, db)
+	if statusCode != http.StatusOK {
+		return nil, statusCode
 	}
 
 	if channel.Type == 1 {
 		return nil, http.StatusForbidden
 	}
 
-	recipients := []primitive.ObjectID{}
-	for _, recipient := range channel.Recipients {
-		if recipient.Hex() != user.ID.Hex() {
-			recipients = append(recipients, recipient)
-		}
-	}
-
-	_, err = channelsCollection.UpdateOne(context.TODO(), bson.M{"id": object_id}, bson.M{"$set": bson.M{"recipients": recipients}})
+	_, err := channelsCollection.UpdateOne(context.TODO(), bson.M{"_id": channel.ID}, bson.M{"$pull": bson.M{"recipients": user.ID}})
 	if err != nil {
 		return nil, http.StatusInternalServerError
 	}
 
-	channel.Recipients = recipients
-	return &channel, http.StatusOK
+	return channel, http.StatusOK
 }
 
 func GetChannel(id string, user *User, db *mongo.Database) (*Channel, int) {
