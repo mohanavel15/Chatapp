@@ -112,17 +112,22 @@ function Chat({ channel_id }: { channel_id: string }) {
 	
 	const onFileChange = () => {
 		if (file_input.current.files && file_input.current.files.length > 0) {
-			setHasFile(true);
 			const file = file_input.current.files[0];
-				setFileJSX(
-					<div className='input-file' key={file.name}>
-						<FontAwesomeIcon icon={faFile} />
-						<button className='input-file-delete' onClick={() => {file_input.current.value='';onFileChange();}}>
-							<FontAwesomeIcon icon={faCircleXmark} />
-						</button>
-						<p>{file.name}</p>
-					</div>
-				)
+			if (file.size > 8388608) {
+				alert("File is bigger than 8MB")
+				file_input.current.value=''
+				return
+			} 
+			setHasFile(true);
+			setFileJSX(
+				<div className='input-file' key={file.name}>
+					<FontAwesomeIcon icon={faFile} />
+					<button className='input-file-delete' onClick={() => {file_input.current.value='';onFileChange();}}>
+						<FontAwesomeIcon icon={faCircleXmark} />
+					</button>
+					<p>{file.name}</p>
+				</div>
+			)
 		} else {
 			setHasFile(false);
 		}

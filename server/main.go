@@ -102,7 +102,7 @@ func main() {
 	// Files
 	router.HandleFunc("/avatars/{user_id}/{avatar_id}/{filename}", IncludeDB(restapi.GetAvatars)).Methods("GET")
 	router.HandleFunc("/icons/{channel_id}/{filename}", IncludeDB(restapi.GetIcons)).Methods("GET")
-	router.HandleFunc("/attachments/{channel_id}/{user_id}/{file_id}/{filename}", IncludeDB(restapi.GetAttachments)).Methods("GET")
+	router.HandleFunc("/attachments/{channel_id}/{message_id}/{attachment_id}/{filename}", IncludeDB(restapi.GetAttachments)).Methods("GET")
 
 	after_cors := handlers.CORS(headers, methods, origins)(router)
 	after_recovery := handlers.RecoveryHandler()(after_cors)

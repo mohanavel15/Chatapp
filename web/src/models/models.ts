@@ -11,7 +11,7 @@ export interface MessageOBJ {
 
 export interface Attachment {
 	id:           string
-	name:           string
+	filename:           string
 	size:           number
 	content_type:   string
 	url:            string

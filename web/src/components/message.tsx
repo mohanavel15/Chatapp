@@ -35,7 +35,7 @@ function Message({ message }: {message: MessageOBJ}) {
                     <div className="attachment-name">
                         <p className="attachment-filename">
                             <a href={message.attachments[0].url} rel="noreferrer" target="_blank">
-                            {message.attachments[0].name}
+                            {message.attachments[0].filename}
                             </a>
                         </p>
                         <p className="attachment-size">{message.attachments[0].size} bytes</p>
