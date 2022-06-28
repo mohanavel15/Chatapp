@@ -7,6 +7,10 @@ import { faPencil, faFile, faDownload } from '@fortawesome/free-solid-svg-icons'
 import { ChannelsContext, ChannelContext } from '../contexts/channelctx';
 import { UserContextOBJ, UserContext } from "../contexts/usercontext";
 import Routes from "../config";
+import AttachmentDefault from "./attachment/default";
+import AttachmentImage from "./attachment/image";
+import AttachmentVideo from "./attachment/video";
+import AttachmentAudio from "./attachment/audio";
 
 function Message({ message }: {message: MessageOBJ}) {
     const msgctx = useContext(MessageContext);
@@ -25,28 +29,25 @@ function Message({ message }: {message: MessageOBJ}) {
 
     let time = new Date(message.created_at * 1000).toLocaleTimeString();
 
+
     useEffect(() => {
         if (message.attachments.length > 0) { 
-            setAttachmentElement(
-                <div className="attachment">
-                    <div className="attachment-icon">
-                        <FontAwesomeIcon icon={faFile} />
-                    </div>
-                    <div className="attachment-name">
-                        <p className="attachment-filename">
-                            <a href={message.attachments[0].url} rel="noreferrer" target="_blank">
-                            {message.attachments[0].filename}
-                            </a>
-                        </p>
-                        <p className="attachment-size">{message.attachments[0].size} bytes</p>
-                    </div>
-                    <button className="attachment-download">
-                    <a href={message.attachments[0].url} rel="noreferrer" target="_blank">
-                        <FontAwesomeIcon icon={faDownload} />
-                    </a>
-                    </button>
-                </div>
-            )
+            const file = message.attachments[0]
+            
+            const is_image_regex = /image\/.+/
+            const is_video_regex = /video\/.+/
+            const is_audio_regex = /audio\/.+/
+            
+            if (file.content_type.search(is_image_regex) != -1) {
+                setAttachmentElement(<AttachmentImage message={message} />)
+            } else if (file.content_type.search(is_video_regex) != -1) {
+                setAttachmentElement(<AttachmentVideo message={message} />)
+            } else if (file.content_type.search(is_audio_regex) != -1) {
+                setAttachmentElement(<AttachmentAudio message={message} />) 
+            } else {
+                setAttachmentElement(<AttachmentDefault message={message} />)
+            }
+
         }
     }, [message.attachments]);
 
@@ -154,7 +155,7 @@ function Message({ message }: {message: MessageOBJ}) {
                     <span className="message-author-name"> {message.author.username}</span>
                     <span className="message-time"> {time}</span>
                 </div>
-                {edit !== true && <p className='Message-content'> {message.content} </p> }
+                {edit !== true && message.content.length > 0 &&<p className='Message-content'> {message.content} </p> }
                 {edit && 
                 <div>
                 <input id="chat-text" type="text" value={msg} onKeyDown={handleKey} onChange={onInputChange} />
