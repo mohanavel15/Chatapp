@@ -44,12 +44,12 @@ func (conns *Connections) AddUserToChannel(user_id string, channel_id string, ws
 
 func (conns *Connections) RemoveUserFromChannel(user_id string, channel_id string) {
 	if _, ok := conns.Channels[channel_id]; !ok {
-		conns.Channels[channel_id] = make(map[string]*Ws)
+		return
 	}
-
-	if _, ok := conns.Channels[channel_id][user_id]; ok {
-		delete(conns.Channels[channel_id], user_id)
+	if _, ok := conns.Channels[channel_id][user_id]; !ok {
+		return
 	}
+	delete(conns.Channels[channel_id], user_id)
 }
 
 func (conns *Connections) GetUserStatus(user_id string) int {

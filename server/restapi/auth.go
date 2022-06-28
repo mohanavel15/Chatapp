@@ -48,7 +48,7 @@ func Register(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
 		return
 	}
 
-	email_regex := regexp.MustCompile("[a-z]+@[a-z]+\\.[a-z]+")
+	email_regex := regexp.MustCompile(`[a-z]+@[a-z]+\\.[a-z]+`)
 	if !email_regex.MatchString(email) {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("Invalid Email"))
@@ -166,7 +166,7 @@ func Logout(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
 	}
 
 	is_valid, session := utils.ValidateAccessToken(access_token, db)
-	if is_valid != true {
+	if !is_valid {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -184,7 +184,7 @@ func Signout(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
 	}
 
 	is_valid, session := utils.ValidateAccessToken(access_token, db)
-	if is_valid != true {
+	if !is_valid {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}

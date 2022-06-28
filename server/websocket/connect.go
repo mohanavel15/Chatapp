@@ -5,7 +5,6 @@ import (
 	"Chatapp/response"
 	"Chatapp/utils"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 )
@@ -25,7 +24,7 @@ func ConnectUser(ctx *Context) {
 	}
 
 	is_valid, session := utils.ValidateAccessToken(token, ctx.Db)
-	if is_valid != true {
+	if !is_valid {
 		ws_message := WS_Message{
 			Event: "INVAILD_SESSION",
 		}
@@ -42,7 +41,7 @@ func ConnectUser(ctx *Context) {
 	res_user := response.NewUser(get_user, 1)
 
 	ctx.Ws.User = get_user
-	log.Println(fmt.Sprintf("%s joined", ctx.Ws.User.Username))
+	log.Printf("%s joined", ctx.Ws.User.Username)
 	ctx.Ws.Conns.Users[get_user.ID.Hex()] = ctx.Ws
 
 	res_channels := response.Channels{}

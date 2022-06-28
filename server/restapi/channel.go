@@ -133,7 +133,7 @@ func EditChannel(ctx *Context) {
 			return
 		}
 
-		ext_regx := regexp.MustCompile("\\.[\\w]+$")
+		ext_regx := regexp.MustCompile(`\\.[\\w]+$`)
 		ext := ext_regx.FindString(handler.Filename)
 
 		new_file_id := uuid.New().String()
@@ -212,9 +212,7 @@ func DeleteChannel(ctx *Context) {
 	ctx.Res.Header().Set("Content-Type", "application/json")
 	ctx.Res.Write(res)
 
-	if _, ok := ctx.Conn.Channels[channel_id][ctx.User.ID.Hex()]; ok {
-		delete(ctx.Conn.Channels[channel_id], ctx.User.ID.Hex())
-	}
+	ctx.Conn.RemoveUserFromChannel(ctx.User.ID.Hex(), channel_id)
 
 	res_user := response.NewUser(&ctx.User, 0)
 	ctx.Conn.BroadcastToChannel(channel.ID.Hex(), "MEMBER_REMOVE", res_user)

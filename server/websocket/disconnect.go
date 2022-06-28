@@ -25,5 +25,4 @@ func Disconnect(ws *Ws) {
 
 	delete(ws.Conns.Users, ws.User.ID.Hex())
 	ws.Close()
-	return
 }
