@@ -23,7 +23,7 @@ type Ws struct {
 func (ws *Ws) Write(data []byte) {
 	err := ws.Conn.WriteMessage(websocket.TextMessage, data)
 	if err != nil {
-		Disconnect(ws)
+		log.Println(err)
 	}
 }
 
