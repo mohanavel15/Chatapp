@@ -50,6 +50,9 @@ function UserCTX({ children }: { children: React.ReactChild }) {
     }, []);
 
     useEffect(() => {
+        if (accessToken === "") {
+            return
+        }
         GetRelationships(accessToken).then(relationships => {
             relationships.forEach(relationship => {
                 setRelationships(prevRelationships => {

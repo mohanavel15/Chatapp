@@ -19,8 +19,8 @@ export default function CreateChannel() {
         state_context.setCreateChannel(false);
     }
     return (
-        <div className="channel-container">
-            <div className='create-channel'>
+        <div onClick={() => state_context.setCreateChannel(false)} className="channel-container">
+            <div onClick={(e) => e.stopPropagation()} className='create-channel'>
                 <button className="create-channel-close-button" onClick={(e) => {e.preventDefault(); state_context.setCreateChannel(false) }}>X</button>
                 <div className="create-channel-input-container">
                     <input className="create-channel-input" ref={channel_name} type="text" placeholder="Channel Name" defaultValue={`${user.username}'s channel`}/>

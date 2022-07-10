@@ -14,8 +14,8 @@ export default function DeleteChannel() {
     }
 
     return (
-        <div className="channel-container">
-            <div className='delete-channel'>
+        <div onClick={() => {state_context.setDeleteChannel(false) }} className="channel-container">
+            <div onClick={(e) => {e.stopPropagation()}} className='delete-channel'>
                 <h3>Leave '{state_context.ChannelOBJ.name}'?</h3>
                 <p>Are you sure you want to leave? You won't be able to re-join unless you are re-invited</p>
                 <button className="popupbox-btn" onClick={(e) => {e.preventDefault(); state_context.setDeleteChannel(false) }}>Cancel</button>
