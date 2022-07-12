@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"regexp"
 	"strings"
 
@@ -49,16 +48,37 @@ func GetAvatars(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
 func GetIcons(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
 	vars := mux.Vars(r)
 	channel_id := vars["channel_id"]
+	icon_id := vars["icon_id"]
 	filename := vars["filename"]
 
-	file_path := fmt.Sprintf("files/icons/%s/%s", channel_id, filename)
-
-	_, err := os.Stat(file_path)
-	if os.IsNotExist(err) {
-		w.WriteHeader(http.StatusNotFound)
+	channelsCollection := db.Collection("channels")
+	object_id, err := primitive.ObjectIDFromHex(channel_id)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	http.ServeFile(w, r, file_path)
+
+	var channel database.Channel
+	err = channelsCollection.FindOne(context.TODO(), bson.M{"_id": object_id}).Decode(&channel)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	icon := channel.Icon
+	if icon_id != icon.ID.Hex() {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if filename != fmt.Sprintf("unknown.%s", icon.Ext) {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", icon.Type)
+	data := base64.NewDecoder(base64.StdEncoding, strings.NewReader(icon.Icon))
+	io.Copy(w, data)
 }
 
 func GetAttachments(w http.ResponseWriter, r *http.Request, db *mongo.Database) {

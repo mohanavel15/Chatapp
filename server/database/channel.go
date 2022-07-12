@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"regexp"
+	"strings"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -50,11 +52,11 @@ func CreateChannel(name string, icon string, recipient_id string, user *User, db
 
 		return &channel, http.StatusOK
 	} else {
+		//Icon:    icon,
 		channel := Channel{
 			ID:      primitive.NewObjectID(),
 			Type:    2,
 			Name:    name,
-			Icon:    icon,
 			OwnerID: user.ID,
 			Recipients: []primitive.ObjectID{
 				user.ID,
@@ -88,7 +90,26 @@ func ModifyChannel(id string, name string, icon string, user *User, db *mongo.Da
 	}
 
 	if icon != "" {
-		channel.Icon = icon
+		file_type_regx := regexp.MustCompile("image/(png|jpeg|gif)")
+		file_ext_regx := regexp.MustCompile("png|jpeg|gif")
+
+		file_type := file_type_regx.FindString(icon)
+		if file_type == "" {
+			return nil, http.StatusBadRequest
+		}
+
+		file_ext := file_ext_regx.FindString(file_type)
+
+		iconBS64 := icon[strings.Index(icon, ",")+1:]
+
+		newIcon := Icon{
+			ID:   primitive.NewObjectID(),
+			Type: file_type,
+			Ext:  file_ext,
+			Icon: iconBS64,
+		}
+
+		channel.Icon = newIcon
 	}
 
 	channel.UpdatedAt = time.Now().Unix()

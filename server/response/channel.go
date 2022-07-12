@@ -1,6 +1,9 @@
 package response
 
-import "Chatapp/database"
+import (
+	"Chatapp/database"
+	"fmt"
+)
 
 type Channel struct {
 	ID         string `json:"id"`
@@ -22,11 +25,17 @@ func NewChannel(channel *database.Channel, recipients []User) Channel {
 		UpdatedAt:  channel.UpdatedAt,
 	}
 	if channel.Type == 2 {
-		res_channel.Icon = channel.Icon
+		res_channel.Icon = GetIconUrl(channel)
 		res_channel.Name = channel.Name
 		res_channel.OwnerID = channel.OwnerID.Hex()
 	}
 	return res_channel
+}
+
+func GetIconUrl(channel *database.Channel) string {
+	url := fmt.Sprint(channel.ID.Hex(), "/", channel.Icon.ID.Hex(), "/unknown."+channel.Icon.Ext)
+	fullUrl := fmt.Sprint("http://localhost:5000/icons/", url)
+	return fullUrl
 }
 
 type Channels []Channel

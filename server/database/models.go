@@ -41,11 +41,18 @@ type Channel struct {
 	ID         primitive.ObjectID   `bson:"_id,omitempty"`
 	Type       int                  `bson:"type,omitempty"`
 	Name       string               `bson:"name,omitempty"`
-	Icon       string               `bson:"icon,omitempty"`
+	Icon       Icon                 `bson:"icon,omitempty"`
 	OwnerID    primitive.ObjectID   `bson:"owner_id,omitempty"`
 	Recipients []primitive.ObjectID `bson:"recipients,omitempty"`
 	CreatedAt  int64                `bson:"created_at,omitempty"`
 	UpdatedAt  int64                `bson:"updated_at,omitempty"`
+}
+
+type Icon struct {
+	ID   primitive.ObjectID `bson:"_id"`
+	Icon string             `bson:"icon"`
+	Type string             `bson:"type"`
+	Ext  string             `bson:"ext"`
 }
 
 type Message struct {
