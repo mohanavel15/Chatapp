@@ -158,6 +158,22 @@ func GetChannel(id string, user *User, db *mongo.Database) (*Channel, int) {
 	return &channel, http.StatusOK
 }
 
+func GetChannelWithoutUser(id string, db *mongo.Database) (*Channel, int) {
+	channelsCollection := db.Collection("channels")
+	object_id, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, http.StatusBadRequest
+	}
+
+	var channel Channel
+	err = channelsCollection.FindOne(context.TODO(), bson.M{"_id": object_id}).Decode(&channel)
+	if err != nil {
+		return nil, http.StatusNotFound
+	}
+
+	return &channel, http.StatusOK
+}
+
 func GetChannels(user *User, db *mongo.Database) []Channel {
 	channelsCollection := db.Collection("channels")
 

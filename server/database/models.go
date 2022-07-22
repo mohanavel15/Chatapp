@@ -56,13 +56,14 @@ type Icon struct {
 }
 
 type Message struct {
-	ID          primitive.ObjectID `bson:"_id"`
-	Content     string             `bson:"content"`
-	ChannelID   primitive.ObjectID `bson:"channel_id"`
-	AccountID   primitive.ObjectID `bson:"account_id"`
-	CreatedAt   int64              `bson:"created_at"`
-	UpdatedAt   int64              `bson:"updated_at"`
-	Attachments []Attachment       `bson:"attachments,omitempty"`
+	ID            primitive.ObjectID `bson:"_id"`
+	Content       string             `bson:"content"`
+	ChannelID     primitive.ObjectID `bson:"channel_id"`
+	AccountID     primitive.ObjectID `bson:"account_id"`
+	SystemMessage bool               `bson:"system_message"`
+	CreatedAt     int64              `bson:"created_at"`
+	UpdatedAt     int64              `bson:"updated_at"`
+	Attachments   []Attachment       `bson:"attachments,omitempty"`
 }
 
 type Attachment struct {

@@ -27,6 +27,12 @@ func GetMessages(ctx *Context) {
 
 	messages_res := []response.Message{}
 	for _, message := range messages {
+		if message.SystemMessage {
+			var user response.User
+			messages_res = append(messages_res, response.NewMessage(&message, user))
+			continue
+		}
+
 		user, statusCode := database.GetUser(message.AccountID.Hex(), ctx.Db)
 		if statusCode != http.StatusOK {
 			continue
@@ -34,14 +40,7 @@ func GetMessages(ctx *Context) {
 		messages_res = append(messages_res, response.NewMessage(&message, response.NewUser(user, 0)))
 	}
 
-	res, err := json.Marshal(messages_res)
-	if err != nil {
-		ctx.Res.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	ctx.Res.Header().Set("Content-Type", "application/json")
-	ctx.Res.Write(res)
+	ctx.WriteJSON(messages_res)
 }
 
 func GetMessage(ctx *Context) {
@@ -55,22 +54,22 @@ func GetMessage(ctx *Context) {
 		return
 	}
 
-	user, statusCode := database.GetUser(message.AccountID.Hex(), ctx.Db)
-	if statusCode != http.StatusOK {
-		ctx.Res.WriteHeader(statusCode)
-		return
+	var message_res response.Message
+
+	if message.SystemMessage {
+		var user response.User
+		message_res = response.NewMessage(message, user)
+	} else {
+		user, statusCode := database.GetUser(message.AccountID.Hex(), ctx.Db)
+		if statusCode != http.StatusOK {
+			ctx.Res.WriteHeader(statusCode)
+			return
+		}
+
+		message_res = response.NewMessage(message, response.NewUser(user, 0))
 	}
 
-	message_res := response.NewMessage(message, response.NewUser(user, 0))
-
-	res, err := json.Marshal(message_res)
-	if err != nil {
-		ctx.Res.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	ctx.Res.Header().Set("Content-Type", "application/json")
-	ctx.Res.Write(res)
+	ctx.WriteJSON(message_res)
 }
 
 func CreateMessage(ctx *Context) {
@@ -93,7 +92,7 @@ func CreateMessage(ctx *Context) {
 			return
 		}
 
-		message, statusCode := database.CreateMessage(content, channel_id, &ctx.User, ctx.Db)
+		message, statusCode := database.CreateMessage(content, channel_id, false, &ctx.User, ctx.Db)
 		if statusCode != http.StatusOK {
 			ctx.Res.WriteHeader(statusCode)
 			return
@@ -141,7 +140,7 @@ func CreateMessage(ctx *Context) {
 		}
 
 		content = strings.TrimSpace(content)
-		message, statusCode := database.CreateMessage(content, channel_id, &ctx.User, ctx.Db)
+		message, statusCode := database.CreateMessage(content, channel_id, false, &ctx.User, ctx.Db)
 		if statusCode != http.StatusOK {
 			ctx.Res.WriteHeader(statusCode)
 			return
@@ -152,15 +151,8 @@ func CreateMessage(ctx *Context) {
 		messageCollection.UpdateOne(context.TODO(), bson.M{"_id": message.ID}, bson.M{"$set": bson.M{"attachments": message.Attachments}})
 
 		message_res := response.NewMessage(message, response.NewUser(&ctx.User, 0))
-		res, err := json.Marshal(message_res)
-		if err != nil {
-			ctx.Res.WriteHeader(http.StatusInternalServerError)
-			return
-		}
 
-		ctx.Res.Header().Set("Content-Type", "application/json")
-		ctx.Res.Write(res)
-
+		ctx.WriteJSON(message_res)
 		ctx.Conn.BroadcastToChannel(channel_id, "MESSAGE_CREATE", message_res)
 	}
 }
@@ -191,14 +183,8 @@ func EditMessage(ctx *Context) {
 	}
 
 	message_res := response.NewMessage(message, response.NewUser(&ctx.User, 0))
-	res, err := json.Marshal(message_res)
-	if err != nil {
-		ctx.Res.WriteHeader(http.StatusInternalServerError)
-		return
-	}
 
-	ctx.Res.Header().Set("Content-Type", "application/json")
-	ctx.Res.Write(res)
+	ctx.WriteJSON(message_res)
 	ctx.Conn.BroadcastToChannel(message_res.ChannelID, "MESSAGE_MODIFY", message_res)
 }
 
@@ -220,13 +206,7 @@ func DeleteMessage(ctx *Context) {
 	}
 
 	message_res := response.NewMessage(message, response.NewUser(user, 0))
-	res, err := json.Marshal(message_res)
-	if err != nil {
-		ctx.Res.WriteHeader(http.StatusInternalServerError)
-		return
-	}
 
-	ctx.Res.Header().Set("Content-Type", "application/json")
-	ctx.Res.Write(res)
+	ctx.WriteJSON(message_res)
 	ctx.Conn.BroadcastToChannel(message_res.ChannelID, "MESSAGE_DELETE", message_res)
 }

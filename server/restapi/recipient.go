@@ -64,11 +64,13 @@ func RemoveRecipient(ctx *Context) {
 
 	if channel.Type == 1 || channel.OwnerID.Hex() != ctx.User.ID.Hex() {
 		ctx.Res.WriteHeader(http.StatusForbidden)
+		return
 	}
 
 	user, statusCode := database.GetUser(user_id, ctx.Db)
 	if statusCode != http.StatusOK {
 		ctx.Res.WriteHeader(statusCode)
+		return
 	}
 
 	_, err := channelCollection.UpdateOne(context.TODO(), bson.M{"_id": channel.ID}, bson.M{"$pull": bson.M{"recipients": user.ID}})
@@ -86,4 +88,7 @@ func RemoveRecipient(ctx *Context) {
 
 	res_channel := response.NewChannel(channel_, recipients)
 	ctx.WriteJSON(res_channel)
+
+	ctx.Conn.RemoveUserFromChannel(user.ID.Hex(), channel.ID.Hex())
+	ctx.Conn.BroadcastToChannel(channel.ID.Hex(), "CHANNEL_MODIFY", res_channel)
 }

@@ -6,25 +6,29 @@ import (
 )
 
 type Message struct {
-	ID          string       `json:"id"`
-	Content     string       `json:"content"`
-	Author      User         `json:"author"`
-	ChannelID   string       `json:"channel_id"`
-	CreatedAt   int64        `json:"created_at"`
-	EditedAt    int64        `json:"edited_at"`
-	Attachments []Attachment `json:"attachments"`
+	ID            string       `json:"id"`
+	Content       string       `json:"content"`
+	Author        User         `json:"author"`
+	ChannelID     string       `json:"channel_id"`
+	SystemMessage bool         `json:"system_message"`
+	CreatedAt     int64        `json:"created_at"`
+	EditedAt      int64        `json:"edited_at"`
+	Attachments   []Attachment `json:"attachments"`
 }
 
 func NewMessage(message *database.Message, user User) Message {
-
 	res_message := Message{
-		ID:          message.ID.Hex(),
-		Content:     message.Content,
-		Author:      user,
-		ChannelID:   message.ChannelID.Hex(),
-		CreatedAt:   message.CreatedAt,
-		EditedAt:    message.UpdatedAt,
-		Attachments: []Attachment{},
+		ID:            message.ID.Hex(),
+		Content:       message.Content,
+		ChannelID:     message.ChannelID.Hex(),
+		SystemMessage: message.SystemMessage,
+		CreatedAt:     message.CreatedAt,
+		EditedAt:      message.UpdatedAt,
+		Attachments:   []Attachment{},
+	}
+
+	if !message.SystemMessage {
+		res_message.Author = user
 	}
 
 	if len(message.Attachments) > 0 {

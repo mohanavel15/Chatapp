@@ -10,8 +10,16 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func CreateMessage(content string, channel_id string, user *User, db *mongo.Database) (*Message, int) {
-	channel, statusCode := GetChannel(channel_id, user, db)
+func CreateMessage(content string, channel_id string, system_message bool, user *User, db *mongo.Database) (*Message, int) {
+	var channel *Channel
+	var statusCode int
+
+	if system_message {
+		channel, statusCode = GetChannelWithoutUser(channel_id, db)
+	} else {
+		channel, statusCode = GetChannel(channel_id, user, db)
+	}
+
 	if statusCode != http.StatusOK {
 		return nil, statusCode
 	}
@@ -45,10 +53,13 @@ func CreateMessage(content string, channel_id string, user *User, db *mongo.Data
 	new_message := Message{
 		ID:        primitive.NewObjectID(),
 		Content:   content,
-		AccountID: user.ID,
 		ChannelID: channel.ID,
 		CreatedAt: time.Now().Unix(),
 		UpdatedAt: time.Now().Unix(),
+	}
+
+	if !system_message {
+		new_message.AccountID = user.ID
 	}
 
 	_, err := messages.InsertOne(context.TODO(), new_message)
