@@ -1,30 +1,17 @@
 import { useContext, useRef } from 'react'
 import { UserContextOBJ, UserContext } from "../contexts/usercontext";
 import { StatesContext, StateContext } from "../contexts/states";
-import Routes from '../config';
+import { RemoveRecipient } from '../api/recipient';
 
 function KickBan() {
     const user_ctx:UserContextOBJ = useContext(UserContext);    
     const state_context: StateContext = useContext(StatesContext);
     const isBan = state_context.isBan
 
-    const reasonRef = useRef<HTMLTextAreaElement>(null);
+    const reasonRef = useRef<HTMLTextAreaElement>(undefined!);
 
     function handleKickOrBan() {
-        /*
-        const url = Routes.Channels + "/" + "/members/" + state_context.KickBanMember?.id;
-        fetch(url, {
-            method: "DELETE",
-            headers: {
-                "Authorization": user_ctx.accessToken,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                "ban": isBan,
-                "reason": reasonRef.current?.value
-            })
-        })
-        */
+        RemoveRecipient(user_ctx.accessToken, state_context.ChannelOBJ.id, state_context.KickBanMember ? state_context.KickBanMember.id : '', reasonRef.current.value, isBan);
         cancelBan();
     }
 

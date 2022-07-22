@@ -26,6 +26,7 @@ export default function MemberContextMenu(props:propsMsgCtxProps) {
 
     function handleKickOrBan(ban: boolean) {
         state_context.setKickBanMember(props.member);
+        state_context.setChannelOBJ(channel);
         state_context.setIsBan(ban);
         state_context.setShowKickBan(true);
     }

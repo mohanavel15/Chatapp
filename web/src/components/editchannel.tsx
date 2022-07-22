@@ -132,17 +132,18 @@ export default function EditChannel() {
         }
 
         if (icon_input.current.files && icon_input.current.files.length > 0) {
-            const url = Routes.Channels+"/"+state_context.ChannelOBJ.id;
-            const formData = new FormData();
-            formData.append('name', channelName);
-            formData.append('file', icon_input.current.files[0]);
-            fetch(url, {
-                method: "PATCH",
-                headers: {
-                    "Authorization": user.accessToken,
-                },
-                body: formData
-            })
+            let reader = new FileReader();
+            reader.readAsDataURL(icon_input.current.files[0]);
+            reader.onload = () => {
+                const url = Routes.Channels+"/"+state_context.ChannelOBJ.id;
+                fetch(url, {
+                    method: "PATCH",
+                    headers: {
+                        "Authorization": user.accessToken,
+                    },
+                    body: JSON.stringify({ name: channelName, icon: reader.result })
+                })
+            }
         }
     }
  

@@ -3,7 +3,7 @@ import { setDefaultAvatar } from '../utils/errorhandle';
 import { MessageContext } from "../contexts/messagectx";
 import { MessageOBJ } from "../models/models";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPencil, faFile, faDownload } from '@fortawesome/free-solid-svg-icons'
+import { faPencil } from '@fortawesome/free-solid-svg-icons'
 import { ChannelsContext, ChannelContext } from '../contexts/channelctx';
 import { UserContextOBJ, UserContext } from "../contexts/usercontext";
 import Routes from "../config";
@@ -34,22 +34,17 @@ function Message({ message }: {message: MessageOBJ}) {
         if (message.attachments.length > 0) { 
             const file = message.attachments[0]
             
-            const is_image_regex = /image\/.+/
-            const is_video_regex = /video\/.+/
-            const is_audio_regex = /audio\/.+/
-            
-            if (file.content_type.search(is_image_regex) != -1) {
+            if (file.content_type.search(/image\/.+/) !== -1) {
                 setAttachmentElement(<AttachmentImage message={message} />)
-            } else if (file.content_type.search(is_video_regex) != -1) {
+            } else if (file.content_type.search(/video\/.+/) !== -1) {
                 setAttachmentElement(<AttachmentVideo message={message} />)
-            } else if (file.content_type.search(is_audio_regex) != -1) {
+            } else if (file.content_type.search(/audio\/.+/) !== -1) {
                 setAttachmentElement(<AttachmentAudio message={message} />) 
             } else {
                 setAttachmentElement(<AttachmentDefault message={message} />)
             }
-
         }
-    }, [message.attachments]);
+    }, [message]);
 
     useEffect(() => {
         setMsg(message.content);
@@ -61,8 +56,8 @@ function Message({ message }: {message: MessageOBJ}) {
         } else {
             setEdit(false);
         }
-    }, [msgctx.messageEdit, msgctx.message]);
-
+    }, [msgctx.messageEdit, msgctx.message, message]);
+    
     useEffect(() => {
         if (messageElement.current !== null) {
             messageElement.current.scrollIntoView({
@@ -71,7 +66,7 @@ function Message({ message }: {message: MessageOBJ}) {
             });
         }
     }, [])
-
+    
     function handleEditBtn() {
         if (msgctx.messageEdit) {
             msgctx.setMessageEdit(false);
