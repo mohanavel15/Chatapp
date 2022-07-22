@@ -15,7 +15,7 @@ import (
 )
 
 func GetUser(ctx *Context) {
-	user_res := response.NewUser(&ctx.User, 0)
+	user_res := response.NewUser(&ctx.User, ctx.Conn.GetUserStatus(ctx.User.ID.Hex()))
 	ctx.WriteJSON(user_res)
 }
 
@@ -60,6 +60,6 @@ func EditUser(ctx *Context) {
 		return
 	}
 	ctx.User.Avatar = avatar_db
-	user_res := response.NewUser(&ctx.User, 0)
+	user_res := response.NewUser(&ctx.User, ctx.Conn.GetUserStatus(ctx.User.ID.Hex()))
 	ctx.WriteJSON(user_res)
 }

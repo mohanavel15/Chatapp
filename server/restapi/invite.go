@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func JoinInvite(ctx *Context) {
@@ -39,30 +40,28 @@ func JoinInvite(ctx *Context) {
 		ctx.Res.WriteHeader(http.StatusForbidden)
 		return
 	}
+	rd := options.After
 
-	_, err = channelCollection.UpdateOne(context.TODO(), bson.M{"_id": channel.ID}, bson.M{"$push": bson.M{"recipients": ctx.User.ID}})
-	if err != nil {
+	result := channelCollection.FindOneAndUpdate(context.TODO(), bson.M{"_id": channel.ID}, bson.M{"$push": bson.M{"recipients": ctx.User.ID}}, &options.FindOneAndUpdateOptions{ReturnDocument: &rd})
+	if result.Err() != nil {
 		ctx.Res.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
-	channel_, statusCode := database.GetChannel(invite.ChannelID.Hex(), &ctx.User, ctx.Db)
-	if statusCode != http.StatusOK {
-		ctx.Res.WriteHeader(statusCode)
-		return
-	}
+	result.Decode(&channel)
 
 	recipients := []response.User{}
-	for _, recipient := range channel_.Recipients {
-		if channel_.Type == 1 && recipient.Hex() == ctx.User.ID.Hex() {
+	for _, recipient := range channel.Recipients {
+		if channel.Type == 1 && recipient.Hex() == ctx.User.ID.Hex() {
 			continue
 		}
 		recipient, _ := database.GetUser(recipient.Hex(), ctx.Db)
-		recipients = append(recipients, response.NewUser(recipient, 0))
+		recipients = append(recipients, response.NewUser(recipient, ctx.Conn.GetUserStatus(recipient.ID.Hex())))
 	}
 
-	res_channel := response.NewChannel(channel_, recipients)
+	res_channel := response.NewChannel(&channel, recipients)
 	ctx.WriteJSON(res_channel)
+	ctx.Conn.AddUserToChannel(ctx.User.ID.Hex(), channel.ID.Hex())
+	ctx.Conn.BroadcastToChannel(res_channel.ID, "CHANNEL_MODIFY", res_channel)
 }
 
 func GetInvites(ctx *Context) {

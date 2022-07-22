@@ -33,9 +33,9 @@ func CreateChannel(ctx *Context) {
 	recipients := []response.User{}
 	if channel.Type == 1 {
 		recipient, _ := database.GetUser(recipientID, ctx.Db)
-		recipients = append(recipients, response.NewUser(recipient, 0))
+		recipients = append(recipients, response.NewUser(recipient, ctx.Conn.GetUserStatus(recipient.ID.Hex())))
 	} else {
-		recipients = append(recipients, response.NewUser(&ctx.User, 0))
+		recipients = append(recipients, response.NewUser(&ctx.User, ctx.Conn.GetUserStatus(ctx.User.ID.Hex())))
 	}
 
 	res_channel := response.NewChannel(channel, recipients)
@@ -53,7 +53,7 @@ func GetChannels(ctx *Context) {
 				continue
 			}
 			recipient, _ := database.GetUser(recipient.Hex(), ctx.Db)
-			recipients = append(recipients, response.NewUser(recipient, 0))
+			recipients = append(recipients, response.NewUser(recipient, ctx.Conn.GetUserStatus(recipient.ID.Hex())))
 		}
 
 		res_channels = append(res_channels, response.NewChannel(&channel, recipients))
@@ -78,7 +78,7 @@ func GetChannel(ctx *Context) {
 			continue
 		}
 		recipient, _ := database.GetUser(recipient.Hex(), ctx.Db)
-		recipients = append(recipients, response.NewUser(recipient, 0))
+		recipients = append(recipients, response.NewUser(recipient, ctx.Conn.GetUserStatus(recipient.ID.Hex())))
 	}
 
 	res_channel := response.NewChannel(channel, recipients)
@@ -108,7 +108,7 @@ func EditChannel(ctx *Context) {
 	recipients := []response.User{}
 	for _, recipient := range channel.Recipients {
 		recipient, _ := database.GetUser(recipient.Hex(), ctx.Db)
-		recipients = append(recipients, response.NewUser(recipient, 0))
+		recipients = append(recipients, response.NewUser(recipient, ctx.Conn.GetUserStatus(recipient.ID.Hex())))
 	}
 
 	res_channel := response.NewChannel(channel, recipients)
@@ -130,7 +130,7 @@ func DeleteChannel(ctx *Context) {
 	recipients := []response.User{}
 	for _, recipient := range channel.Recipients {
 		recipient, _ := database.GetUser(recipient.Hex(), ctx.Db)
-		recipients = append(recipients, response.NewUser(recipient, 0))
+		recipients = append(recipients, response.NewUser(recipient, ctx.Conn.GetUserStatus(recipient.ID.Hex())))
 	}
 
 	res_channel := response.NewChannel(channel, recipients)

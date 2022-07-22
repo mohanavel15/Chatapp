@@ -11,6 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func CreateChannel(name string, icon string, recipient_id string, user *User, db *mongo.Database) (*Channel, int) {
@@ -134,11 +135,13 @@ func DeleteChannel(id string, user *User, db *mongo.Database) (*Channel, int) {
 		return nil, http.StatusForbidden
 	}
 
-	_, err := channelsCollection.UpdateOne(context.TODO(), bson.M{"_id": channel.ID}, bson.M{"$pull": bson.M{"recipients": user.ID}})
-	if err != nil {
+	rd := options.After
+	result := channelsCollection.FindOneAndUpdate(context.TODO(), bson.M{"_id": channel.ID}, bson.M{"$pull": bson.M{"recipients": user.ID}}, &options.FindOneAndUpdateOptions{ReturnDocument: &rd})
+	if result.Err() != nil {
 		return nil, http.StatusInternalServerError
 	}
 
+	result.Decode(&channel)
 	return channel, http.StatusOK
 }
 

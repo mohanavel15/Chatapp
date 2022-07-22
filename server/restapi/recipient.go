@@ -8,6 +8,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func AddRecipient(ctx *Context) {
@@ -32,20 +33,22 @@ func AddRecipient(ctx *Context) {
 		ctx.Res.WriteHeader(statusCode)
 	}
 
-	_, err := channelCollection.UpdateOne(context.TODO(), bson.M{"_id": channel.ID}, bson.M{"$push": bson.M{"recipients": user.ID}})
-	if err != nil {
+	rd := options.After
+	result := channelCollection.FindOneAndUpdate(context.TODO(), bson.M{"_id": channel.ID}, bson.M{"$push": bson.M{"recipients": user.ID}}, &options.FindOneAndUpdateOptions{ReturnDocument: &rd})
+	if result.Err() != nil {
 		ctx.Res.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	channel_, _ := database.GetChannel(channel_id, &ctx.User, ctx.Db)
+	result.Decode(&channel)
+
 	recipients := []response.User{}
-	for _, recipient := range channel_.Recipients {
+	for _, recipient := range channel.Recipients {
 		recipient, _ := database.GetUser(recipient.Hex(), ctx.Db)
 		recipients = append(recipients, response.NewUser(recipient, ctx.Conn.GetUserStatus(recipient.ID.Hex())))
 	}
 
-	res_channel := response.NewChannel(channel_, recipients)
+	res_channel := response.NewChannel(channel, recipients)
 	ctx.WriteJSON(res_channel)
 }
 
@@ -73,20 +76,21 @@ func RemoveRecipient(ctx *Context) {
 		return
 	}
 
-	_, err := channelCollection.UpdateOne(context.TODO(), bson.M{"_id": channel.ID}, bson.M{"$pull": bson.M{"recipients": user.ID}})
-	if err != nil {
+	rd := options.After
+	result := channelCollection.FindOneAndUpdate(context.TODO(), bson.M{"_id": channel.ID}, bson.M{"$pull": bson.M{"recipients": user.ID}}, &options.FindOneAndUpdateOptions{ReturnDocument: &rd})
+	if result.Err() != nil {
 		ctx.Res.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	channel_, _ := database.GetChannel(channel_id, &ctx.User, ctx.Db)
+	result.Decode(&channel)
 	recipients := []response.User{}
-	for _, recipient := range channel_.Recipients {
+	for _, recipient := range channel.Recipients {
 		recipient, _ := database.GetUser(recipient.Hex(), ctx.Db)
 		recipients = append(recipients, response.NewUser(recipient, ctx.Conn.GetUserStatus(recipient.ID.Hex())))
 	}
 
-	res_channel := response.NewChannel(channel_, recipients)
+	res_channel := response.NewChannel(channel, recipients)
 	ctx.WriteJSON(res_channel)
 
 	ctx.Conn.RemoveUserFromChannel(user.ID.Hex(), channel.ID.Hex())
