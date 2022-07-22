@@ -4,7 +4,6 @@ import (
 	"Chatapp/database"
 	"Chatapp/response"
 	"context"
-	"encoding/json"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -36,14 +35,7 @@ func GetRelationships(ctx *Context) {
 		relationships = append(relationships, response.NewRelationship(res_user, relationship.Type))
 	}
 
-	res, err := json.Marshal(relationships)
-	if err != nil {
-		ctx.Res.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	ctx.Res.Header().Set("Content-Type", "application/json")
-	ctx.Res.Write(res)
+	ctx.WriteJSON(relationships)
 }
 
 func GetRelationship(ctx *Context) {
@@ -74,14 +66,7 @@ func GetRelationship(ctx *Context) {
 	res_user := response.NewUser(user, ctx.Conn.GetUserStatus(user.ID.Hex()))
 	res_relationship := response.NewRelationship(res_user, relationship.Type)
 
-	res, err := json.Marshal(res_relationship)
-	if err != nil {
-		ctx.Res.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	ctx.Res.Header().Set("Content-Type", "application/json")
-	ctx.Res.Write(res)
+	ctx.WriteJSON(res_relationship)
 }
 
 func ChangeRelationshipToDefault(ctx *Context) {
@@ -144,14 +129,7 @@ func ChangeRelationshipToDefault(ctx *Context) {
 	}
 
 	res := response.NewRelationship(response.NewUser(relationship_user, ctx.Conn.GetUserStatus(relationship_user.ID.Hex())), 0)
-	res_json, err := json.Marshal(res)
-	if err != nil {
-		ctx.Res.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	ctx.Res.Header().Set("Content-Type", "application/json")
-	ctx.Res.Write(res_json)
+	ctx.WriteJSON(res)
 }
 
 func ChangeRelationshipToFriend(ctx *Context) {
@@ -228,14 +206,7 @@ func ChangeRelationshipToFriend(ctx *Context) {
 	}
 
 	res := response.NewRelationship(response.NewUser(relationship_user, ctx.Conn.GetUserStatus(relationship_user.ID.Hex())), relationship_type)
-	res_json, err := json.Marshal(res)
-	if err != nil {
-		ctx.Res.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	ctx.Res.Header().Set("Content-Type", "application/json")
-	ctx.Res.Write(res_json)
+	ctx.WriteJSON(res)
 }
 
 func ChangeRelationshipToBlock(ctx *Context) {
@@ -298,12 +269,5 @@ func ChangeRelationshipToBlock(ctx *Context) {
 	}
 
 	res := response.NewRelationship(response.NewUser(relationship_user, ctx.Conn.GetUserStatus(relationship_user.ID.Hex())), 2)
-	res_json, err := json.Marshal(res)
-	if err != nil {
-		ctx.Res.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	ctx.Res.Header().Set("Content-Type", "application/json")
-	ctx.Res.Write(res_json)
+	ctx.WriteJSON(res)
 }

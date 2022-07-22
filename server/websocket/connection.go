@@ -35,11 +35,14 @@ func (conns *Connections) SendToUser(user_id string, event string, data interfac
 	}
 }
 
-func (conns *Connections) AddUserToChannel(user_id string, channel_id string, ws *Ws) {
+func (conns *Connections) AddUserToChannel(user_id string, channel_id string) {
 	if _, ok := conns.Channels[channel_id]; !ok {
 		conns.Channels[channel_id] = make(map[string]*Ws)
 	}
-	conns.Channels[channel_id][user_id] = conns.Users[user_id]
+
+	if user, ok := conns.Users[user_id]; ok {
+		conns.Channels[channel_id][user_id] = user
+	}
 }
 
 func (conns *Connections) RemoveUserFromChannel(user_id string, channel_id string) {

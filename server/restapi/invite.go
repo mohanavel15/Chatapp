@@ -4,7 +4,6 @@ import (
 	"Chatapp/database"
 	"Chatapp/response"
 	"context"
-	"encoding/json"
 	"net/http"
 	"time"
 
@@ -53,14 +52,17 @@ func JoinInvite(ctx *Context) {
 		return
 	}
 
-	res, err := json.Marshal(channel_)
-	if err != nil {
-		ctx.Res.WriteHeader(http.StatusInternalServerError)
-		return
+	recipients := []response.User{}
+	for _, recipient := range channel_.Recipients {
+		if channel_.Type == 1 && recipient.Hex() == ctx.User.ID.Hex() {
+			continue
+		}
+		recipient, _ := database.GetUser(recipient.Hex(), ctx.Db)
+		recipients = append(recipients, response.NewUser(recipient, 0))
 	}
 
-	ctx.Res.Header().Set("Content-Type", "application/json")
-	ctx.Res.Write(res)
+	res_channel := response.NewChannel(channel_, recipients)
+	ctx.WriteJSON(res_channel)
 }
 
 func GetInvites(ctx *Context) {
@@ -99,14 +101,7 @@ func GetInvites(ctx *Context) {
 		invites = append(invites, invite_obj)
 	}
 
-	res, err := json.Marshal(invites)
-	if err != nil {
-		ctx.Res.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	ctx.Res.Header().Set("Content-Type", "application/json")
-	ctx.Res.Write(res)
+	ctx.WriteJSON(invites)
 }
 
 func CreateInvite(ctx *Context) {
@@ -141,18 +136,10 @@ func CreateInvite(ctx *Context) {
 		return
 	}
 
-	res, err := json.Marshal(response.Invite{
+	ctx.WriteJSON(response.Invite{
 		InviteCode: invite.InviteCode,
 		CreatedAt:  invite.CreatedAt.String(),
 	})
-
-	if err != nil {
-		ctx.Res.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	ctx.Res.Header().Set("Content-Type", "application/json")
-	ctx.Res.Write(res)
 }
 
 func DeleteInvite(ctx *Context) {

@@ -99,15 +99,8 @@ func CreateMessage(ctx *Context) {
 		}
 
 		message_res := response.NewMessage(message, response.NewUser(&ctx.User, 0))
-		res, err := json.Marshal(message_res)
-		if err != nil {
-			ctx.Res.WriteHeader(http.StatusInternalServerError)
-			return
-		}
 
-		ctx.Res.Header().Set("Content-Type", "application/json")
-		ctx.Res.Write(res)
-
+		ctx.WriteJSON(message_res)
 		ctx.Conn.BroadcastToChannel(channel_id, "MESSAGE_CREATE", message_res)
 	} else {
 		content := ctx.Req.FormValue("content")

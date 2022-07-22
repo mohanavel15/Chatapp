@@ -16,15 +16,7 @@ import (
 
 func GetUser(ctx *Context) {
 	user_res := response.NewUser(&ctx.User, 0)
-
-	res, err := json.Marshal(user_res)
-	if err != nil {
-		ctx.Res.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	ctx.Res.Header().Set("Content-Type", "application/json")
-	ctx.Res.Write(res)
+	ctx.WriteJSON(user_res)
 }
 
 func EditUser(ctx *Context) {
@@ -69,13 +61,5 @@ func EditUser(ctx *Context) {
 	}
 	ctx.User.Avatar = avatar_db
 	user_res := response.NewUser(&ctx.User, 0)
-
-	res, err := json.Marshal(user_res)
-	if err != nil {
-		ctx.Res.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	ctx.Res.Header().Set("Content-Type", "application/json")
-	ctx.Res.Write(res)
+	ctx.WriteJSON(user_res)
 }

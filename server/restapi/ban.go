@@ -4,7 +4,6 @@ import (
 	"Chatapp/database"
 	"Chatapp/response"
 	"context"
-	"encoding/json"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -56,14 +55,7 @@ func GetAllBans(ctx *Context) {
 		res_bans = append(res_bans, response.NewBan(response.NewUser(BannedBy, 0), response.NewUser(BannedUser, 0), ban.ChannelID.Hex(), &ban))
 	}
 
-	res, err := json.Marshal(res_bans)
-	if err != nil {
-		ctx.Res.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	ctx.Res.WriteHeader(http.StatusOK)
-	ctx.Res.Write(res)
+	ctx.WriteJSON(res_bans)
 }
 
 func GetBan(ctx *Context) {
@@ -109,15 +101,7 @@ func GetBan(ctx *Context) {
 	}
 
 	res_ban := response.NewBan(response.NewUser(BannedBy, 0), response.NewUser(BannedUser, 0), channel_id, &ban)
-
-	res, err := json.Marshal(res_ban)
-	if err != nil {
-		ctx.Res.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	ctx.Res.WriteHeader(http.StatusOK)
-	ctx.Res.Write(res)
+	ctx.WriteJSON(res_ban)
 }
 
 func DeleteBan(ctx *Context) {

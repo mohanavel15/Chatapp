@@ -4,7 +4,6 @@ import (
 	"Chatapp/database"
 	"Chatapp/response"
 	"context"
-	"encoding/json"
 	"net/http"
 	"time"
 
@@ -55,10 +54,7 @@ func GetPins(ctx *Context) {
 		messages_res = append(messages_res, response.NewMessage(message, res_author))
 	}
 
-	res, _ := json.Marshal(messages_res)
-
-	ctx.Res.Header().Set("Content-Type", "application/json")
-	ctx.Res.Write(res)
+	ctx.WriteJSON(messages_res)
 }
 
 func PinMsg(ctx *Context) {
@@ -100,13 +96,8 @@ func PinMsg(ctx *Context) {
 
 	author_res := response.NewUser(author, 0)
 	res := response.NewMessage(message, author_res)
-	res_json, err := json.Marshal(res)
-	if err != nil {
-		ctx.Res.WriteHeader(http.StatusInternalServerError)
-		return
-	}
 
-	ctx.Res.Write(res_json)
+	ctx.WriteJSON(res)
 	ctx.Conn.BroadcastToChannel(channel_id, "MESSAGE_PINNED", res)
 }
 
@@ -142,12 +133,7 @@ func UnpinMsg(ctx *Context) {
 
 	author_res := response.NewUser(author, 0)
 	res := response.NewMessage(message, author_res)
-	res_json, err := json.Marshal(res)
-	if err != nil {
-		ctx.Res.WriteHeader(http.StatusInternalServerError)
-		return
-	}
 
-	ctx.Res.Write(res_json)
+	ctx.WriteJSON(res)
 	ctx.Conn.BroadcastToChannel(channel_id, "MESSAGE_UNPINNED", res)
 }

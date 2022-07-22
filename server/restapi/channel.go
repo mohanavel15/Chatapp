@@ -38,16 +38,9 @@ func CreateChannel(ctx *Context) {
 		recipients = append(recipients, response.NewUser(&ctx.User, 0))
 	}
 
-	response := response.NewChannel(channel, recipients)
-
-	res, err := json.Marshal(response)
-	if err != nil {
-		ctx.Res.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	ctx.Res.Header().Set("Content-Type", "application/json")
-	ctx.Res.Write(res)
+	res_channel := response.NewChannel(channel, recipients)
+	ctx.WriteJSON(res_channel)
+	ctx.Conn.AddUserToChannel(ctx.User.ID.Hex(), channel.ID.Hex())
 }
 
 func GetChannels(ctx *Context) {
@@ -66,14 +59,7 @@ func GetChannels(ctx *Context) {
 		res_channels = append(res_channels, response.NewChannel(&channel, recipients))
 	}
 
-	res, err := json.Marshal(res_channels)
-	if err != nil {
-		ctx.Res.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	ctx.Res.Header().Set("Content-Type", "application/json")
-	ctx.Res.Write(res)
+	ctx.WriteJSON(res_channels)
 }
 
 func GetChannel(ctx *Context) {
@@ -96,14 +82,7 @@ func GetChannel(ctx *Context) {
 	}
 
 	res_channel := response.NewChannel(channel, recipients)
-	res, err := json.Marshal(res_channel)
-	if err != nil {
-		ctx.Res.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	ctx.Res.Header().Set("Content-Type", "application/json")
-	ctx.Res.Write(res)
+	ctx.WriteJSON(res_channel)
 }
 
 func EditChannel(ctx *Context) {
@@ -134,14 +113,7 @@ func EditChannel(ctx *Context) {
 
 	res_channel := response.NewChannel(channel, recipients)
 
-	res, err := json.Marshal(res_channel)
-	if err != nil {
-		ctx.Res.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	ctx.Res.Header().Set("Content-Type", "application/json")
-	ctx.Res.Write(res)
-
+	ctx.WriteJSON(res_channel)
 	ctx.Conn.BroadcastToChannel(res_channel.ID, "CHANNEL_MODIFY", res_channel)
 }
 
@@ -162,17 +134,8 @@ func DeleteChannel(ctx *Context) {
 	}
 
 	res_channel := response.NewChannel(channel, recipients)
-	res, err := json.Marshal(res_channel)
-	if err != nil {
-		ctx.Res.WriteHeader(http.StatusInternalServerError)
-		return
-	}
 
-	ctx.Res.Header().Set("Content-Type", "application/json")
-	ctx.Res.Write(res)
-
+	ctx.WriteJSON(res_channel)
 	ctx.Conn.RemoveUserFromChannel(ctx.User.ID.Hex(), channel_id)
-
-	res_user := response.NewUser(&ctx.User, 0)
-	ctx.Conn.BroadcastToChannel(channel.ID.Hex(), "MEMBER_REMOVE", res_user)
+	ctx.Conn.BroadcastToChannel(channel.ID.Hex(), "CHANNEL_MODIFY", res_channel)
 }
