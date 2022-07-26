@@ -26,11 +26,13 @@ func AddRecipient(ctx *Context) {
 
 	if channel.Type == 1 || channel.OwnerID.Hex() != ctx.User.ID.Hex() {
 		ctx.Res.WriteHeader(http.StatusForbidden)
+		return
 	}
 
 	user, statusCode := database.GetUser(user_id, ctx.Db)
 	if statusCode != http.StatusOK {
 		ctx.Res.WriteHeader(statusCode)
+		return
 	}
 
 	rd := options.After
@@ -50,6 +52,8 @@ func AddRecipient(ctx *Context) {
 
 	res_channel := response.NewChannel(channel, recipients)
 	ctx.WriteJSON(res_channel)
+	ctx.Conn.AddUserToChannel(user_id, channel_id)
+	ctx.Conn.BroadcastToChannel(res_channel.ID, "CHANNEL_MODIFY", res_channel)
 }
 
 func RemoveRecipient(ctx *Context) {

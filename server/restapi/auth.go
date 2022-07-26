@@ -48,7 +48,7 @@ func Register(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
 		return
 	}
 
-	email_regex := regexp.MustCompile(`[a-z]+@[a-z]+\\.[a-z]+`)
+	email_regex := regexp.MustCompile(`[a-zA-Z0-9.!#$%&'*+/=?^_{|}~-]+@[a-zA-Z0-9]+(?:\.[a-zA-Z0-9-]+)*$`)
 	if !email_regex.MatchString(email) {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("Invalid Email"))
