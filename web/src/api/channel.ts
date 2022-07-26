@@ -5,7 +5,7 @@ export async function GetChannels(access_token: string) {
     const response = await fetch(Routes.Channels, {
         method: 'GET',
         headers: {
-            'Authorization': `Bearer ${access_token}`
+            'Authorization': access_token,
         }
     });
     if (!response.ok) {

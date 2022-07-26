@@ -1,6 +1,6 @@
 import { setDefaultIcon, setDefaultAvatar } from '../utils/errorhandle';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUserGroup, faThumbTack } from '@fortawesome/free-solid-svg-icons'
+import { faUserGroup, faUserPlus, faThumbTack } from '@fortawesome/free-solid-svg-icons'
 import { useContext, useState, useEffect } from 'react';
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 import { StatesContext, StateContext } from "../contexts/states";
@@ -42,6 +42,7 @@ function ChannelHeader({ channel_id }: { channel_id: string }) {
             </div>
             <div className='channel-header-actions'>
                 <button className='channel-header-action-button' onClick={() => { setShowPinnedMessage(p => !p)}}><FontAwesomeIcon icon={faThumbTack} /></button>
+                { channel?.type === 2 && <button className='channel-header-action-button' onClick={() => alert("Not Implemented In Front-End")}><FontAwesomeIcon icon={faUserPlus} /></button> }
                 { channel?.type === 2 && <button className='channel-header-action-button' onClick={() => {state_context.setShowMembers(!state_context.showMembers)}}><FontAwesomeIcon icon={faUserGroup} /></button> }
             </div>
             { showPinnedMessage && 

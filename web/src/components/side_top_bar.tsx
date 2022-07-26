@@ -26,10 +26,11 @@ function SideTopBar() {
                 if (response.status === 200) {
                     response.json().then(channel => {
                         channel_context.setChannel(prevChannels => new Map(prevChannels.set(channel.id, channel)));
-                        navegate(`/channels/${channel.uuid}`)
+                        navegate(`/channels/${channel.id}`)
                     })
                 }
             })
+        
         InviteCode.current.value = ""
     }
 

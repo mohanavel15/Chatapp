@@ -29,6 +29,8 @@ import ChannelHome from "../components/channel_home";
 import MessageCTX from '../contexts/messagectx';
 import Routes from '../config';
 import { Refresh } from "../utils/api";
+import { GetMessages } from "../api/message";
+import { GetPinnedMessages } from "../api/pinned_msgs"
 
 function Channel() {
 	const parameter  = useParams<string>();
@@ -57,49 +59,36 @@ function Channel() {
 		let gateway = NewGateway();
 
 		const onMessage = (message: IMessageEvent) => {
-			console.log(message);
 			const data = message.data;
-			if (typeof data === "string") {
-				const payload = JSON.parse(data);
-				if (payload.event === 'READY') {
+
+			if (typeof data !== "string") {
+				return
+			}
+
+			const payload = JSON.parse(data);
+
+			switch(payload.event) {
+				case "READY":
 					const ready: ReadyOBJ = payload.data;
 					user_ctx.setId(ready.user.id);
 					user_ctx.setUsername(ready.user.username);
 					user_ctx.setAvatar(ready.user.avatar);
 
+					const token = localStorage.getItem("access_token") || ""
 					ready.channels.forEach((channel: ChannelOBJ) => {
 						channel_context.setChannel(prev => new Map(prev.set(channel.id, channel)));
-						const url = Routes.Channels+`/${channel.id}/messages`
-						fetch(url, {
-							method: "GET",
-							headers: {
-								"Authorization": localStorage.getItem("access_token") || ""
-							}
-						}).then(response => {
-							if (response.status === 200) {
-								response.json().then((msgs: MessageOBJ[]) => {
-									msgs.forEach(msg => channel_context.UpdateMessage(channel.id, msg.id, msg))
-								})
-							}
+						
+						GetMessages(token, channel.id).then((msgs: MessageOBJ[]) => {
+							msgs.forEach(msg => channel_context.UpdateMessage(channel.id, msg.id, msg))
 						})
 
-						const url2 = Routes.Channels+`/${channel.id}/pins`
-						fetch(url2, {
-							method: "GET",
-							headers: {
-								"Authorization": localStorage.getItem("access_token") || ""
-							}
-						}).then(response => {
-							if (response.status === 200) {
-								response.json().then((msgs: MessageOBJ[]) => {
-									msgs.forEach(msg => channel_context.UpdatePinnedMessage(channel.id, msg.id, msg))
-								})
-							}
+						GetPinnedMessages(token, channel.id).then((msgs: MessageOBJ[]) => {
+							msgs.forEach(msg => channel_context.UpdatePinnedMessage(channel.id, msg.id, msg))
 						})
 					});
-				}
-
-				if (payload.event === 'INVAILD_SESSION') {
+					break
+				
+				case "INVAILD_SESSION":
 					Refresh().then(access_token => {
 						if (access_token === undefined) {
 							localStorage.removeItem('access_token');
@@ -108,79 +97,95 @@ function Channel() {
 							window.location.reload()
 						}
 					})
-				}
-
-				if (payload.event === 'MESSAGE_CREATE' || payload.event === 'MESSAGE_MODIFY') {
+					break
+				
+				case "MESSAGE_CREATE":
 					const message: MessageOBJ = payload.data;
 					channel_context.UpdateMessage(message.channel_id, message.id ,message);
-				}
+					break
 
-				if (payload.event === 'MESSAGE_DELETE') {
-					const message: MessageOBJ = payload.data;
-					channel_context.DeleteMessage(message.channel_id, message.id);
-				}
-
-				if (payload.event === 'CHANNEL_CREATE' || payload.event === 'CHANNEL_MODIFY') {
+				case "MESSAGE_MODIFY":
+					const edited_message: MessageOBJ = payload.data;
+					channel_context.UpdateMessage(edited_message.channel_id, edited_message.id ,edited_message);
+					break
+				
+				case "MESSAGE_DELETE":
+					const deleted_message: MessageOBJ = payload.data;
+					channel_context.DeleteMessage(deleted_message.channel_id, deleted_message.id);
+					break
+				
+				case "CHANNEL_CREATE":
 					const channel: ChannelOBJ = payload.data;
 					channel_context.setChannel(prevChannels => new Map(prevChannels.set(channel.id, channel)));
-				}
+					break
 
-				if (payload.event === 'CHANNEL_DELETE') {
-					const channel: ChannelOBJ = payload.data;
-					channel_context.deleteChannel(channel.id)
-				}
+				case "CHANNEL_MODIFY":
+					const edited_channel: ChannelOBJ = payload.data;
+					channel_context.setChannel(prevChannels => new Map(prevChannels.set(edited_channel.id, edited_channel)));
+					break
 
-				if (payload.event === 'RELATIONSHIP_CREATE' || payload.event === 'RELATIONSHIP_MODIFY') {
+				case "CHANNEL_DELETE":
+					const deleted_channel: ChannelOBJ = payload.data;
+					channel_context.deleteChannel(deleted_channel.id)
+					break
+
+				case "MESSAGE_PINNED":
+					const pinned_message: MessageOBJ = payload.data;
+					channel_context.UpdatePinnedMessage(pinned_message.channel_id, pinned_message.id, pinned_message);
+					break
+
+				case "MESSAGE_UNPINNED":
+					const upinned_message: MessageOBJ = payload.data;
+					channel_context.DeletePinnedMessage(upinned_message.channel_id, upinned_message.id);
+					break
+				
+				case "RELATIONSHIP_CREATE":
+					const new_relationship: Relationship = payload.data;
+					user_ctx.setRelationships(prevRelationship => new Map(prevRelationship.set(new_relationship.id, new_relationship)));
+					break
+
+				case "RELATIONSHIP_MODIFY":
 					const relationship: Relationship = payload.data;
 					user_ctx.setRelationships(prevRelationship => new Map(prevRelationship.set(relationship.id, relationship)));
-				}
-				
-				if (payload.event === 'RELATIONSHIP_DELETE') {
+					break
+
+				case "RELATIONSHIP_DELETE":
 					const relationship_: Relationship = payload.data;
 					user_ctx.deleterelationship(relationship_.id);
-				}
+			}
 
-				if (payload.event === 'STATUS_UPDATE') {
-					const status: Status = payload.data;
-					
-					if (status.type === 0) {
-						const relationship_ = user_ctx.relationships.get(status.user_id);
-						if (relationship_ !== undefined) {
-							relationship_.status = status.status;
-							user_ctx.setRelationships(prevFriends => new Map(prevFriends.set(relationship_.id, relationship_)));
-						}
+			if (payload.event === 'STATUS_UPDATE') {
+				const status: Status = payload.data;
+				
+				if (status.type === 0) {
+					const relationship_ = user_ctx.relationships.get(status.user_id);
+					if (relationship_ !== undefined) {
+						relationship_.status = status.status;
+						user_ctx.setRelationships(prevFriends => new Map(prevFriends.set(relationship_.id, relationship_)));
 					}
-					
-					if (status.type === 1) {
-						const UpdateChannelStatus = (prevChannels: Map<String, ChannelOBJ>, status: Status) => {
-							const channel = prevChannels.get(status.channel_id)
-							if (channel !== undefined) {
-								for (let i = 0; i < channel.recipients.length; i++) {
-									if (channel.recipients[i].id === status.user_id) {
-										channel.recipients[i].status = status.status;
-										break;
-									}
-								}
-								return prevChannels.set(channel.id, channel)
-							} else {
-								return prevChannels
+				}
+				
+				if (status.type === 1) {
+					const UpdateChannelStatus = (prevChannels: Map<String, ChannelOBJ>, status: Status) => {
+						const channel = prevChannels.get(status.channel_id)
+						if (channel === undefined) {
+							return prevChannels
+						}
+
+						for (let i = 0; i < channel.recipients.length; i++) {
+							if (channel.recipients[i].id === status.user_id) {
+								channel.recipients[i].status = status.status;
+								break;
 							}
 						}
-						channel_context.setChannel(prevChannels => new Map(UpdateChannelStatus(prevChannels, status)));
+
+						return prevChannels.set(channel.id, channel)
+						
 					}
-				}
-
-				if (payload.event === 'MESSAGE_PINNED') {
-					const message: MessageOBJ = payload.data;
-					channel_context.UpdatePinnedMessage(message.channel_id, message.id, message);
-				}
-
-				if (payload.event === 'MESSAGE_UNPINNED') {
-					const message: MessageOBJ = payload.data;
-					channel_context.DeletePinnedMessage(message.channel_id, message.id);
+					channel_context.setChannel(prevChannels => new Map(UpdateChannelStatus(prevChannels, status)));
 				}
 			}
-		};
+		}
 		
 		const onClose = () => {
 			console.log("Disconnected from server");
