@@ -55,7 +55,9 @@ function ChannelHome() {
 	function SendFriendRequest() {
 		if (FriendUserUUID.current !== undefined) {
 			if (FriendUserUUID.current.value !== "") {
-				RelationshipToFriend(user_ctx.accessToken, FriendUserUUID.current.value)
+				RelationshipToFriend(user_ctx.accessToken, FriendUserUUID.current.value).then(relationship => {
+					user_ctx.setRelationships(prevRelationship => new Map(prevRelationship.set(relationship.id, relationship)));
+				})
 				FriendUserUUID.current.value = ""
 			}
 		}

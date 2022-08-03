@@ -103,6 +103,8 @@ func ChangeRelationshipToDefault(ctx *Context) {
 		}
 	}
 
+	relationship_user_type := 2
+
 	var relationship2 database.Relationship
 	err = relationshipsCollection.FindOne(context.TODO(), bson.M{"from_user_id": relationship_user.ID, "to_user_id": ctx.User.ID}).Decode(&relationship2)
 	if err != nil {
@@ -118,6 +120,8 @@ func ChangeRelationshipToDefault(ctx *Context) {
 			ctx.Res.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+
+		relationship_user_type = 0
 	} else {
 		if relationship2.Type != 2 {
 			_, err := relationshipsCollection.UpdateByID(context.TODO(), relationship2.ID, bson.M{"$set": bson.M{"type": 0}})
@@ -125,11 +129,14 @@ func ChangeRelationshipToDefault(ctx *Context) {
 				ctx.Res.WriteHeader(http.StatusInternalServerError)
 				return
 			}
+
+			relationship_user_type = 0
 		}
 	}
 
 	res := response.NewRelationship(response.NewUser(relationship_user, ctx.Conn.GetUserStatus(relationship_user.ID.Hex())), 0)
 	ctx.WriteJSON(res)
+	ctx.Conn.SendToUser(relationship_user.ID.Hex(), "RELATIONSHIP_MODIFY", response.NewRelationship(response.NewUser(&ctx.User, ctx.Conn.GetUserStatus(ctx.User.ID.Hex())), relationship_user_type))
 }
 
 func ChangeRelationshipToFriend(ctx *Context) {
@@ -207,6 +214,7 @@ func ChangeRelationshipToFriend(ctx *Context) {
 
 	res := response.NewRelationship(response.NewUser(relationship_user, ctx.Conn.GetUserStatus(relationship_user.ID.Hex())), relationship_type)
 	ctx.WriteJSON(res)
+	ctx.Conn.SendToUser(relationship_user.ID.Hex(), "RELATIONSHIP_MODIFY", response.NewRelationship(response.NewUser(&ctx.User, ctx.Conn.GetUserStatus(ctx.User.ID.Hex())), relationship_user_type))
 }
 
 func ChangeRelationshipToBlock(ctx *Context) {
@@ -243,6 +251,8 @@ func ChangeRelationshipToBlock(ctx *Context) {
 		}
 	}
 
+	relationship_user_type := 2
+
 	var relationship2 database.Relationship
 	err = relationshipsCollection.FindOne(context.TODO(), bson.M{"from_user_id": relationship_user.ID, "to_user_id": ctx.User.ID}).Decode(&relationship2)
 	if err != nil {
@@ -258,6 +268,8 @@ func ChangeRelationshipToBlock(ctx *Context) {
 			ctx.Res.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+
+		relationship_user_type = 0
 	} else {
 		if relationship2.Type != 2 {
 			_, err := relationshipsCollection.UpdateByID(context.TODO(), relationship2.ID, bson.M{"$set": bson.M{"type": 0}})
@@ -265,9 +277,12 @@ func ChangeRelationshipToBlock(ctx *Context) {
 				ctx.Res.WriteHeader(http.StatusInternalServerError)
 				return
 			}
+
+			relationship_user_type = 0
 		}
 	}
 
 	res := response.NewRelationship(response.NewUser(relationship_user, ctx.Conn.GetUserStatus(relationship_user.ID.Hex())), 2)
 	ctx.WriteJSON(res)
+	ctx.Conn.SendToUser(relationship_user.ID.Hex(), "RELATIONSHIP_MODIFY", response.NewRelationship(response.NewUser(&ctx.User, ctx.Conn.GetUserStatus(ctx.User.ID.Hex())), relationship_user_type))
 }

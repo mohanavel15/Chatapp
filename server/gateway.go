@@ -36,5 +36,6 @@ func Gateway(w http.ResponseWriter, r *http.Request) {
 		Db:      db,
 		Conns:   &conns,
 	}
-	go ws.ReadLoop()
+
+	ws.ReadLoop()
 }
