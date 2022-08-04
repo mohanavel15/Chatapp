@@ -27,7 +27,7 @@ func GenerateJWT(id string) (string, error) {
 	tokenString, err := token.SignedString(secret_key)
 
 	if err != nil {
-		log.Fatal(fmt.Sprintf("Couldn't sign the token: %s", err))
+		log.Fatal("Couldn't sign the token:", err)
 		return "", err
 	}
 	return tokenString, nil
@@ -58,7 +58,7 @@ func ValidateJWT(tokenString string) (string, error) {
 	secret_key := []byte(JWT_SECRET)
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("There was an error")
+			return nil, fmt.Errorf("there was an error")
 		}
 		return secret_key, nil
 	})
@@ -71,6 +71,6 @@ func ValidateJWT(tokenString string) (string, error) {
 		uuid := claims["id"].(string)
 		return uuid, nil
 	} else {
-		return "", fmt.Errorf("Token is invalid")
+		return "", fmt.Errorf("token is invalid")
 	}
 }

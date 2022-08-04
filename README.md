@@ -28,14 +28,11 @@ In server folder
 ### Example `.env`
 
 ```bash
-export SERVER_HOST="127.0.0.1"
+export SERVER_HOST="0.0.0.0"
 export SERVER_PORT="5000"
 export JWT_SECRET="some_random_string"
-export PG_HOST="127.0.0.1"
-export PG_PORT="5432"
-export PG_USER="database_username"
-export PG_PASSWORD="database_password"
-export PG_DATABASE="chatapp"
+export MONGO_URI="mongodb://username:password@host:27017"
+export MONGO_DATABASE="database"
 ```
 
 ### Run Server

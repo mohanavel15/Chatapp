@@ -96,6 +96,5 @@ type Ban struct {
 	ChannelID  primitive.ObjectID `bson:"channel_id"`
 	BannedBy   primitive.ObjectID `bson:"banned_by"`
 	Reason     string             `bson:"reason"`
-	CreatedAt  time.Time          `bson:"created_at"`
-	UpdatedAt  time.Time          `bson:"updated_at"`
+	CreatedAt  int64              `bson:"created_at"`
 }

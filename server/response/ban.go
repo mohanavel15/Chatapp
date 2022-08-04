@@ -18,6 +18,6 @@ func NewBan(bannedBy User, BannedUser User, channel_id string, ban *database.Ban
 		BannedUser: BannedUser,
 		ChannelID:  channel_id,
 		Reason:     ban.Reason,
-		CreatedAt:  ban.CreatedAt.Unix(),
+		CreatedAt:  ban.CreatedAt,
 	}
 }

@@ -1,6 +1,6 @@
 package request
 
 type RemoveRecipient struct {
-	IsBan  bool   `json:"is_ban"`
+	IsBan  bool   `json:"isban"`
 	Reason string `json:"reason"`
 }
