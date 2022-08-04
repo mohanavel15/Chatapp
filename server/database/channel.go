@@ -53,7 +53,6 @@ func CreateChannel(name string, icon string, recipient_id string, user *User, db
 
 		return &channel, http.StatusOK
 	} else {
-		//Icon:    icon,
 		channel := Channel{
 			ID:      primitive.NewObjectID(),
 			Type:    2,
@@ -65,6 +64,29 @@ func CreateChannel(name string, icon string, recipient_id string, user *User, db
 			CreatedAt: time.Now().Unix(),
 			UpdatedAt: time.Now().Unix(),
 		}
+
+		if icon != "" {
+			file_type_regx := regexp.MustCompile("image/(png|jpeg|gif)")
+			file_ext_regx := regexp.MustCompile("png|jpeg|gif")
+
+			file_type := file_type_regx.FindString(icon)
+			if file_type == "" {
+				return nil, http.StatusBadRequest
+			}
+
+			file_ext := file_ext_regx.FindString(file_type)
+			iconBS64 := icon[strings.Index(icon, ",")+1:]
+
+			newIcon := Icon{
+				ID:   primitive.NewObjectID(),
+				Type: file_type,
+				Ext:  file_ext,
+				Icon: iconBS64,
+			}
+
+			channel.Icon = newIcon
+		}
+
 		_, err := channels.InsertOne(context.TODO(), channel)
 		if err != nil {
 			return nil, http.StatusInternalServerError

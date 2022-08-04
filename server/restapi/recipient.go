@@ -2,12 +2,18 @@ package restapi
 
 import (
 	"Chatapp/database"
+	"Chatapp/request"
 	"Chatapp/response"
 	"context"
+	"encoding/json"
+	"fmt"
 	"net/http"
+	"strings"
+	"time"
 
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -61,7 +67,16 @@ func RemoveRecipient(ctx *Context) {
 	channel_id := url_vars["id"]
 	user_id := url_vars["uid"]
 
+	var request_ request.RemoveRecipient
+	_ = json.NewDecoder(ctx.Req.Body).Decode(&request_)
+
+	fmt.Println(request_)
+
+	isBan := request_.IsBan
+	reason := strings.TrimSpace(request_.Reason)
+
 	channelCollection := ctx.Db.Collection("channels")
+	bansCollection := ctx.Db.Collection("bans")
 
 	channel, statusCode := database.GetChannel(channel_id, &ctx.User, ctx.Db)
 	if statusCode != http.StatusOK {
@@ -78,6 +93,23 @@ func RemoveRecipient(ctx *Context) {
 	if statusCode != http.StatusOK {
 		ctx.Res.WriteHeader(statusCode)
 		return
+	}
+
+	if isBan {
+		ban := database.Ban{
+			ID:         primitive.NewObjectID(),
+			BannedUser: user.ID,
+			ChannelID:  channel.ID,
+			BannedBy:   ctx.User.ID,
+			Reason:     reason,
+			CreatedAt:  time.Now().Unix(),
+		}
+
+		_, err := bansCollection.InsertOne(context.TODO(), ban)
+		if err != nil {
+			ctx.Res.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
 
 	rd := options.After
@@ -99,4 +131,5 @@ func RemoveRecipient(ctx *Context) {
 
 	ctx.Conn.RemoveUserFromChannel(user.ID.Hex(), channel.ID.Hex())
 	ctx.Conn.BroadcastToChannel(channel.ID.Hex(), "CHANNEL_MODIFY", res_channel)
+	ctx.Conn.SendToUser(user.ID.Hex(), "CHANNEL_DELETE", res_channel)
 }
