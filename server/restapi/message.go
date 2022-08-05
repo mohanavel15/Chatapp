@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gorilla/mux"
@@ -18,8 +19,17 @@ import (
 func GetMessages(ctx *Context) {
 	vars := mux.Vars(ctx.Req)
 	channel_id := vars["id"]
+	querys := ctx.Req.URL.Query()
 
-	messages, statusCode := database.GetMessages(channel_id, &ctx.User, ctx.Db)
+	limit, _ := strconv.ParseInt(querys.Get("limit"), 10, 64)
+	offset, _ := strconv.ParseInt(querys.Get("offset"), 10, 64)
+	if limit == 0 {
+		limit = 25
+	} else if limit > 100 {
+		limit = 100
+	}
+
+	messages, statusCode := database.GetMessages(channel_id, limit, offset, &ctx.User, ctx.Db)
 	if statusCode != http.StatusOK {
 		ctx.Res.WriteHeader(statusCode)
 		return

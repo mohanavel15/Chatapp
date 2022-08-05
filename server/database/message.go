@@ -8,6 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func CreateMessage(content string, channel_id string, system_message bool, user *User, db *mongo.Database) (*Message, int) {
@@ -138,14 +139,14 @@ func GetMessage(id string, channel_id string, user *User, db *mongo.Database) (*
 	return &message, channel, http.StatusOK
 }
 
-func GetMessages(channel_id string, user *User, db *mongo.Database) ([]Message, int) {
+func GetMessages(channel_id string, limit int64, offset int64, user *User, db *mongo.Database) ([]Message, int) {
 	channel, statusCode := GetChannel(channel_id, user, db)
 	if statusCode != http.StatusOK {
 		return nil, statusCode
 	}
 
 	messages := db.Collection("messages")
-	cur, err := messages.Find(context.TODO(), bson.M{"channel_id": channel.ID})
+	cur, err := messages.Find(context.TODO(), bson.M{"channel_id": channel.ID}, options.Find().SetSort(bson.M{"created_at": -1}).SetLimit(limit).SetSkip(offset))
 	if err != nil {
 		return nil, http.StatusInternalServerError
 	}
