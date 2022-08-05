@@ -12,30 +12,21 @@ import (
 )
 
 func GetRelationships(ctx *Context) {
-	relationshipsCollection := ctx.Db.Collection("relationships")
+	relationships := database.GetRelationships(ctx.User.ID, ctx.Db)
 
-	cursor, err := relationshipsCollection.Find(context.TODO(), bson.M{"from_user_id": ctx.User.ID})
-	if err != nil {
-		ctx.Res.WriteHeader(http.StatusNotFound)
-		return
-	}
+	var res_relationships []response.Relationship
 
-	var relationships []response.Relationship
-
-	for cursor.Next(context.TODO()) {
-		var relationship database.Relationship
-		cursor.Decode(&relationship)
-
+	for _, relationship := range relationships {
 		user, statusCode := database.GetUser(relationship.ToUserID.Hex(), ctx.Db)
 		if statusCode != http.StatusOK {
 			continue
 		}
 
 		res_user := response.NewUser(user, ctx.Conn.GetUserStatus(user.ID.Hex()))
-		relationships = append(relationships, response.NewRelationship(res_user, relationship.Type))
+		res_relationships = append(res_relationships, response.NewRelationship(res_user, relationship.Type))
 	}
 
-	ctx.WriteJSON(relationships)
+	ctx.WriteJSON(res_relationships)
 }
 
 func GetRelationship(ctx *Context) {

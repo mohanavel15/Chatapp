@@ -67,6 +67,16 @@ func ConnectUser(ctx *Context) {
 		ctx.Ws.Conns.AddUserToChannel(get_user.ID.Hex(), channel.ID.Hex())
 	}
 
+	relationships := database.GetRelationships(get_user.ID, ctx.Db)
+	for _, relationship := range relationships {
+		status := response.Status{
+			UserID: get_user.ID.Hex(),
+			Status: 1,
+			Type:   0,
+		}
+		ctx.Ws.Conns.SendToUser(relationship.ToUserID.Hex(), "STATUS_UPDATE", status)
+	}
+
 	ws_msg := WS_Message{
 		Event: "READY",
 		Data: Ready{

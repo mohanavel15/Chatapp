@@ -20,3 +20,23 @@ func GetRelationship(from primitive.ObjectID, to primitive.ObjectID, db *mongo.D
 
 	return &relationship, http.StatusOK
 }
+
+func GetRelationships(user_id primitive.ObjectID, db *mongo.Database) []Relationship {
+	relationshipsCollection := db.Collection("relationships")
+
+	cursor, err := relationshipsCollection.Find(context.TODO(), bson.M{"from_user_id": user_id})
+	if err != nil {
+		return []Relationship{}
+	}
+
+	var relationships []Relationship
+
+	for cursor.Next(context.TODO()) {
+		var relationship Relationship
+		cursor.Decode(&relationship)
+
+		relationships = append(relationships, relationship)
+	}
+
+	return relationships
+}

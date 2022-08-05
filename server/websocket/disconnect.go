@@ -23,6 +23,16 @@ func Disconnect(ws *Ws) {
 		ws.Conns.BroadcastToChannel(channel.ID.Hex(), "STATUS_UPDATE", status)
 	}
 
+	relationships := database.GetRelationships(ws.User.ID, ws.Db)
+	for _, relationship := range relationships {
+		status := response.Status{
+			UserID: ws.User.ID.Hex(),
+			Status: 0,
+			Type:   0,
+		}
+		ws.Conns.SendToUser(relationship.ToUserID.Hex(), "STATUS_UPDATE", status)
+	}
+
 	delete(ws.Conns.Users, ws.User.ID.Hex())
 	ws.Close()
 }
