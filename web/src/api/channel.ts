@@ -16,7 +16,7 @@ export async function GetChannels(access_token: string) {
     return channels;
 }
 
-export async function CreateChannel(access_token: string, name: string, icon: string) {
+export async function CreateChannel(access_token: string, name: string, icon: string | ArrayBuffer | null) {
     const url = Routes.currentUser+"/channels";
     const response = await fetch(url, {
         method: "POST",
@@ -26,7 +26,13 @@ export async function CreateChannel(access_token: string, name: string, icon: st
         },
         body: JSON.stringify({ name: name, icon: icon })
     })
-    return response;
+
+    if (!response.ok) {
+        return {} as ChannelOBJ;
+    }
+
+    const channel_: ChannelOBJ = await response.json();
+    return channel_;
 }
 
 export async function EditChannel(access_token: string, channel_id: string, name: string, icon: string) {

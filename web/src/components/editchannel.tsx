@@ -127,9 +127,7 @@ export default function EditChannel() {
         e.preventDefault();
         const channelName = channel_name.current.value;
 
-        if (channelName === "") {
-            return
-        }
+        if (channelName === "") return
 
         if (icon_input.current.files && icon_input.current.files.length > 0) {
             let reader = new FileReader();
