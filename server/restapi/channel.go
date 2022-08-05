@@ -5,6 +5,7 @@ import (
 	"Chatapp/request"
 	"Chatapp/response"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -138,4 +139,14 @@ func DeleteChannel(ctx *Context) {
 	ctx.WriteJSON(res_channel)
 	ctx.Conn.RemoveUserFromChannel(ctx.User.ID.Hex(), channel_id)
 	ctx.Conn.BroadcastToChannel(channel.ID.Hex(), "CHANNEL_MODIFY", res_channel)
+
+	recipient_leave := fmt.Sprintf(RECIPIENT_LEAVE, ctx.User.Username)
+	message, statusCode := database.CreateMessage(recipient_leave, res_channel.ID, true, nil, ctx.Db)
+
+	if statusCode != http.StatusOK {
+		return
+	}
+
+	res_message := response.NewMessage(message, response.User{})
+	ctx.Conn.BroadcastToChannel(res_channel.ID, "MESSAGE_CREATE", res_message)
 }

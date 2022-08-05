@@ -51,11 +51,12 @@ func CreateMessage(content string, channel_id string, system_message bool, user 
 	messages := db.Collection("messages")
 
 	new_message := Message{
-		ID:        primitive.NewObjectID(),
-		Content:   content,
-		ChannelID: channel.ID,
-		CreatedAt: time.Now().Unix(),
-		UpdatedAt: time.Now().Unix(),
+		ID:            primitive.NewObjectID(),
+		Content:       content,
+		ChannelID:     channel.ID,
+		SystemMessage: system_message,
+		CreatedAt:     time.Now().Unix(),
+		UpdatedAt:     time.Now().Unix(),
 	}
 
 	if !system_message {

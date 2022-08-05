@@ -4,6 +4,7 @@ import (
 	"Chatapp/database"
 	"Chatapp/response"
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -62,6 +63,16 @@ func JoinInvite(ctx *Context) {
 	ctx.WriteJSON(res_channel)
 	ctx.Conn.AddUserToChannel(ctx.User.ID.Hex(), channel.ID.Hex())
 	ctx.Conn.BroadcastToChannel(res_channel.ID, "CHANNEL_MODIFY", res_channel)
+
+	invite_join := fmt.Sprintf(INVITE_JOIN, ctx.User.Username)
+	message, statusCode := database.CreateMessage(invite_join, res_channel.ID, true, nil, ctx.Db)
+
+	if statusCode != http.StatusOK {
+		return
+	}
+
+	res_message := response.NewMessage(message, response.User{})
+	ctx.Conn.BroadcastToChannel(res_channel.ID, "MESSAGE_CREATE", res_message)
 }
 
 func GetInvites(ctx *Context) {

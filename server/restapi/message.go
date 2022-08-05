@@ -28,8 +28,7 @@ func GetMessages(ctx *Context) {
 	messages_res := []response.Message{}
 	for _, message := range messages {
 		if message.SystemMessage {
-			var user response.User
-			messages_res = append(messages_res, response.NewMessage(&message, user))
+			messages_res = append(messages_res, response.NewMessage(&message, response.User{}))
 			continue
 		}
 

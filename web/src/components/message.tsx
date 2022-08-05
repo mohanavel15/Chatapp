@@ -144,12 +144,14 @@ function Message({ message }: {message: MessageOBJ}) {
         { !ShowMsg && <div className="BlockedUserDiv"><p className="message-edit-text BlockedUserMessage">Message From User You Blocked! <button className="Message-Edit-Action BlockedUserMessage" onClick={() => {setShowMsg(true)}}>Reveal</button></p></div> }
         { ShowMsg && 
             <>
-            <img id="Message-avatar" src={message.author.avatar} alt="Avatar" onError={setDefaultAvatar} />
+            { !message.system_message && <img id="Message-avatar" src={message.author.avatar} alt="Avatar" onError={setDefaultAvatar} /> }
             <div id="Message-text"> 
+            { !message.system_message && 
                 <div id="Message-author">
                     <span className="message-author-name"> {message.author.username}</span>
                     <span className="message-time"> {time}</span>
                 </div>
+            }
                 {edit !== true && message.content.length > 0 &&<p className='Message-content'> {message.content} </p> }
                 {edit && 
                 <div>

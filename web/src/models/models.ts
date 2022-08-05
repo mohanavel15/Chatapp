@@ -7,6 +7,7 @@ export interface MessageOBJ {
     created_at:     number
     updated_at:     number
     attachments:    Attachment[]
+    system_message: boolean
 }
 
 export interface Attachment {

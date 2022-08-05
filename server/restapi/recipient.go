@@ -17,6 +17,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+const (
+	INVITE_JOIN      = "%s has joined using the invite."
+	ADD_RECIPIENT    = "%s added %s to the channel."
+	REMOVE_RECIPIENT = "%s %s %s from the channel."
+	REASON           = "Reason: %s."
+	RECIPIENT_LEAVE  = "%s has left the channel."
+)
+
 func AddRecipient(ctx *Context) {
 	url_vars := mux.Vars(ctx.Req)
 	channel_id := url_vars["id"]
@@ -60,6 +68,16 @@ func AddRecipient(ctx *Context) {
 	ctx.WriteJSON(res_channel)
 	ctx.Conn.AddUserToChannel(user_id, channel_id)
 	ctx.Conn.BroadcastToChannel(res_channel.ID, "CHANNEL_MODIFY", res_channel)
+
+	add := fmt.Sprintf(ADD_RECIPIENT, ctx.User.Username, user.Username)
+	message, statusCode := database.CreateMessage(add, channel_id, true, nil, ctx.Db)
+
+	if statusCode != http.StatusOK {
+		return
+	}
+
+	res_message := response.NewMessage(message, response.User{})
+	ctx.Conn.BroadcastToChannel(channel_id, "MESSAGE_CREATE", res_message)
 }
 
 func RemoveRecipient(ctx *Context) {
@@ -69,8 +87,6 @@ func RemoveRecipient(ctx *Context) {
 
 	var request_ request.RemoveRecipient
 	_ = json.NewDecoder(ctx.Req.Body).Decode(&request_)
-
-	fmt.Println(request_)
 
 	isBan := request_.IsBan
 	reason := strings.TrimSpace(request_.Reason)
@@ -132,4 +148,24 @@ func RemoveRecipient(ctx *Context) {
 	ctx.Conn.RemoveUserFromChannel(user.ID.Hex(), channel.ID.Hex())
 	ctx.Conn.BroadcastToChannel(channel.ID.Hex(), "CHANNEL_MODIFY", res_channel)
 	ctx.Conn.SendToUser(user.ID.Hex(), "CHANNEL_DELETE", res_channel)
+
+	kickorban := "kicked"
+	if isBan {
+		kickorban = "banned"
+	}
+
+	remove := fmt.Sprintf(REMOVE_RECIPIENT, ctx.User.Username, kickorban, user.Username)
+
+	if reason != "" {
+		remove = fmt.Sprint(remove, " ", fmt.Sprintf(REASON, reason))
+	}
+
+	message, statusCode := database.CreateMessage(remove, channel_id, true, nil, ctx.Db)
+
+	if statusCode != http.StatusOK {
+		return
+	}
+
+	res_message := response.NewMessage(message, response.User{})
+	ctx.Conn.BroadcastToChannel(channel_id, "MESSAGE_CREATE", res_message)
 }
