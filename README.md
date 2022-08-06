@@ -52,7 +52,7 @@ go get .
 ## Setup Database
 ### Postgres Database Docker
 ```bash
-docker-compose up -d
+docker-compose up -d mongodb
 ```
 
 ## Setup Web Client
@@ -69,4 +69,9 @@ npm ci
 
 ```bash
 npm start
+```
+
+## Deploy on Docker
+```bash
+docker-compose up -d
 ```
