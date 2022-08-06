@@ -60,13 +60,13 @@ export default function Relationship({ relationship_obj }: { relationship_obj: R
       <div className='Friend-User'>
         <div className='Friend-Avatar-Container'>
           <img className='Friend-Avatar' src={relationship_obj.avatar} alt={"Avatar"} onError={setDefaultAvatar} />
-          <FontAwesomeIcon className='Friend-Status' icon={icon} style={style} />
+          { relationship_obj.type === 1 && <FontAwesomeIcon className='Friend-Status' icon={icon} style={style} /> }
         </div>
         <h3 className='Friend-Name'>{relationship_obj.username}</h3>
       </div>
       <div className='Friend-Actions-Container'>
-        {relationship_obj.type === 3 && <button className='Friend-Actions Friend-Actions-Accept' onClick={Accept}><FontAwesomeIcon icon={faCheck} /></button>}
-        {relationship_obj.type === 1 && <button className='Friend-Actions Friend-Actions-Accept' onClick={Message}><FontAwesomeIcon icon={faMessage} /></button>}
+        { relationship_obj.type === 3 && <button className='Friend-Actions Friend-Actions-Accept' onClick={Accept}><FontAwesomeIcon icon={faCheck} /></button> }
+        { relationship_obj.type === 1 && <button className='Friend-Actions Friend-Actions-Accept' onClick={Message}><FontAwesomeIcon icon={faMessage} /></button> }
         <button className='Friend-Actions Friend-Actions-Decline' onClick={Decline}><FontAwesomeIcon icon={faX} /></button>
       </div>
     </div>

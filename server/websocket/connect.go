@@ -69,6 +69,9 @@ func ConnectUser(ctx *Context) {
 
 	relationships := database.GetRelationships(get_user.ID, ctx.Db)
 	for _, relationship := range relationships {
+		if relationship.Type != 1 {
+			continue
+		}
 		status := response.Status{
 			UserID: get_user.ID.Hex(),
 			Status: 1,

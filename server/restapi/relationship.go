@@ -22,7 +22,12 @@ func GetRelationships(ctx *Context) {
 			continue
 		}
 
-		res_user := response.NewUser(user, ctx.Conn.GetUserStatus(user.ID.Hex()))
+		status := 0
+		if relationship.Type == 1 {
+			status = ctx.Conn.GetUserStatus(user.ID.Hex())
+		}
+
+		res_user := response.NewUser(user, status)
 		res_relationships = append(res_relationships, response.NewRelationship(res_user, relationship.Type))
 	}
 
@@ -54,7 +59,12 @@ func GetRelationship(ctx *Context) {
 		return
 	}
 
-	res_user := response.NewUser(user, ctx.Conn.GetUserStatus(user.ID.Hex()))
+	status := 0
+	if relationship.Type == 1 {
+		status = ctx.Conn.GetUserStatus(user.ID.Hex())
+	}
+
+	res_user := response.NewUser(user, status)
 	res_relationship := response.NewRelationship(res_user, relationship.Type)
 
 	ctx.WriteJSON(res_relationship)
@@ -127,7 +137,11 @@ func ChangeRelationshipToDefault(ctx *Context) {
 
 	res := response.NewRelationship(response.NewUser(relationship_user, ctx.Conn.GetUserStatus(relationship_user.ID.Hex())), 0)
 	ctx.WriteJSON(res)
-	ctx.Conn.SendToUser(relationship_user.ID.Hex(), "RELATIONSHIP_MODIFY", response.NewRelationship(response.NewUser(&ctx.User, ctx.Conn.GetUserStatus(ctx.User.ID.Hex())), relationship_user_type))
+	status := 0
+	if relationship_user_type == 1 {
+		status = ctx.Conn.GetUserStatus(ctx.User.ID.Hex())
+	}
+	ctx.Conn.SendToUser(relationship_user.ID.Hex(), "RELATIONSHIP_MODIFY", response.NewRelationship(response.NewUser(&ctx.User, status), relationship_user_type))
 }
 
 func ChangeRelationshipToFriend(ctx *Context) {
@@ -205,7 +219,11 @@ func ChangeRelationshipToFriend(ctx *Context) {
 
 	res := response.NewRelationship(response.NewUser(relationship_user, ctx.Conn.GetUserStatus(relationship_user.ID.Hex())), relationship_type)
 	ctx.WriteJSON(res)
-	ctx.Conn.SendToUser(relationship_user.ID.Hex(), "RELATIONSHIP_MODIFY", response.NewRelationship(response.NewUser(&ctx.User, ctx.Conn.GetUserStatus(ctx.User.ID.Hex())), relationship_user_type))
+	status := 0
+	if relationship_user_type == 1 {
+		status = ctx.Conn.GetUserStatus(ctx.User.ID.Hex())
+	}
+	ctx.Conn.SendToUser(relationship_user.ID.Hex(), "RELATIONSHIP_MODIFY", response.NewRelationship(response.NewUser(&ctx.User, status), relationship_user_type))
 }
 
 func ChangeRelationshipToBlock(ctx *Context) {
@@ -275,5 +293,9 @@ func ChangeRelationshipToBlock(ctx *Context) {
 
 	res := response.NewRelationship(response.NewUser(relationship_user, ctx.Conn.GetUserStatus(relationship_user.ID.Hex())), 2)
 	ctx.WriteJSON(res)
-	ctx.Conn.SendToUser(relationship_user.ID.Hex(), "RELATIONSHIP_MODIFY", response.NewRelationship(response.NewUser(&ctx.User, ctx.Conn.GetUserStatus(ctx.User.ID.Hex())), relationship_user_type))
+	status := 0
+	if relationship_user_type == 1 {
+		status = ctx.Conn.GetUserStatus(ctx.User.ID.Hex())
+	}
+	ctx.Conn.SendToUser(relationship_user.ID.Hex(), "RELATIONSHIP_MODIFY", response.NewRelationship(response.NewUser(&ctx.User, status), relationship_user_type))
 }

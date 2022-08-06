@@ -25,6 +25,10 @@ func Disconnect(ws *Ws) {
 
 	relationships := database.GetRelationships(ws.User.ID, ws.Db)
 	for _, relationship := range relationships {
+		if relationship.Type != 1 {
+			continue
+		}
+
 		status := response.Status{
 			UserID: ws.User.ID.Hex(),
 			Status: 0,
