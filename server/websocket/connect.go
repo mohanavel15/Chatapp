@@ -42,7 +42,7 @@ func ConnectUser(ctx *Context) {
 
 	ctx.Ws.User = get_user
 	log.Printf("%s joined", ctx.Ws.User.Username)
-	ctx.Ws.Conns.Users[get_user.ID.Hex()] = ctx.Ws
+	ctx.Ws.Conns.AddUser(get_user.ID.Hex(), ctx.Ws)
 
 	res_channels := response.Channels{}
 	channels := database.GetChannels(get_user, ctx.Db)

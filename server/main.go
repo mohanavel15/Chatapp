@@ -18,8 +18,7 @@ import (
 var db *mongo.Database
 var handler *websocket.EventHandler
 
-var onlineUsers = make(map[string]*websocket.Ws)
-var channels = make(map[string]map[string]*websocket.Ws)
+var conns = websocket.NewConnections()
 
 var (
 	HOST           = os.Getenv("SERVER_HOST")

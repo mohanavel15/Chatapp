@@ -4,7 +4,6 @@ import (
 	"Chatapp/database"
 	"Chatapp/restapi"
 	"Chatapp/utils"
-	"Chatapp/websocket"
 	"context"
 	"net/http"
 
@@ -46,17 +45,12 @@ func Authenticated(function AuthFunction) http.HandlerFunc {
 			return
 		}
 
-		conns := websocket.Connections{
-			Users:    onlineUsers,
-			Channels: channels,
-		}
-
 		ctx := restapi.Context{
 			Res:  w,
 			Req:  r,
 			Db:   db,
 			User: user,
-			Conn: &conns,
+			Conn: conns,
 		}
 
 		function(&ctx)

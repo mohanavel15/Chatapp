@@ -33,6 +33,6 @@ func Disconnect(ws *Ws) {
 		ws.Conns.SendToUser(relationship.ToUserID.Hex(), "STATUS_UPDATE", status)
 	}
 
-	delete(ws.Conns.Users, ws.User.ID.Hex())
+	ws.Conns.RemoveUser(ws.User.ID.Hex())
 	ws.Close()
 }
