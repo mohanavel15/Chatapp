@@ -1,129 +1,161 @@
 package database
 
 import (
+	"context"
 	"net/http"
 	"time"
 
-	"github.com/google/uuid"
-	"gorm.io/gorm"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func CreateMessage(content string, channel_id string, user *Account, db *gorm.DB) (*Message, int) {
+func CreateMessage(content string, channel_id string, system_message bool, user *User, db *mongo.Database) (*Message, int) {
+	var channel *Channel
+	var statusCode int
 
-	_, dm_user, statusCode := GetDMChannel(channel_id, user, db)
-	if statusCode != http.StatusOK {
-		_, statusCode := GetChannel(channel_id, user, db)
-		if statusCode != http.StatusOK {
-			return nil, statusCode
-		}
+	if system_message {
+		channel, statusCode = GetChannelWithoutUser(channel_id, db)
 	} else {
-		checkBlock := Block{
-			BlockedBy:   dm_user.ID,
-			BlockedUser: user.ID,
-		}
-		db.Where(checkBlock).First(&checkBlock)
-		if checkBlock.ID != 0 {
-			return nil, http.StatusForbidden
-		}
+		channel, statusCode = GetChannel(channel_id, user, db)
+	}
 
-		checkBlock2 := Block{
-			BlockedBy:   user.ID,
-			BlockedUser: dm_user.ID,
-		}
-		db.Where(checkBlock2).First(&checkBlock2)
-		if checkBlock2.ID != 0 {
-			return nil, http.StatusForbidden
+	if statusCode != http.StatusOK {
+		return nil, statusCode
+	}
+
+	if channel.Type == 1 {
+		for _, recipient := range channel.Recipients {
+			if recipient.Hex() == user.ID.Hex() {
+				continue
+			}
+
+			relationship1, statusCode := GetRelationship(recipient, user.ID, db)
+			if statusCode == http.StatusNotFound {
+				continue
+			}
+			if relationship1.Type == 2 {
+				return nil, http.StatusForbidden
+			}
+
+			relationship2, statusCode := GetRelationship(user.ID, recipient, db)
+			if statusCode == http.StatusNotFound {
+				continue
+			}
+			if relationship2.Type == 2 {
+				return nil, http.StatusForbidden
+			}
 		}
 	}
+
+	messages := db.Collection("messages")
 
 	new_message := Message{
-		Uuid:      uuid.New().String(),
-		Content:   content,
-		AccountID: user.ID,
-		ChannelID: channel_id,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		ID:            primitive.NewObjectID(),
+		Content:       content,
+		ChannelID:     channel.ID,
+		SystemMessage: system_message,
+		CreatedAt:     time.Now().Unix(),
+		UpdatedAt:     time.Now().Unix(),
 	}
-	db.Create(&new_message)
+
+	if !system_message {
+		new_message.AccountID = user.ID
+	}
+
+	_, err := messages.InsertOne(context.TODO(), new_message)
+	if err != nil {
+		return nil, http.StatusInternalServerError
+	}
+
 	return &new_message, http.StatusOK
 }
 
-func EditMessage(uuid string, content string, user *Account, db *gorm.DB) (*Message, int) {
-	var message Message
-	db.Where("uuid = ?", uuid).First(&message)
-	if message.ID == 0 {
-		return nil, http.StatusNotFound
+func EditMessage(id string, channel_id string, content string, user *User, db *mongo.Database) (*Message, int) {
+	message, _, statusCode := GetMessage(id, channel_id, user, db)
+	if statusCode != http.StatusOK {
+		return nil, statusCode
 	}
 
 	if message.AccountID != user.ID {
 		return nil, http.StatusForbidden
 	}
 
-	_, _, statusCode := GetDMChannel(message.ChannelID, user, db)
-	if statusCode != http.StatusOK {
-		_, statusCode := GetChannel(message.ChannelID, user, db)
-		if statusCode != http.StatusOK {
-			return nil, statusCode
-		}
+	messages := db.Collection("messages")
+	_, err := messages.UpdateOne(context.TODO(), bson.M{"_id": message.ID}, bson.M{"$set": bson.M{"content": content, "updated_at": time.Now().Unix()}})
+	if err != nil {
+		return nil, http.StatusInternalServerError
 	}
 
 	message.Content = content
-	message.UpdatedAt = time.Now()
-	db.Save(&message)
-	return &message, http.StatusOK
+	message.UpdatedAt = time.Now().Unix()
+
+	return message, http.StatusOK
 }
 
-func DeleteMessage(uuid string, user *Account, db *gorm.DB) (*Message, int) {
+func DeleteMessage(id string, channel_id string, user *User, db *mongo.Database) (*Message, int) {
+	message, channel, statusCode := GetMessage(id, channel_id, user, db)
+	if statusCode != http.StatusOK {
+		return nil, statusCode
+	}
+
+	if channel.Type == 1 && message.AccountID != user.ID {
+		return nil, http.StatusForbidden
+	}
+
+	if channel.Type == 2 && message.AccountID != user.ID && channel.OwnerID != user.ID {
+		return nil, http.StatusForbidden
+	}
+
+	messages := db.Collection("messages")
+	_, err := messages.DeleteOne(context.TODO(), bson.M{"_id": message.ID})
+	if err != nil {
+		return nil, http.StatusInternalServerError
+	}
+
+	return message, http.StatusOK
+}
+
+func GetMessage(id string, channel_id string, user *User, db *mongo.Database) (*Message, *Channel, int) {
+	object_id, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, nil, http.StatusBadRequest
+	}
+
+	channel, statusCode := GetChannel(channel_id, user, db)
+	if statusCode != http.StatusOK {
+		return nil, nil, statusCode
+	}
+
+	messages := db.Collection("messages")
+
 	var message Message
-	db.Where("uuid = ?", uuid).First(&message)
-	if message.ID == 0 {
-		return nil, http.StatusNotFound
+	err = messages.FindOne(context.TODO(), bson.M{"_id": object_id}).Decode(&message)
+	if err != nil {
+		return nil, nil, http.StatusNotFound
 	}
 
-	_, _, statusCode := GetDMChannel(message.ChannelID, user, db)
-	if statusCode != http.StatusOK {
-		channel, statusCode := GetChannel(message.ChannelID, user, db)
-		if statusCode != http.StatusOK {
-			return nil, statusCode
-		}
-
-		if message.AccountID != user.ID && channel.Owner != user.Uuid {
-			return nil, http.StatusForbidden
-		}
-	}
-
-	db.Delete(&message)
-	return &message, http.StatusOK
+	return &message, channel, http.StatusOK
 }
 
-func GetMessage(uuid string, user *Account, db *gorm.DB) (*Message, int) {
-	var message Message
-	db.Where("uuid = ?", uuid).First(&message)
-	if message.ID == 0 {
-		return nil, http.StatusNotFound
-	}
-
-	_, _, statusCode := GetDMChannel(message.ChannelID, user, db)
+func GetMessages(channel_id string, limit int64, offset int64, user *User, db *mongo.Database) ([]Message, int) {
+	channel, statusCode := GetChannel(channel_id, user, db)
 	if statusCode != http.StatusOK {
-		_, statusCode := GetChannel(message.ChannelID, user, db)
-		if statusCode != http.StatusOK {
-			return nil, statusCode
-		}
+		return nil, statusCode
 	}
 
-	return &message, http.StatusOK
-}
-
-func GetMessages(channel_id string, user *Account, db *gorm.DB) ([]Message, int) {
-	_, _, statusCode := GetDMChannel(channel_id, user, db)
-	if statusCode != http.StatusOK {
-		_, statusCode := GetChannel(channel_id, user, db)
-		if statusCode != http.StatusOK {
-			return nil, statusCode
-		}
+	messages := db.Collection("messages")
+	cur, err := messages.Find(context.TODO(), bson.M{"channel_id": channel.ID}, options.Find().SetSort(bson.M{"created_at": -1}).SetLimit(limit).SetSkip(offset))
+	if err != nil {
+		return nil, http.StatusInternalServerError
 	}
 
-	messages := []Message{}
-	db.Where("channel_id = ?", channel_id).Find(&messages)
-	return messages, http.StatusOK
+	var messages_list []Message
+	err = cur.All(context.TODO(), &messages_list)
+	if err != nil {
+		return nil, http.StatusInternalServerError
+	}
+
+	return messages_list, http.StatusOK
 }

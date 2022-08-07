@@ -9,7 +9,7 @@ export default function DeleteMessage() {
 
     function HandleDeleteMessage(e: React.MouseEvent<Element, MouseEvent>) {
         e.preventDefault();
-        const url = Routes.Channels+"/"+state_context.ChannelOBJ.uuid;
+        const url = Routes.Channels+"/"+state_context.messageOBJ.channel_id+"/messages/"+state_context.messageOBJ.id;
         fetch(url, {
             method: "DELETE",
             headers: {
@@ -19,8 +19,8 @@ export default function DeleteMessage() {
         state_context.setDeleteMessage(false);
     }
     return (
-        <div className="channel-container">
-            <div className='delete-channel'>
+        <div className="channel-container" onClick={(e) => {e.preventDefault(); state_context.setDeleteMessage(false) }}>
+            <div className='delete-channel' onClick={(e) => {e.stopPropagation()}}>
                     <h3>Delete Message</h3>
                     <p>Are you sure you want to delete?</p>
                     <button className="popupbox-btn" onClick={(e) => {e.preventDefault(); state_context.setDeleteMessage(false) }}>Cancel</button>

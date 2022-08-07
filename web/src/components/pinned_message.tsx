@@ -15,7 +15,7 @@ function PinnedMessage({ message }: {message: MessageOBJ}) {
 
 
     function UnpinMsg() {
-        const url = Routes.Channels + '/' + message.channel_id + '/pins/' + message.uuid;
+        const url = Routes.Channels + '/' + message.channel_id + '/pins/' + message.id;
         fetch(url, {
             method: 'DELETE',
             headers: {
@@ -23,7 +23,7 @@ function PinnedMessage({ message }: {message: MessageOBJ}) {
             }
         }).then(res => {
             if (res.status === 200) {
-                channel_ctx.DeletePinnedMessage(message.channel_id, message.uuid);
+                channel_ctx.DeletePinnedMessage(message.channel_id, message.id);
             }
         })
     }

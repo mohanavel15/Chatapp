@@ -2,7 +2,8 @@ import { useParams } from "react-router-dom";
 import { useContext, useEffect } from "react";
 import { IMessageEvent } from "websocket";
 
-import { MessageOBJ, ChannelOBJ, MemberOBJ, FriendOBJ, ReadyOBJ, Status, UserOBJ } from "../models/models";
+import { MessageOBJ, ChannelOBJ, ReadyOBJ, Status } from "../models/models";
+import { Relationship } from "../models/relationship";
 import Settings from "./settings"; 
 
 import SideBar from "../components/sidebar";
@@ -28,6 +29,8 @@ import ChannelHome from "../components/channel_home";
 import MessageCTX from '../contexts/messagectx';
 import Routes from '../config';
 import { Refresh } from "../utils/api";
+import { GetMessages } from "../api/message";
+import { GetPinnedMessages } from "../api/pinned_msgs"
 
 function Channel() {
 	const parameter  = useParams<string>();
@@ -56,86 +59,36 @@ function Channel() {
 		let gateway = NewGateway();
 
 		const onMessage = (message: IMessageEvent) => {
-			console.log(message);
 			const data = message.data;
-			if (typeof data === "string") {
-				const payload = JSON.parse(data);
-				if (payload.event === 'READY') {
+
+			if (typeof data !== "string") {
+				return
+			}
+
+			const payload = JSON.parse(data);
+
+			switch(payload.event) {
+				case "READY":
 					const ready: ReadyOBJ = payload.data;
-					user_ctx.setUuid(ready.user.uuid);
+					user_ctx.setId(ready.user.id);
 					user_ctx.setUsername(ready.user.username);
 					user_ctx.setAvatar(ready.user.avatar);
 
+					const token = localStorage.getItem("access_token") || ""
 					ready.channels.forEach((channel: ChannelOBJ) => {
-						channel.type = 1;
-						channel_context.setChannel(prev => new Map(prev.set(channel.uuid, channel)));
-						const url = Routes.Channels+`/${channel.uuid}/messages`
-						fetch(url, {
-							method: "GET",
-							headers: {
-								"Authorization": localStorage.getItem("access_token") || ""
-							}
-						}).then(response => {
-							if (response.status === 200) {
-								response.json().then((msgs: MessageOBJ[]) => {
-									msgs.forEach(msg => channel_context.UpdateMessage(channel.uuid, msg.uuid, msg))
-								})
-							}
+						channel_context.setChannel(prev => new Map(prev.set(channel.id, channel)));
+						
+						GetMessages(token, channel.id).then((msgs: MessageOBJ[]) => {
+							msgs.forEach(msg => channel_context.UpdateMessage(channel.id, msg.id, msg))
 						})
 
-						const url2 = Routes.Channels+`/${channel.uuid}/members`
-						fetch(url2, {
-							method: "GET",
-							headers: {
-								"Authorization": localStorage.getItem("access_token") || ""
-							}
-						}).then(response => {
-							if (response.status === 200) {
-								response.json().then((members: MemberOBJ[]) => {
-									members.forEach(member => channel_context.UpdateMember(channel.uuid, member.uuid, member))
-								})
-							}
-						})
-
-						const url3 = Routes.Channels+`/${channel.uuid}/pins`
-						fetch(url3, {
-							method: "GET",
-							headers: {
-								"Authorization": localStorage.getItem("access_token") || ""
-							}
-						}).then(response => {
-							if (response.status === 200) {
-								response.json().then((msgs: MessageOBJ[]) => {
-									msgs.forEach(msg => channel_context.UpdatePinnedMessage(channel.uuid, msg.uuid, msg))
-								})
-							}
+						GetPinnedMessages(token, channel.id).then((msgs: MessageOBJ[]) => {
+							msgs.forEach(msg => channel_context.UpdatePinnedMessage(channel.id, msg.id, msg))
 						})
 					});
-
-					ready.dm_channels.forEach((dm_channel: ChannelOBJ) => {
-						dm_channel.type = 0;
-						channel_context.setChannel(prev => new Map(prev.set(dm_channel.uuid, dm_channel)));
-						const url = Routes.Channels+`/${dm_channel.uuid}/messages`
-						fetch(url, {
-							method: "GET",
-							headers: {
-								"Authorization": localStorage.getItem("access_token") || ""
-							}
-						}).then(response => {
-							if (response.status === 200) {
-								response.json().then((msgs: MessageOBJ[]) => {
-									msgs.forEach(msg => channel_context.UpdateMessage(dm_channel.uuid, msg.uuid, msg))
-								})
-							}
-						})
-					});
-
-					ready.friends.forEach((friend: FriendOBJ) => {
-						user_ctx.setFriend(prev => new Map(prev.set(friend.uuid, friend)));
-					});
-				}
-
-				if (payload.event === 'INVAILD_SESSION') {
+					break
+				
+				case "INVAILD_SESSION":
 					Refresh().then(access_token => {
 						if (access_token === undefined) {
 							localStorage.removeItem('access_token');
@@ -144,114 +97,101 @@ function Channel() {
 							window.location.reload()
 						}
 					})
-				}
-
-				if (payload.event === 'MESSAGE_CREATE' || payload.event === 'MESSAGE_MODIFY') {
+					break
+				
+				case "MESSAGE_CREATE":
 					const message: MessageOBJ = payload.data;
-					channel_context.UpdateMessage(message.channel_id, message.uuid ,message);
-				}
+					channel_context.UpdateMessage(message.channel_id, message.id ,message);
+					break
 
-				if (payload.event === 'MESSAGE_DELETE') {
-					const message: MessageOBJ = payload.data;
-					channel_context.DeleteMessage(message.channel_id, message.uuid);
-				}
-
-				if (payload.event === 'CHANNEL_CREATE' || payload.event === 'CHANNEL_MODIFY') {
+				case "MESSAGE_MODIFY":
+					const edited_message: MessageOBJ = payload.data;
+					channel_context.UpdateMessage(edited_message.channel_id, edited_message.id ,edited_message);
+					break
+				
+				case "MESSAGE_DELETE":
+					const deleted_message: MessageOBJ = payload.data;
+					channel_context.DeleteMessage(deleted_message.channel_id, deleted_message.id);
+					break
+				
+				case "CHANNEL_CREATE":
 					const channel: ChannelOBJ = payload.data;
-					channel.type = 1;
-					channel_context.setChannel(prevChannels => new Map(prevChannels.set(channel.uuid, channel)));
-				}
+					channel_context.setChannel(prevChannels => new Map(prevChannels.set(channel.id, channel)));
+					break
 
-				if (payload.event === 'CHANNEL_DELETE') {
-					const channel: ChannelOBJ = payload.data;
-					channel_context.deleteChannel(channel.uuid)
-				}
+				case "CHANNEL_MODIFY":
+					const edited_channel: ChannelOBJ = payload.data;
+					channel_context.setChannel(prevChannels => new Map(prevChannels.set(edited_channel.id, edited_channel)));
+					break
 
-				if (payload.event === 'DM_CHANNEL_CREATE' || payload.event === 'DM_CHANNEL_MODIFY') {
-					const channel: ChannelOBJ = payload.data;
-					channel.type = 0;
-					channel_context.setChannel(prevChannels => new Map(prevChannels.set(channel.uuid, channel)));
-				}
+				case "CHANNEL_DELETE":
+					const deleted_channel: ChannelOBJ = payload.data;
+					channel_context.deleteChannel(deleted_channel.id)
+					break
 
-				if (payload.event === 'MEMBER_JOIN' || payload.event === 'MEMBER_UPDATE') {
-					const member: MemberOBJ = payload.data;
-					channel_context.UpdateMember(member.channel_id, member.uuid, member);
-				}
+				case "MESSAGE_PINNED":
+					const pinned_message: MessageOBJ = payload.data;
+					channel_context.UpdatePinnedMessage(pinned_message.channel_id, pinned_message.id, pinned_message);
+					break
 
-				if (payload.event === 'MEMBER_REMOVE') {
-					const member: MemberOBJ = payload.data;
-					channel_context.DeleteMember(member.channel_id, member.uuid);
-				}
+				case "MESSAGE_UNPINNED":
+					const upinned_message: MessageOBJ = payload.data;
+					channel_context.DeletePinnedMessage(upinned_message.channel_id, upinned_message.id);
+					break
+				
+				case "RELATIONSHIP_CREATE":
+					const new_relationship: Relationship = payload.data;
+					user_ctx.setRelationships(prevRelationship => new Map(prevRelationship.set(new_relationship.id, new_relationship)));
+					break
 
-				if (payload.event === 'FRIEND_CREATE' || payload.event === 'FRIEND_MODIFY') {
-					const friend: FriendOBJ = payload.data;
-					user_ctx.setFriend(prevFriends => new Map(prevFriends.set(friend.uuid, friend)));
+				case "RELATIONSHIP_MODIFY":
+					const relationship: Relationship = payload.data;
+					user_ctx.setRelationships(prevRelationship => new Map(prevRelationship.set(relationship.id, relationship)));
+					break
+
+				case "RELATIONSHIP_DELETE":
+					const relationship_: Relationship = payload.data;
+					user_ctx.deleterelationship(relationship_.id);
+			}
+
+			if (payload.event === 'STATUS_UPDATE') {
+				const status: Status = payload.data;
+				
+				if (status.type === 0) {
+					const relationship_ = user_ctx.relationships.get(status.user_id);
+					if (relationship_ !== undefined) {
+						relationship_.status = status.status;
+						user_ctx.setRelationships(prevFriends => new Map(prevFriends.set(relationship_.id, relationship_)));
+					}
 				}
 				
-				if (payload.event === 'FRIEND_DELETE') {
-					const friend: FriendOBJ = payload.data;
-					user_ctx.deleteFriend(friend.uuid);
-				}
-
-				if (payload.event === 'STATUS_UPDATE') {
-					const status: Status = payload.data;
-					if (status.type === 0) {
-						const friend = user_ctx.friends.get(status.user_id);
-						if (friend !== undefined) {
-							friend.status = status.status;
-							user_ctx.setFriend(prevFriends => new Map(prevFriends.set(friend.uuid, friend)));
+				if (status.type === 1) {
+					const UpdateChannelStatus = (prevChannels: Map<String, ChannelOBJ>, status: Status) => {
+						const channel = prevChannels.get(status.channel_id)
+						if (channel === undefined) {
+							return prevChannels
 						}
-					}
-					if (status.type === 1) {
-						const UpdateChannelStatus = (prevChannels: Map<String, ChannelOBJ>, status: Status) => {
-							const channel = prevChannels.get(status.channel_id)
-							if (channel !== undefined) {
-								channel.recipient.status = status.status;
-								return new Map(prevChannels.set(channel.uuid, channel))
-							} else {
-								return prevChannels
+
+						for (let i = 0; i < channel.recipients.length; i++) {
+							if (channel.recipients[i].id === status.user_id) {
+								channel.recipients[i].status = status.status;
+								break;
 							}
 						}
-						channel_context.setChannel(prevChannels => new Map(UpdateChannelStatus(prevChannels, status)));
+
+						return prevChannels.set(channel.id, channel)
+						
 					}
-					if (status.type === 2) {
-						const member = channel_context.members.get(status.channel_id)?.get(status.user_id);
-						if (member !== undefined) {
-							member.status = status.status;
-							channel_context.UpdateMember(status.channel_id, status.user_id, member);
-						}
-					}
-				}
-
-				if (payload.event === 'BLOCK_CREATE') {
-					const blocked_user: UserOBJ = payload.data;
-					user_ctx.deleteFriend(blocked_user.uuid);
-					user_ctx.setBlocked(prevBlockedUsers => new Map(prevBlockedUsers.set(blocked_user.uuid, blocked_user)));
-				}
-				
-				if (payload.event === 'BLOCK_DELETE') {
-					const blocked_user: UserOBJ = payload.data;
-					user_ctx.deleteBlocked(blocked_user.uuid);
-				}
-
-				if (payload.event === 'MESSAGE_PINNED') {
-					const message: MessageOBJ = payload.data;
-					channel_context.UpdatePinnedMessage(message.channel_id, message.uuid, message);
-				}
-
-				if (payload.event === 'MESSAGE_UNPINNED') {
-					const message: MessageOBJ = payload.data;
-					channel_context.DeletePinnedMessage(message.channel_id, message.uuid);
+					channel_context.setChannel(prevChannels => new Map(UpdateChannelStatus(prevChannels, status)));
 				}
 			}
-		};
+		}
 		
 		const onClose = () => {
 			console.log("Disconnected from server");
 			gateway = NewGateway();
 		};
-	
-		//gateway.onopen = onOpen;
+		
 		gateway.onclose = onClose;
 	  	gateway.onmessage = onMessage;
   
@@ -262,7 +202,7 @@ function Channel() {
 
 	let currentChannel = channel_context.channels.get(channel_id);
 	if (currentChannel === undefined) {
-		currentChannel = { uuid: "@me", name: "@me",icon: "", owner_id: "", type: 0, created_at: "", recipient: { uuid: "@me", username: "@me", avatar: "", status:0, created_at: 0 }};
+		currentChannel = { id: "@me", name: "@me",icon: "", owner_id: "", type: 0, created_at: "", recipients: [{ id: "@me", username: "@me", avatar: "", status:0, created_at: 0 }]};
 	}
 
 	useEffect(() => {
@@ -283,14 +223,13 @@ function Channel() {
 					<MessageCTX>
 					<>
 						<SideBar />
-						{ currentChannel.uuid !== "@me" && state_context.editChannel !== true &&
+						{ currentChannel.id !== "@me" && state_context.editChannel !== true &&
 							<>
-								<Chat channel_id={currentChannel.uuid} />
-								{ state_context.showMembers && currentChannel.type === 1 && <MembersBar channel={currentChannel} /> }
+								<Chat channel_id={currentChannel.id} />
+								{ state_context.showMembers && currentChannel.type === 2 && <MembersBar channel={currentChannel} /> }
 							</>
 						}
-
-						{ currentChannel.uuid === "@me" && !state_context.editChannel && <ChannelHome /> }
+						{ currentChannel.id === "@me" && !state_context.editChannel && <ChannelHome /> }
 						{ state_context.createChannel && <CreateChannel /> }
 						{ state_context.editChannel && <EditChannel /> }
 						{ state_context.deleteChannel && <DeleteChannel /> }

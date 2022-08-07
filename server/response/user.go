@@ -1,37 +1,37 @@
 package response
 
-import "Chatapp/database"
+import (
+	"Chatapp/database"
+	"fmt"
+)
 
 type User struct {
-	Uuid      string `json:"uuid"`
+	ID        string `json:"id"`
 	Avatar    string `json:"avatar"`
 	Username  string `json:"username"`
 	Status    int    `json:"status"`
 	CreatedAt int64  `json:"created_at"`
 }
 
-func NewUser(user *database.Account, status int) User {
-	if user.ID == 0 {
-		return User{
-			Uuid:      "00000000-0000-0000-0000-000000000000",
-			Username:  "Unknown User",
-			Avatar:    "",
-			Status:    status,
-			CreatedAt: 0,
-		}
-	}
+func GetUrl(user *database.User) string {
+	url := fmt.Sprint(user.ID.Hex(), "/", user.Avatar.ID.Hex(), "/unknown."+user.Avatar.Ext)
+	fullUrl := fmt.Sprint("http://localhost:5000/avatars/", url)
+	return fullUrl
+}
+
+func NewUser(user *database.User, status int) User {
 	return User{
-		Uuid:      user.Uuid,
-		Avatar:    user.Avatar,
+		ID:        user.ID.Hex(),
+		Avatar:    GetUrl(user),
 		Username:  user.Username,
 		Status:    status,
-		CreatedAt: user.CreatedAt.Unix(),
+		CreatedAt: user.CreatedAt,
 	}
 }
 
 func ErrorUser() User {
 	return User{
-		Uuid:      "00000000-0000-0000-0000-000000000000",
+		ID:        "00000000-0000-0000-0000-000000000000",
 		Username:  "System",
 		Avatar:    "",
 		Status:    0,

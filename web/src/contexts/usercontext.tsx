@@ -1,34 +1,30 @@
 import { createContext, useEffect, useState } from "react";
-import { FriendOBJ, UserOBJ } from "../models/models";
 import useMap from '../hooks/useMap';
 import Routes from "../config";
-
+import { Relationship } from "../models/relationship";
+import { GetRelationships } from "../api/relationship";
 export interface UserContextOBJ {
-    uuid: string;
+    id: string;
     username: string;
     avatar: string;
     accessToken: string;
-    setUuid:React.Dispatch<React.SetStateAction<string>>;
+    setId:React.Dispatch<React.SetStateAction<string>>;
     setUsername:React.Dispatch<React.SetStateAction<string>>;
     setAvatar:React.Dispatch<React.SetStateAction<string>>;
     setAccessToken:React.Dispatch<React.SetStateAction<string>>;
-    friends: Map<String,FriendOBJ>;
-	setFriend: React.Dispatch<React.SetStateAction<Map<String, FriendOBJ>>>
-    deleteFriend: (key: String) => void
-    blocked: Map<String,UserOBJ>;
-	setBlocked: React.Dispatch<React.SetStateAction<Map<String, UserOBJ>>>
-    deleteBlocked: (key: String) => void
+    relationships: Map<String,Relationship>;
+	setRelationships: React.Dispatch<React.SetStateAction<Map<String, Relationship>>>
+    deleterelationship: (key: String) => void
 }
 
 export const UserContext = createContext<UserContextOBJ>(undefined!);
 
 function UserCTX({ children }: { children: React.ReactChild }) {
-    const [uuid, setUuid] = useState<string>("");
+    const [id, setId] = useState<string>("");
     const [username, setUsername] = useState<string>("");
     const [avatar, setAvatar] = useState<string>("");
     const [accessToken, setAccessToken] = useState<string>("");
-    const [friends, setFriend, deleteFriend] = useMap<FriendOBJ>(new Map<String,FriendOBJ>());
-	const [blocked, setBlocked, deleteBlocked] = useMap<UserOBJ>(new Map<String,UserOBJ>());
+	const [relationships, setRelationships, deleterelationship] = useMap<Relationship>(new Map<String,Relationship>());
 
     useEffect(() => {
         const token = localStorage.getItem("access_token") || "";
@@ -41,7 +37,7 @@ function UserCTX({ children }: { children: React.ReactChild }) {
             }).then(response => {
                 if (response.status === 200) {
                     response.json().then(user => {
-                        setUuid(user.uuid);
+                        setId(user.id);
                         setUsername(user.username);
                         setAvatar(user.avatar);
                         setAccessToken(token);
@@ -54,40 +50,31 @@ function UserCTX({ children }: { children: React.ReactChild }) {
     }, []);
 
     useEffect(() => {
-        fetch(Routes.Blocks, {
-            method: "GET",
-            headers: {
-                "Authorization": localStorage.getItem("access_token") || "",
-                "Content-Type": "application/json"
-            }
-        }).then(response => {
-            if (response.status === 200) {
-                response.json().then((blocked: UserOBJ[]) => {
-                    blocked.forEach(user => {
-                        console.log("blocked user", user);
-                        setBlocked(prevBlocked => new Map(prevBlocked.set(user.uuid, user)));
-                        console.log("blocks count", Array(blocked.values()).length);
-                    })
+        if (accessToken === "") {
+            return
+        }
+        GetRelationships(accessToken).then(relationships => {
+            relationships.forEach(relationship => {
+                setRelationships(prevRelationships => {
+                    prevRelationships.set(relationship.id, relationship);
+                    return prevRelationships;
                 });
-            }
-        })
+            });
+        });
     }, [accessToken]);
 
     const context_value: UserContextOBJ = {
-        uuid: uuid,
+        id: id,
         username: username,
         avatar: avatar,
         accessToken: accessToken,
-        setUuid: setUuid,
+        setId: setId,
         setUsername: setUsername,
         setAvatar: setAvatar,
         setAccessToken: setAccessToken,
-        friends: friends,
-        setFriend: setFriend,
-        deleteFriend: deleteFriend,
-        blocked: blocked,
-        setBlocked: setBlocked,
-        deleteBlocked: deleteBlocked
+        relationships: relationships,
+        setRelationships: setRelationships,
+        deleterelationship: deleterelationship
     }
     
     return (

@@ -1,5 +1,5 @@
 import Picker, { IEmojiData } from 'emoji-picker-react';
-import React, { useState, useContext, useEffect, useRef } from 'react';
+import React, { useState, useContext, useRef, useMemo } from 'react';
 import Message from './message';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFaceLaughBeam, faCirclePlus, faFile, faCircleXmark } from '@fortawesome/free-solid-svg-icons'
@@ -16,7 +16,43 @@ function Chat({ channel_id }: { channel_id: string }) {
 	const channel_context: ChannelContext = useContext(ChannelsContext);
     const [Input_message, setInput_message] = useState('');
     const [showPicker, setShowPicker] = useState(false);
-	const [message_jsx, setMessage_jsx] = useState<JSX.Element[]>([]);
+	
+	const MessageElement = useMemo(() => {
+		let messagesList: JSX.Element[] = [];
+
+		let msg_channel = channel_context.messages.get(channel_id);
+
+		if (!msg_channel) {
+			msg_channel = new Map<String, MessageOBJ>()
+		}
+
+		const msgs = Array.from(msg_channel.values()).sort((a, b) => { return a.created_at - b.created_at;});
+
+		let preDate: string
+		msgs.forEach((message) => {
+				if (message.channel_id === channel_id) {
+					let date = new Date(message.created_at * 1000).toLocaleDateString();
+					if (preDate === undefined || preDate !== date) {
+						messagesList.push(<div key={date} className="date-divider">{date}</div>);
+						preDate = date;
+					}
+
+					messagesList.push(
+					<div key={message.id} onContextMenu={(event) => {
+							event.preventDefault();
+							ctx_menu_context.closeAll();
+							ctx_menu_context.setMsgCtxMenu({x: event.clientX, y: event.clientY, message: message});
+							ctx_menu_context.setShowMsgCtxMenu(true);
+						}
+					}>
+					<Message message={message} />
+					</div>
+					)
+				}
+			});
+
+		return messagesList;
+	}, [channel_context.messages, channel_id]);
 
     const [hasFile, setHasFile] = useState(false);
 	const file_input = useRef<HTMLInputElement>(undefined!);
@@ -43,7 +79,7 @@ function Chat({ channel_id }: { channel_id: string }) {
 		if (event.key === 'Enter') {
 			event.preventDefault();
 			console.log(file_input.current.files);
-			if (Input_message.length > 0 && file_input === null || file_input.current.files?.length === 0) {
+			if (Input_message.length > 0 && (file_input === null || file_input.current.files?.length === 0)) {
 				const url = Routes.Channels+"/"+channel_id +"/messages"; 
 				fetch(url, {
 					method: "POST",
@@ -74,53 +110,24 @@ function Chat({ channel_id }: { channel_id: string }) {
 		}
     }
 	
-	useEffect(() => {
-		setMessage_jsx([])
-		let msg_channel = channel_context.messages.get(channel_id);
-
-		if (!msg_channel) {
-			msg_channel = new Map<String, MessageOBJ>()
-		}
-
-		const msgs = Array.from(msg_channel.values()).sort((a, b) => { return a.created_at - b.created_at;});
-
-		let preDate: string
-		msgs.forEach((message) => {
-				if (message.channel_id === channel_id) {
-					let date = new Date(message.created_at * 1000).toLocaleDateString();
-					if (preDate === undefined || preDate !== date) {
-						setMessage_jsx(prevMessage =>  [...prevMessage, <div key={date} className="date-divider">{date}</div>])
-						preDate = date;
-					}
-
-					setMessage_jsx(prevMessage =>  [...prevMessage, 
-					<div key={message.uuid} onContextMenu={(event) => {
-							event.preventDefault();
-							ctx_menu_context.closeAll();
-							ctx_menu_context.setMsgCtxMenu({x: event.clientX, y: event.clientY, message: message, channel_id: channel_id});
-							ctx_menu_context.setShowMsgCtxMenu(true);
-						}
-					}>
-					<Message message={message} />
-					</div>
-					])
-				}
-			});
-	}, [channel_context.messages, channel_id]);
-
 	const onFileChange = () => {
 		if (file_input.current.files && file_input.current.files.length > 0) {
-			setHasFile(true);
 			const file = file_input.current.files[0];
-				setFileJSX(
-					<div className='input-file' key={file.name}>
-						<FontAwesomeIcon icon={faFile} />
-						<button className='input-file-delete' onClick={() => {file_input.current.value='';onFileChange();}}>
-							<FontAwesomeIcon icon={faCircleXmark} />
-						</button>
-						<p>{file.name}</p>
-					</div>
-				)
+			if (file.size > 8388608) {
+				alert("File is bigger than 8MB")
+				file_input.current.value=''
+				return
+			} 
+			setHasFile(true);
+			setFileJSX(
+				<div className='input-file' key={file.name}>
+					<FontAwesomeIcon icon={faFile} />
+					<button className='input-file-delete' onClick={() => {file_input.current.value='';onFileChange();}}>
+						<FontAwesomeIcon icon={faCircleXmark} />
+					</button>
+					<p>{file.name}</p>
+				</div>
+			)
 		} else {
 			setHasFile(false);
 		}
@@ -129,7 +136,7 @@ function Chat({ channel_id }: { channel_id: string }) {
     return (
         <div className="Chat">
 				<div className="chat-message">
-					{message_jsx}
+					{MessageElement}
 				</div>
 			<div className="chat-input">
 				{ hasFile && 

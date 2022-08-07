@@ -6,7 +6,7 @@ import { MessageContext } from "../contexts/messagectx";
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 import Routes from '../config'
 interface propsMsgCtxProps {
-    x: number, y: number, message: MessageOBJ, channel_id: string
+    x: number, y: number, message: MessageOBJ
 }
 
 export default function MessageContextMenu(props:propsMsgCtxProps) {
@@ -15,17 +15,17 @@ export default function MessageContextMenu(props:propsMsgCtxProps) {
     const state_context: StateContext = useContext(StatesContext);
     const channel_ctx:ChannelContext = useContext(ChannelsContext);
     const msgctx = useContext(MessageContext);
-    const channel = channel_ctx.channels.get(props.channel_id);
+    const channel = channel_ctx.channels.get(props.message.channel_id);
 
     const [isPinned, setIsPinned] = useState(false);
     useEffect(() => {
-        const pinnedMessage = channel_ctx.pinnedMessages.get(message.channel_id)?.get(message.uuid);
+        const pinnedMessage = channel_ctx.pinnedMessages.get(message.channel_id)?.get(message.id);
         if (pinnedMessage !== undefined) {
             setIsPinned(true);
         } else {
             setIsPinned(false);
         }
-    }, [channel_ctx.pinnedMessages, message.uuid])
+    }, [channel_ctx.pinnedMessages, message.id])
 
     let style: React.CSSProperties
     style = {
@@ -34,7 +34,7 @@ export default function MessageContextMenu(props:propsMsgCtxProps) {
     }
 
     function PinMsg() {
-        const url = Routes.Channels + '/' + message.channel_id + '/pins/' + message.uuid;
+        const url = Routes.Channels + '/' + message.channel_id + '/pins/' + message.id;
         fetch(url, {
             method: 'PUT',
             headers: {
@@ -42,13 +42,13 @@ export default function MessageContextMenu(props:propsMsgCtxProps) {
             }
         }).then(res => {
             if (res.status === 200) {
-                channel_ctx.UpdatePinnedMessage(message.channel_id, message.uuid, message);
+                channel_ctx.UpdatePinnedMessage(message.channel_id, message.id, message);
             }
         })
     }
 
     function UnpinMsg() {
-        const url = Routes.Channels + '/' + message.channel_id + '/pins/' + message.uuid;
+        const url = Routes.Channels + '/' + message.channel_id + '/pins/' + message.id;
         fetch(url, {
             method: 'DELETE',
             headers: {
@@ -56,7 +56,7 @@ export default function MessageContextMenu(props:propsMsgCtxProps) {
             }
         }).then(res => {
             if (res.status === 200) {
-                channel_ctx.DeletePinnedMessage(message.channel_id, message.uuid);
+                channel_ctx.DeletePinnedMessage(message.channel_id, message.id);
             }
         })
     }
@@ -66,19 +66,19 @@ export default function MessageContextMenu(props:propsMsgCtxProps) {
             <button className='CtxBtn' onClick={() => {navigator.clipboard.writeText(props.message.content)}}>Copy Text</button>
             { !isPinned && <button className='CtxBtn' onClick={PinMsg}>Pin Message</button> }
             { isPinned && <button className='CtxBtn' onClick={UnpinMsg}>Unpin Message</button> }
-            { user_ctx.uuid === message.author.uuid && <button className='CtxBtn' onClick={
+            { user_ctx.id === message.author.id && <button className='CtxBtn' onClick={
                 () => {
                     msgctx.setMessage(message);
                     msgctx.setMessageEdit(true);
                 }
             }
             >Edit Message</button> }
-            { (user_ctx.uuid === message.author.uuid || channel?.owner_id === user_ctx.uuid) && <button className='CtxDelBtn' onClick={ () => {
+            { (user_ctx.id === message.author.id || channel?.owner_id === user_ctx.id) && <button className='CtxDelBtn' onClick={ () => {
                     state_context.setDeleteMessage(true);
                     state_context.setMessageOBJ(message);
             }
             }>Delete Message</button> }
-            <button className='CtxBtn' onClick={() => {navigator.clipboard.writeText(props.message.uuid)}}>Copy ID</button>
+            <button className='CtxBtn' onClick={() => {navigator.clipboard.writeText(props.message.id)}}>Copy ID</button>
         </div>
     )
 }

@@ -5,3 +5,5 @@
 
 /web/node_modules
 /web/build
+
+docker-compose.yml

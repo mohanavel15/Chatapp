@@ -3,208 +3,178 @@ package restapi
 import (
 	"Chatapp/database"
 	"Chatapp/response"
-	"Chatapp/websocket"
-	"encoding/json"
+	"context"
+	"fmt"
 	"net/http"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func JoinInvite(ctx *Context) {
-	r, w, db, user := ctx.Req, ctx.Res, ctx.Db, ctx.User
-
-	vars := mux.Vars(r)
+	vars := mux.Vars(ctx.Req)
 	invite_code := vars["id"]
 
-	invite := database.Invites{
-		InviteCode: invite_code,
-	}
-	db.Where(&invite).First(&invite)
+	inviteCollection := ctx.Db.Collection("invites")
+	channelCollection := ctx.Db.Collection("channels")
+	banCollection := ctx.Db.Collection("bans")
 
-	if invite.ID == 0 {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-
-	channel := database.Channel{}
-	db.Where("id = ?", invite.ChannelID).First(&channel)
-
-	if channel.ID == 0 {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-
-	ban := database.Ban{
-		BannedUser: user.ID,
-		ChannelID:  channel.ID,
-	}
-	db.Where(&ban).First(&ban)
-	if ban.ID != 0 {
-		w.WriteHeader(http.StatusForbidden)
-		return
-	}
-
-	member := database.Member{
-		ChannelID: channel.ID,
-		AccountID: user.ID,
-	}
-	db.Where(&member).First(&member)
-	if member.ID != 0 {
-		ctx.Res.WriteHeader(http.StatusAccepted)
-		return
-	}
-
-	member = database.Member{
-		ChannelID: channel.ID,
-		AccountID: user.ID,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-	}
-	db.Create(&member)
-
-	res_channel := response.NewChannel(&channel)
-
-	res, err := json.Marshal(res_channel)
+	var invite database.Invites
+	err := inviteCollection.FindOne(context.TODO(), bson.M{"invite_code": invite_code}).Decode(&invite)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		ctx.Res.WriteHeader(http.StatusNotFound)
 		return
 	}
 
-	res_member_user := response.NewUser(&ctx.User, 0)
-	if user, ok := ctx.Conn.Users[ctx.User.Uuid]; ok {
-		res_member_user.Status = 1
-		_, ok := ctx.Conn.Channels[channel.Uuid]
-		if !ok {
-			ctx.Conn.Channels[channel.Uuid] = make(map[string]*websocket.Ws)
-		}
-		ctx.Conn.Channels[channel.Uuid][ctx.User.Uuid] = user
+	var channel database.Channel
+	err = channelCollection.FindOne(context.TODO(), bson.M{"_id": invite.ChannelID}).Decode(&channel)
+	if err != nil {
+		ctx.Res.WriteHeader(http.StatusNotFound)
+		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(res)
+	err = banCollection.FindOne(context.TODO(), bson.M{"banned_user": ctx.User.ID, "channel_id": channel.ID}).Err()
+	if err == nil {
+		ctx.Res.WriteHeader(http.StatusForbidden)
+		return
+	}
+	rd := options.After
 
-	res_member := response.NewMember(&res_member_user, &channel, &member)
-	websocket.BroadcastToChannel(ctx.Conn, channel.Uuid, "MEMBER_JOIN", res_member)
+	result := channelCollection.FindOneAndUpdate(context.TODO(), bson.M{"_id": channel.ID}, bson.M{"$push": bson.M{"recipients": ctx.User.ID}}, &options.FindOneAndUpdateOptions{ReturnDocument: &rd})
+	if result.Err() != nil {
+		ctx.Res.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	result.Decode(&channel)
+
+	recipients := []response.User{}
+	for _, recipient := range channel.Recipients {
+		if channel.Type == 1 && recipient.Hex() == ctx.User.ID.Hex() {
+			continue
+		}
+		recipient, _ := database.GetUser(recipient.Hex(), ctx.Db)
+		recipients = append(recipients, response.NewUser(recipient, ctx.Conn.GetUserStatus(recipient.ID.Hex())))
+	}
+
+	res_channel := response.NewChannel(&channel, recipients)
+	ctx.WriteJSON(res_channel)
+	ctx.Conn.AddUserToChannel(ctx.User.ID.Hex(), channel.ID.Hex())
+	ctx.Conn.BroadcastToChannel(res_channel.ID, "CHANNEL_MODIFY", res_channel)
+
+	invite_join := fmt.Sprintf(INVITE_JOIN, ctx.User.Username)
+	message, statusCode := database.CreateMessage(invite_join, res_channel.ID, true, nil, ctx.Db)
+
+	if statusCode != http.StatusOK {
+		return
+	}
+
+	res_message := response.NewMessage(message, response.User{})
+	ctx.Conn.BroadcastToChannel(res_channel.ID, "MESSAGE_CREATE", res_message)
 }
 
 func GetInvites(ctx *Context) {
-	r, w, db, user := ctx.Req, ctx.Res, ctx.Db, ctx.User
-
-	vars := mux.Vars(r)
+	vars := mux.Vars(ctx.Req)
 	channel_id := vars["id"]
+	inviteCollection := ctx.Db.Collection("invites")
 
-	channel := database.Channel{}
-	db.Where("uuid = ?", channel_id).First(&channel)
-
-	if channel.ID == 0 {
-		w.WriteHeader(http.StatusNotFound)
+	channel, statusCode := database.GetChannel(channel_id, &ctx.User, ctx.Db)
+	if statusCode != http.StatusOK {
+		ctx.Res.WriteHeader(statusCode)
 		return
 	}
 
-	if channel.Owner != user.Uuid {
-		w.WriteHeader(http.StatusForbidden)
+	if channel.OwnerID != ctx.User.ID {
+		ctx.Res.WriteHeader(http.StatusForbidden)
 		return
 	}
 
-	invites := []database.Invites{}
-	db.Where("channel_id = ?", channel.ID).Find(&invites)
-
-	if len(invites) == 0 {
-		w.WriteHeader(http.StatusNotFound)
+	cur, err := inviteCollection.Find(context.TODO(), bson.M{"channel_id": channel.ID})
+	if err != nil {
+		ctx.Res.WriteHeader(http.StatusNotFound)
 		return
 	}
 
-	var invites_res_obj []response.Invite
-	for _, invite := range invites {
+	invites := []response.Invite{}
+	for cur.Next(context.TODO()) {
+		var invite database.Invites
+		err := cur.Decode(&invite)
+		if err != nil {
+			continue
+		}
 		invite_obj := response.Invite{
 			InviteCode: invite.InviteCode,
 			CreatedAt:  invite.CreatedAt.String(),
 		}
-		invites_res_obj = append(invites_res_obj, invite_obj)
+		invites = append(invites, invite_obj)
 	}
 
-	res, err := json.Marshal(invites_res_obj)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(res)
+	ctx.WriteJSON(invites)
 }
 
 func CreateInvite(ctx *Context) {
-	r, w, db, user := ctx.Req, ctx.Res, ctx.Db, ctx.User
-
-	vars := mux.Vars(r)
+	vars := mux.Vars(ctx.Req)
 	channel_id := vars["id"]
 
-	channel := database.Channel{}
-	db.Where("uuid = ?", channel_id).First(&channel)
+	inviteCollection := ctx.Db.Collection("invites")
 
-	if channel.ID == 0 {
-		w.WriteHeader(http.StatusNotFound)
+	channel, statusCode := database.GetChannel(channel_id, &ctx.User, ctx.Db)
+	if statusCode != http.StatusOK {
+		ctx.Res.WriteHeader(statusCode)
 		return
 	}
 
-	if channel.Owner != user.Uuid {
-		w.WriteHeader(http.StatusForbidden)
+	if channel.OwnerID != ctx.User.ID {
+		ctx.Res.WriteHeader(http.StatusForbidden)
 		return
 	}
 
 	invite := database.Invites{
-		InviteCode: uuid.New().String(),
+		ID:         primitive.NewObjectID(),
+		InviteCode: primitive.NewObjectID().Hex(),
 		ChannelID:  channel.ID,
+		AccountID:  ctx.User.ID,
 		CreatedAt:  time.Now(),
 		UpdatedAt:  time.Now(),
 	}
-	db.Create(&invite)
 
-	res, err := json.Marshal(response.Invite{
+	_, err := inviteCollection.InsertOne(context.TODO(), &invite)
+	if err != nil {
+		ctx.Res.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	ctx.WriteJSON(response.Invite{
 		InviteCode: invite.InviteCode,
 		CreatedAt:  invite.CreatedAt.String(),
 	})
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(res)
 }
 
 func DeleteInvite(ctx *Context) {
-	r, w, db, user := ctx.Req, ctx.Res, ctx.Db, ctx.User
-
-	vars := mux.Vars(r)
+	vars := mux.Vars(ctx.Req)
 	channel_id := vars["id"]
 	invite_code := vars["iid"]
 
-	channel := database.Channel{}
-	db.Where("uuid = ?", channel_id).First(&channel)
+	inviteCollection := ctx.Db.Collection("invites")
 
-	if channel.ID == 0 {
-		w.WriteHeader(http.StatusNotFound)
+	channel, statusCode := database.GetChannel(channel_id, &ctx.User, ctx.Db)
+	if statusCode != http.StatusOK {
+		ctx.Res.WriteHeader(statusCode)
 		return
 	}
 
-	if channel.Owner != user.Uuid {
-		w.WriteHeader(http.StatusForbidden)
+	if channel.OwnerID != ctx.User.ID {
+		ctx.Res.WriteHeader(http.StatusForbidden)
 		return
 	}
 
-	invite := database.Invites{
-		InviteCode: invite_code,
-		ChannelID:  channel.ID,
-	}
-	db.Where(&invite).First(&invite)
-
-	if invite.ID == 0 {
-		w.WriteHeader(http.StatusNotFound)
+	_, err := inviteCollection.DeleteOne(context.TODO(), bson.M{"channel_id": channel.ID, "invite_code": invite_code})
+	if err != nil {
+		ctx.Res.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	db.Delete(&invite)
+	ctx.Res.WriteHeader(http.StatusOK)
 }

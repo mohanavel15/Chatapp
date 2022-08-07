@@ -1,6 +1,5 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { StatesContext, StateContext } from "../contexts/states";
-import { ChannelsContext, ChannelContext } from '../contexts/channelctx';
 import Member from "./member";
 import { ContextMenuCtx, ContextMenu } from "../contexts/context_menu_ctx";
 import { InviteOBJ, BanOBJ } from "../models/models";
@@ -22,7 +21,6 @@ function Invite({ invite, onDelete }: { invite: InviteOBJ, onDelete: (invite_cod
 export default function EditChannel() {
     const user:UserContextOBJ = useContext(UserContext);
     const state_context: StateContext = useContext(StatesContext);
-    const channel_context: ChannelContext = useContext(ChannelsContext);
     const ctx_menu_context: ContextMenuCtx = useContext(ContextMenu);
     
     const [channelEditSection, setChannelEditSection] = useState(0);
@@ -38,11 +36,9 @@ export default function EditChannel() {
 
     useEffect(() => {
         setMembersElement([]);
-        const members = channel_context.members.get(state_context.ChannelOBJ.uuid)
-        if (members) {
-            members.forEach(member => {
+        state_context.ChannelOBJ.recipients.forEach(member => {
                 setMembersElement(prevMembers => [...prevMembers,
-                <div key={member.uuid} onContextMenu={
+                <div key={member.id} onContextMenu={
 					(event) => {
 						event.preventDefault();
 						ctx_menu_context.closeAll();
@@ -50,15 +46,14 @@ export default function EditChannel() {
 						ctx_menu_context.setShowMemberCtxMenu(true);
 					}
           		}>
-          		<Member member_obj={member} />
+          		<Member member_obj={member} channel_obj={state_context.ChannelOBJ} />
           		</div>])
             })
-        }
-    }, [channel_context.members]);
+    }, [state_context.ChannelOBJ]);
 
     useEffect(() => {
         setInvites([]);
-        const url = Routes.Channels + "/" + state_context.ChannelOBJ.uuid + "/invites";
+        const url = Routes.Channels + "/" + state_context.ChannelOBJ.id + "/invites";
         fetch(url, {
             method: "GET",
             headers: {
@@ -74,7 +69,7 @@ export default function EditChannel() {
     }, [InviteReload]);
 
     function Unban(ban_id: string) {
-        const url = Routes.Channels + "/" + state_context.ChannelOBJ.uuid + "/bans/" + ban_id;
+        const url = Routes.Channels + "/" + state_context.ChannelOBJ.id + "/bans/" + ban_id;
         fetch(url, {
             method: "DELETE",
             headers: {
@@ -89,7 +84,7 @@ export default function EditChannel() {
 
     useEffect(() => {
         setBans([]);
-        const url = Routes.Channels + "/" + state_context.ChannelOBJ.uuid + "/bans";
+        const url = Routes.Channels + "/" + state_context.ChannelOBJ.id + "/bans";
         fetch(url, {
             method: "GET",
             headers: {
@@ -107,7 +102,7 @@ export default function EditChannel() {
                                     <p>{ban.banned_user.username}</p>
                                 </div>
                                 <div className="ban-action">
-                                    <button className="delete-invite-button" onClick={() => {Unban(ban.uuid)}}><FontAwesomeIcon icon={faTrashCan} /></button>
+                                    <button className="delete-invite-button" onClick={() => {Unban(ban.id)}}><FontAwesomeIcon icon={faTrashCan} /></button>
                                 </div>
                             </div>
                             <div className="ban-container">
@@ -132,27 +127,26 @@ export default function EditChannel() {
         e.preventDefault();
         const channelName = channel_name.current.value;
 
-        if (channelName === "") {
-            return
-        }
+        if (channelName === "") return
 
         if (icon_input.current.files && icon_input.current.files.length > 0) {
-            const url = Routes.Channels+"/"+state_context.ChannelOBJ.uuid;
-            const formData = new FormData();
-            formData.append('name', channelName);
-            formData.append('file', icon_input.current.files[0]);
-            fetch(url, {
-                method: "PATCH",
-                headers: {
-                    "Authorization": user.accessToken,
-                },
-                body: formData
-            })
+            let reader = new FileReader();
+            reader.readAsDataURL(icon_input.current.files[0]);
+            reader.onload = () => {
+                const url = Routes.Channels+"/"+state_context.ChannelOBJ.id;
+                fetch(url, {
+                    method: "PATCH",
+                    headers: {
+                        "Authorization": user.accessToken,
+                    },
+                    body: JSON.stringify({ name: channelName, icon: reader.result })
+                })
+            }
         }
     }
  
     function create_invite() {
-        const url = Routes.Channels + "/" + state_context.ChannelOBJ.uuid + "/invites";
+        const url = Routes.Channels + "/" + state_context.ChannelOBJ.id + "/invites";
         fetch(url, {
             method: "POST",
             headers: {
@@ -168,7 +162,7 @@ export default function EditChannel() {
     }
 
     function delete_invite(invite_code: string) {
-        const url = Routes.Channels +  `/${state_context.ChannelOBJ.uuid}/invites/${invite_code}`;
+        const url = Routes.Channels +  `/${state_context.ChannelOBJ.id}/invites/${invite_code}`;
         fetch(url, {
             method: 'DELETE',
             headers: {
@@ -207,7 +201,7 @@ export default function EditChannel() {
                     <>
                     <input className="channel-edit-input" ref={channel_name} type="text" placeholder="Channel Name" defaultValue={state_context.ChannelOBJ.name}/>
                     <div className="channel-edit-icon-container">
-                        <img className="channel-edit-icon" ref={icon_image} src={state_context.ChannelOBJ.icon} />
+                        <img className="channel-edit-icon" ref={icon_image} alt="icon" src={state_context.ChannelOBJ.icon} />
                         <FontAwesomeIcon icon={faCamera} className="channel-edit-icon-camera" onClick={() => icon_input.current.click()} />
 				        <input type="file" ref={icon_input} name="filename" hidden onChange={onIconChange} accept="image/*"></input>
                     </div>

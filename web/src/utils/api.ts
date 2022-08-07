@@ -31,15 +31,4 @@ async function Refresh(): Promise<string | undefined> {
     }
 }
 
-function DMUser(access_token: string, user_id: string) {
-    const url = Routes.host + "/dms/" + user_id;
-    const response = fetch(url, {
-        method: "GET",
-        headers: {
-            "Authorization": access_token,
-        }
-    })
-    return response;
-}
-
-export { Refresh, DMUser };
+export { Refresh };

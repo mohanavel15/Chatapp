@@ -1,15 +1,14 @@
 package websocket
 
-import "gorm.io/gorm"
+import "go.mongodb.org/mongo-driver/mongo"
 
 type Context struct {
 	Ws    *Ws
 	Event string
 	Data  []byte
-	Raw   []byte
-	Db    *gorm.DB
+	Db    *mongo.Database
 }
 
-func (ctx *Context) Send(data []byte) error {
-	return ctx.Ws.Write(data)
+func (ctx *Context) Send(data []byte) {
+	ctx.Ws.Write(data)
 }

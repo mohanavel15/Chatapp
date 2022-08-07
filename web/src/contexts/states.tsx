@@ -1,5 +1,5 @@
 import React, { useState, createContext } from 'react'
-import { ChannelOBJ, MemberOBJ, MessageOBJ } from '../models/models';
+import { ChannelOBJ, MessageOBJ, UserOBJ } from '../models/models';
 
 export interface StateContext {
     Settings: boolean;
@@ -12,7 +12,7 @@ export interface StateContext {
     showMembers: boolean;
     showKickBan: boolean;
     isBan: boolean;
-    KickBanMember: MemberOBJ | undefined;
+    KickBanMember: UserOBJ | undefined;
     setSettings: React.Dispatch<React.SetStateAction<boolean>>;
     setCreateChannel: React.Dispatch<React.SetStateAction<boolean>>;
     setEditChannel: React.Dispatch<React.SetStateAction<boolean>>;
@@ -23,7 +23,7 @@ export interface StateContext {
     setShowMembers: React.Dispatch<React.SetStateAction<boolean>>;
     setShowKickBan: React.Dispatch<React.SetStateAction<boolean>>;
     setIsBan: React.Dispatch<React.SetStateAction<boolean>>;
-    setKickBanMember: React.Dispatch<React.SetStateAction<MemberOBJ | undefined>>;
+    setKickBanMember: React.Dispatch<React.SetStateAction<UserOBJ | undefined>>;
 }
 
 export const StatesContext = createContext<StateContext>(undefined!);
@@ -41,7 +41,7 @@ export default function States({ children }: {children: React.ReactChild}) {
 
     const [showKickBan, setShowKickBan] = useState(false)
     const [isBan, setIsBan] = useState(false)
-    const [KickBanMember, setKickBanMember] = useState<MemberOBJ>()
+    const [KickBanMember, setKickBanMember] = useState<UserOBJ>()
 
     const [showMembers, setShowMembers] = useState(true)
 

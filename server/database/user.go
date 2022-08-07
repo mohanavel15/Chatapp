@@ -1,16 +1,25 @@
 package database
 
 import (
+	"context"
 	"net/http"
 
-	"gorm.io/gorm"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func GetUser(uuid string, db *gorm.DB) (*Account, int) {
-	var user Account
-	db.Where("uuid = ?", uuid).First(&user)
+func GetUser(id string, db *mongo.Database) (*User, int) {
+	var user User
+	users := db.Collection("users")
 
-	if user.ID == 0 {
+	object_id, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, http.StatusBadRequest
+	}
+
+	err = users.FindOne(context.TODO(), bson.M{"_id": object_id}).Decode(&user)
+	if err != nil {
 		return nil, http.StatusNotFound
 	}
 

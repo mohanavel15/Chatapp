@@ -1,83 +1,65 @@
 package restapi
 
 import (
+	"Chatapp/database"
+	"Chatapp/request"
 	"Chatapp/response"
+	"context"
 	"encoding/json"
-	"fmt"
-	"io"
 	"net/http"
-	"os"
 	"regexp"
+	"strings"
 
-	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func GetUser(ctx *Context) {
-	user_res := response.NewUser(&ctx.User, 0)
-
-	res, err := json.Marshal(user_res)
-	if err != nil {
-		ctx.Res.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	ctx.Res.Header().Set("Content-Type", "application/json")
-	ctx.Res.Write(res)
+	user_res := response.NewUser(&ctx.User, ctx.Conn.GetUserStatus(ctx.User.ID.Hex()))
+	ctx.WriteJSON(user_res)
 }
 
 func EditUser(ctx *Context) {
-	file, handler, err := ctx.Req.FormFile("file")
+	var request request.User
+	err := json.NewDecoder(ctx.Req.Body).Decode(&request)
 	if err != nil {
 		ctx.Res.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	defer file.Close()
 
-	file_type_regx := regexp.MustCompile("image/.+")
-	file_type := file_type_regx.FindString(handler.Header["Content-Type"][0])
+	avatar := request.Avatar
+	if avatar == "" {
+		ctx.Res.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	file_type_regx := regexp.MustCompile("image/(png|jpeg|gif)")
+	file_ext_regx := regexp.MustCompile("png|jpeg|gif")
+
+	file_type := file_type_regx.FindString(avatar)
 	if file_type == "" {
 		ctx.Res.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	ext_regx := regexp.MustCompile("\\.[\\w]+$")
-	ext := ext_regx.FindString(handler.Filename)
+	file_ext := file_ext_regx.FindString(file_type)
 
-	new_file_id := uuid.New().String()
-	new_file_name := fmt.Sprintf("%s%s", new_file_id, ext)
-	upload_folder := fmt.Sprintf("files/avatars/%s/", ctx.User.Uuid)
+	avatarB64 := avatar[strings.Index(avatar, ",")+1:]
 
-	_, err = os.Stat(upload_folder)
-	if os.IsNotExist(err) {
-		err := os.MkdirAll(upload_folder, 0750)
-		if err != nil {
-			ctx.Res.WriteHeader(http.StatusInternalServerError)
-			return
-		}
+	avatar_db := database.Avatar{
+		ID:     primitive.NewObjectID(),
+		Ext:    file_ext,
+		Type:   file_type,
+		Avatar: avatarB64,
 	}
 
-	new_file_name_with_path := fmt.Sprintf("%s%s", upload_folder, new_file_name)
-	new_file, err := os.OpenFile(new_file_name_with_path, os.O_WRONLY|os.O_CREATE, 0666)
+	users := ctx.Db.Collection("users")
+	_, err = users.UpdateOne(context.TODO(), bson.M{"_id": ctx.User.ID}, bson.M{"$set": bson.M{"avatar": avatar_db}})
 	if err != nil {
 		ctx.Res.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	defer new_file.Close()
-	io.Copy(new_file, file)
-
-	url := fmt.Sprintf("http://127.0.0.1:5000/avatars/%s/%s", ctx.User.Uuid, new_file_name)
-
-	ctx.User.Avatar = url
-	ctx.Db.Save(&ctx.User)
-
-	user_res := response.NewUser(&ctx.User, 0)
-
-	res, err := json.Marshal(user_res)
-	if err != nil {
-		ctx.Res.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	ctx.Res.Header().Set("Content-Type", "application/json")
-	ctx.Res.Write(res)
+	ctx.User.Avatar = avatar_db
+	user_res := response.NewUser(&ctx.User, ctx.Conn.GetUserStatus(ctx.User.ID.Hex()))
+	ctx.WriteJSON(user_res)
 }

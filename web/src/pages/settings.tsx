@@ -24,19 +24,23 @@ function Settings() {
 
     function avatar() {
         if (avatar_input.current.files && avatar_input.current.files.length > 0) {
-            const formData = new FormData();
-            formData.append('file', avatar_input.current.files[0]);
-            fetch(Routes.currentUser, {
-                method: "PATCH",
-                headers: {
-                    "Authorization": user_ctx.accessToken
-                },
-                body: formData
-            }).then(response => {
-                if (response.status === 200) {
-                    alert("Successfully updated avatar!")
-                }
-            })
+            let reader = new FileReader();
+            reader.readAsDataURL(avatar_input.current.files[0]);
+            reader.onload = () => {
+                console.log(reader.result);
+                fetch(Routes.currentUser, {
+                    method: "PATCH",
+                    headers: {
+                        "Authorization": user_ctx.accessToken,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ avatar: reader.result })
+                }).then(response => {
+                    if (response.status === 200) {
+                        alert("Successfully updated avatar!")
+                    }
+                })
+            }
         }
     }
 
@@ -129,6 +133,7 @@ function Settings() {
                 <div className='settings-content-item'>
                 <h3 className='settings-content-item-title'>DMs</h3>
                 <ToggleBtn input_ref={who_can_dm_ref}> Only Friends Can Dm </ToggleBtn>
+                <ToggleBtn input_ref={who_can_dm_ref}> Only Friends Add To Channel </ToggleBtn>
                 <button className='btn-green' onClick={who_can_dm}>Save</button>
                 </div>
                 <div className='settings-content-item'>

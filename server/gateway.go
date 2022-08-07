@@ -6,7 +6,6 @@ import (
 
 	ws "Chatapp/websocket"
 
-	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
 
@@ -24,17 +23,12 @@ func Gateway(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	conns := ws.Connections{
-		Users:    onlineUsers,
-		Channels: channels,
-	}
-
 	ws := &ws.Ws{
-		Uuid:    uuid.New().String(),
 		Conn:    conn,
 		Handler: handler,
 		Db:      db,
-		Conns:   &conns,
+		Conns:   conns,
 	}
-	go ws.ReadLoop()
+
+	ws.ReadLoop()
 }

@@ -4,24 +4,32 @@ import (
 	"Chatapp/database"
 	"Chatapp/request"
 	"Chatapp/response"
-	"Chatapp/websocket"
+	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
-	"os"
-	"regexp"
-	"time"
+	"strconv"
+	"strings"
 
-	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func GetMessages(ctx *Context) {
 	vars := mux.Vars(ctx.Req)
 	channel_id := vars["id"]
+	querys := ctx.Req.URL.Query()
 
-	messages, statusCode := database.GetMessages(channel_id, &ctx.User, ctx.Db)
+	limit, _ := strconv.ParseInt(querys.Get("limit"), 10, 64)
+	offset, _ := strconv.ParseInt(querys.Get("offset"), 10, 64)
+	if limit == 0 {
+		limit = 25
+	} else if limit > 100 {
+		limit = 100
+	}
+
+	messages, statusCode := database.GetMessages(channel_id, limit, offset, &ctx.User, ctx.Db)
 	if statusCode != http.StatusOK {
 		ctx.Res.WriteHeader(statusCode)
 		return
@@ -29,41 +37,48 @@ func GetMessages(ctx *Context) {
 
 	messages_res := []response.Message{}
 	for _, message := range messages {
-		var author database.Account
-		ctx.Db.Where("id = ?", message.AccountID).First(&author)
-		messages_res = append(messages_res, response.NewMessage(&message, response.NewUser(&author, 0)))
+		if message.SystemMessage {
+			messages_res = append(messages_res, response.NewMessage(&message, response.User{}))
+			continue
+		}
+
+		user, statusCode := database.GetUser(message.AccountID.Hex(), ctx.Db)
+		if statusCode != http.StatusOK {
+			continue
+		}
+		messages_res = append(messages_res, response.NewMessage(&message, response.NewUser(user, 0)))
 	}
 
-	res, err := json.Marshal(messages_res)
-	if err != nil {
-		ctx.Res.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	ctx.Res.Header().Set("Content-Type", "application/json")
-	ctx.Res.Write(res)
+	ctx.WriteJSON(messages_res)
 }
 
 func GetMessage(ctx *Context) {
 	vars := mux.Vars(ctx.Req)
+	channel_id := vars["id"]
 	message_id := vars["mid"]
 
-	message, statusCode := database.GetMessage(message_id, &ctx.User, ctx.Db)
+	message, _, statusCode := database.GetMessage(message_id, channel_id, &ctx.User, ctx.Db)
 	if statusCode != http.StatusOK {
 		ctx.Res.WriteHeader(statusCode)
 		return
 	}
 
-	message_res := response.NewMessage(message, response.NewUser(&ctx.User, 0))
+	var message_res response.Message
 
-	res, err := json.Marshal(message_res)
-	if err != nil {
-		ctx.Res.WriteHeader(http.StatusInternalServerError)
-		return
+	if message.SystemMessage {
+		var user response.User
+		message_res = response.NewMessage(message, user)
+	} else {
+		user, statusCode := database.GetUser(message.AccountID.Hex(), ctx.Db)
+		if statusCode != http.StatusOK {
+			ctx.Res.WriteHeader(statusCode)
+			return
+		}
+
+		message_res = response.NewMessage(message, response.NewUser(user, 0))
 	}
 
-	ctx.Res.Header().Set("Content-Type", "application/json")
-	ctx.Res.Write(res)
+	ctx.WriteJSON(message_res)
 }
 
 func CreateMessage(ctx *Context) {
@@ -79,28 +94,23 @@ func CreateMessage(ctx *Context) {
 			return
 		}
 
-		if message_req.Content == "" {
+		content := strings.TrimSpace(message_req.Content)
+
+		if content == "" {
 			ctx.Res.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
-		message, statusCode := database.CreateMessage(message_req.Content, channel_id, &ctx.User, ctx.Db)
+		message, statusCode := database.CreateMessage(content, channel_id, false, &ctx.User, ctx.Db)
 		if statusCode != http.StatusOK {
 			ctx.Res.WriteHeader(statusCode)
 			return
 		}
 
 		message_res := response.NewMessage(message, response.NewUser(&ctx.User, 0))
-		res, err := json.Marshal(message_res)
-		if err != nil {
-			ctx.Res.WriteHeader(http.StatusInternalServerError)
-			return
-		}
 
-		ctx.Res.Header().Set("Content-Type", "application/json")
-		ctx.Res.Write(res)
-
-		websocket.BroadcastToChannel(ctx.Conn, channel_id, "MESSAGE_CREATE", message_res)
+		ctx.WriteJSON(message_res)
+		ctx.Conn.BroadcastToChannel(channel_id, "MESSAGE_CREATE", message_res)
 	} else {
 		content := ctx.Req.FormValue("content")
 		file, handler, err := ctx.Req.FormFile("file")
@@ -110,57 +120,48 @@ func CreateMessage(ctx *Context) {
 		}
 		defer file.Close()
 
-		ext_regx := regexp.MustCompile("\\.[\\w]+$")
-		ext := ext_regx.FindString(handler.Filename)
-
-		new_file_id := uuid.New().String()
-		new_file_name := fmt.Sprintf("%s%s", new_file_id, ext)
-		upload_folder := fmt.Sprintf("files/attachments/%s/%s/", channel_id, ctx.User.Uuid)
-
-		_, err = os.Stat(upload_folder)
-		if os.IsNotExist(err) {
-			err := os.MkdirAll(upload_folder, 0750)
-			if err != nil {
-				ctx.Res.WriteHeader(http.StatusInternalServerError)
-				return
-			}
-		}
-
-		new_file_name_with_path := fmt.Sprintf("%s%s", upload_folder, new_file_name)
-		new_file, err := os.OpenFile(new_file_name_with_path, os.O_WRONLY|os.O_CREATE, 0666)
-		if err != nil {
-			ctx.Res.WriteHeader(http.StatusInternalServerError)
+		if handler.Size > 8388608 {
+			ctx.Res.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		defer new_file.Close()
-		io.Copy(new_file, file)
 
-		url := fmt.Sprintf("http://127.0.0.1:5000/attachments/%s/%s/%s", channel_id, ctx.User.Uuid, new_file_name)
+		file_data, err := io.ReadAll(file)
+		if err != nil {
+			ctx.Res.WriteHeader(http.StatusBadRequest)
+			return
+		}
 
-		attachment := response.Attachment{
-			Uuid:        new_file_id,
-			Name:        handler.Filename,
+		filename := strings.ReplaceAll(handler.Filename, " ", "_")
+
+		db_attachment := database.Attachment{
+			ID:          primitive.NewObjectID(),
+			Filename:    filename,
 			Size:        handler.Size,
 			ContentType: handler.Header["Content-Type"][0],
-			Url:         url,
+			Data:        file_data,
 		}
-		attachments := []response.Attachment{attachment}
 
-		message_res := response.Message{
-			Uuid:        uuid.New().String(),
-			Content:     content,
-			Author:      response.NewUser(&ctx.User, 0),
-			ChannelID:   channel_id,
-			CreatedAt:   time.Now().Unix(),
-			EditedAt:    time.Now().Unix(),
-			Attachments: attachments,
+		content = strings.TrimSpace(content)
+		message, statusCode := database.CreateMessage(content, channel_id, false, &ctx.User, ctx.Db)
+		if statusCode != http.StatusOK {
+			ctx.Res.WriteHeader(statusCode)
+			return
 		}
-		websocket.BroadcastToChannel(ctx.Conn, channel_id, "MESSAGE_CREATE", message_res)
+		message.Attachments = []database.Attachment{db_attachment}
+
+		messageCollection := ctx.Db.Collection("messages")
+		messageCollection.UpdateOne(context.TODO(), bson.M{"_id": message.ID}, bson.M{"$set": bson.M{"attachments": message.Attachments}})
+
+		message_res := response.NewMessage(message, response.NewUser(&ctx.User, 0))
+
+		ctx.WriteJSON(message_res)
+		ctx.Conn.BroadcastToChannel(channel_id, "MESSAGE_CREATE", message_res)
 	}
 }
 
 func EditMessage(ctx *Context) {
 	vars := mux.Vars(ctx.Req)
+	channel_id := vars["id"]
 	message_id := vars["mid"]
 
 	var message_req request.Message
@@ -170,45 +171,44 @@ func EditMessage(ctx *Context) {
 		return
 	}
 
-	if message_req.Content == "" {
+	content := strings.TrimSpace(message_req.Content)
+
+	if content == "" {
 		ctx.Res.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	message, statusCode := database.EditMessage(message_id, message_req.Content, &ctx.User, ctx.Db)
+	message, statusCode := database.EditMessage(message_id, channel_id, content, &ctx.User, ctx.Db)
 	if statusCode != http.StatusOK {
 		ctx.Res.WriteHeader(statusCode)
 		return
 	}
-	message_res := response.NewMessage(message, response.NewUser(&ctx.User, 0))
-	res, err := json.Marshal(message_res)
-	if err != nil {
-		ctx.Res.WriteHeader(http.StatusInternalServerError)
-		return
-	}
 
-	ctx.Res.Header().Set("Content-Type", "application/json")
-	ctx.Res.Write(res)
-	websocket.BroadcastToChannel(ctx.Conn, message_res.ChannelID, "MESSAGE_MODIFY", message_res)
+	message_res := response.NewMessage(message, response.NewUser(&ctx.User, 0))
+
+	ctx.WriteJSON(message_res)
+	ctx.Conn.BroadcastToChannel(message_res.ChannelID, "MESSAGE_MODIFY", message_res)
 }
 
 func DeleteMessage(ctx *Context) {
 	vars := mux.Vars(ctx.Req)
+	channel_id := vars["id"]
 	message_id := vars["mid"]
 
-	message, statusCode := database.DeleteMessage(message_id, &ctx.User, ctx.Db)
+	message, statusCode := database.DeleteMessage(message_id, channel_id, &ctx.User, ctx.Db)
 	if statusCode != http.StatusOK {
 		ctx.Res.WriteHeader(statusCode)
 		return
 	}
-	message_res := response.NewMessage(message, response.NewUser(&ctx.User, 0))
-	res, err := json.Marshal(message_res)
-	if err != nil {
-		ctx.Res.WriteHeader(http.StatusInternalServerError)
+
+	user, statusCode := database.GetUser(message.AccountID.Hex(), ctx.Db)
+	if statusCode != http.StatusOK {
+		ctx.Res.WriteHeader(statusCode)
 		return
 	}
 
-	ctx.Res.Header().Set("Content-Type", "application/json")
-	ctx.Res.Write(res)
-	websocket.BroadcastToChannel(ctx.Conn, message_res.ChannelID, "MESSAGE_DELETE", message_res)
+	message_res := response.NewMessage(message, response.NewUser(user, 0))
+
+	ctx.WriteJSON(message_res)
+	ctx.Conn.BroadcastToChannel(message_res.ChannelID, "MESSAGE_DELETE", message_res)
 }
