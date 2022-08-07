@@ -49,6 +49,17 @@ func AddRecipient(ctx *Context) {
 		return
 	}
 
+	relationship, statusCode := database.GetRelationship(ctx.User.ID, user.ID, ctx.Db)
+	if statusCode != http.StatusOK {
+		ctx.Res.WriteHeader(statusCode)
+		return
+	}
+
+	if relationship.Type != 1 {
+		ctx.Res.WriteHeader(http.StatusForbidden)
+		return
+	}
+
 	rd := options.After
 	result := channelCollection.FindOneAndUpdate(context.TODO(), bson.M{"_id": channel.ID}, bson.M{"$push": bson.M{"recipients": user.ID}}, &options.FindOneAndUpdateOptions{ReturnDocument: &rd})
 	if result.Err() != nil {

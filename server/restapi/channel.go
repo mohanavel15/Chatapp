@@ -42,6 +42,12 @@ func CreateChannel(ctx *Context) {
 	res_channel := response.NewChannel(channel, recipients)
 	ctx.WriteJSON(res_channel)
 	ctx.Conn.AddUserToChannel(ctx.User.ID.Hex(), channel.ID.Hex())
+	if channel.Type == 1 {
+		recipient := res_channel.Recipients[0]
+		ctx.Conn.AddUserToChannel(recipient.ID, res_channel.ID)
+		res_user := response.NewUser(&ctx.User, ctx.Conn.GetUserStatus(ctx.User.ID.Hex()))
+		ctx.Conn.SendToUser(recipient.ID, "CHANNEL_CREATE", response.NewChannel(channel, []response.User{res_user}))
+	}
 }
 
 func GetChannels(ctx *Context) {

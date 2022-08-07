@@ -12,7 +12,6 @@ import (
 )
 
 type Ws struct {
-	Uuid    string
 	Conn    *websocket.Conn
 	Handler *EventHandler
 	Db      *mongo.Database
@@ -64,7 +63,6 @@ func (ws *Ws) HandleWSMessage(data []byte) {
 		Event: strings.ToUpper(ws_message.Event),
 		Data:  data_json,
 		Db:    ws.Db,
-		Raw:   data,
 	}
 
 	if ws.User == nil {

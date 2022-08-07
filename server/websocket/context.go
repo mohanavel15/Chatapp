@@ -6,7 +6,6 @@ type Context struct {
 	Ws    *Ws
 	Event string
 	Data  []byte
-	Raw   []byte
 	Db    *mongo.Database
 }
 

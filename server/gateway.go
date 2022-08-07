@@ -6,7 +6,6 @@ import (
 
 	ws "Chatapp/websocket"
 
-	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
 
@@ -25,7 +24,6 @@ func Gateway(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ws := &ws.Ws{
-		Uuid:    uuid.New().String(),
 		Conn:    conn,
 		Handler: handler,
 		Db:      db,
