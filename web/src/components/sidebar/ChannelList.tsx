@@ -10,7 +10,7 @@ export default function ChannelList() {
 	const channels = useMemo(() => Array.from(channel_context.channels.values()).sort((a: ChannelOBJ, b: ChannelOBJ) => sortChannel(a, b, channel_context)), [channel_context.channels, channel_context.messages])
 
 	return (
-		<div className='ChannelBar'>
+		<div className='flex flex-col h-full overflow-scroll'>
 			{ channels.map(channel => (
 			<div key={channel.id} onContextMenu={event => {
 				event.preventDefault();
@@ -24,8 +24,6 @@ export default function ChannelList() {
 		</div>
 	)
 }
-
-
 
 function sortChannel(a: ChannelOBJ, b: ChannelOBJ, channel_context: ChannelContext) {
 	const a_msg = channel_context.messages.get(a.id)

@@ -12,9 +12,9 @@ export default function ProfileBar() {
     return (
         <div className="bg-gray-900 h-20 flex items-center">
             <img className="rounded-full h-10 w-10 mx-2" src={user.avatar} alt="avatar" onError={setDefaultAvatar} />
-            <span className="font-bold text-lg">{user.username}</span>
+            <span className="text-white font-bold text-lg">{user.username}</span>
             <IconButton onClick={() => { state_context.setSettings(true) }}>
-                <FaCog />
+                <FaCog size={20} color={"white"} />
             </IconButton>
         </div>
     );
