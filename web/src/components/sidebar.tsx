@@ -1,12 +1,12 @@
-import ProfileBar from './sidebar/ProfileBar';
+import ProfileBar from './profile_bar';
 import SideTopBar from './side_top_bar';
-import ChannelList from './sidebar/ChannelList';
+import ChannelBar from './channel_bar';
 
 function SideBar() {
     return (
-        <div className="flex flex-col w-60 relative bg-gray-800">
+        <div className="Sidebar">
           <SideTopBar />
-          <ChannelList />
+          <ChannelBar />
           <ProfileBar />
         </div>
     );
