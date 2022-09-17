@@ -20,6 +20,7 @@ func Gateway(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		log.Println(err)
+		conn.Close()
 		return
 	}
 

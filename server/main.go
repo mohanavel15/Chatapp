@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -107,6 +108,17 @@ func main() {
 	after_recovery := handlers.RecoveryHandler()(after_cors)
 
 	server_uri := fmt.Sprintf("%s:%s", HOST, PORT)
-	log.Printf("Listening on %s", server_uri)
-	http.ListenAndServe(server_uri, after_recovery)
+	log.Println("Listening on ", server_uri)
+
+	server := http.Server{
+		Addr:         server_uri,
+		Handler:      after_recovery,
+		ReadTimeout:  time.Second,
+		WriteTimeout: time.Second,
+		IdleTimeout:  time.Second,
+	}
+
+	if err = server.ListenAndServe(); err != nil {
+		log.Fatalln(err.Error())
+	}
 }

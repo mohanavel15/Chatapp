@@ -12,10 +12,6 @@ type Signin struct {
 	ClientToken string `json:"client_token"`
 }
 
-type Signout struct {
-	AccessToken string `json:"access_token"`
-}
-
 type ChangePassword struct {
 	CurrentPassword string `json:"current_password"`
 	NewPassword     string `json:"new_password"`

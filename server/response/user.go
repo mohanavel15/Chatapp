@@ -28,13 +28,3 @@ func NewUser(user *database.User, status int) User {
 		CreatedAt: user.CreatedAt,
 	}
 }
-
-func ErrorUser() User {
-	return User{
-		ID:        "00000000-0000-0000-0000-000000000000",
-		Username:  "System",
-		Avatar:    "",
-		Status:    0,
-		CreatedAt: 0,
-	}
-}

@@ -11,12 +11,6 @@ type WS_Message struct {
 	Data  interface{} `json:"data"`
 }
 
-type Channel struct {
-	Uuid string `json:"uuid"`
-	Name string `json:"name"`
-	Icon string `json:"icon"`
-}
-
 type Ready struct {
 	User         response.User           `json:"user"`
 	Channels     []response.Channel      `json:"channels"`
