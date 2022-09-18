@@ -10,7 +10,7 @@ import (
 
 func (db *Database) GetUser(id string) (*User, int) {
 	var user User
-	users := db.mongo.Collection("users")
+	users := db.Mongo.Collection("users")
 
 	object_id, err := primitive.ObjectIDFromHex(id)
 	if err != nil {

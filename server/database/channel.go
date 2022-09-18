@@ -14,7 +14,7 @@ import (
 )
 
 func (db *Database) CreateChannel(name string, icon string, recipient_id string, user *User) (*Channel, int) {
-	channels := db.mongo.Collection("channels")
+	channels := db.Mongo.Collection("channels")
 
 	if recipient_id != "" {
 		recipient, statusCode := db.GetUser(recipient_id)
@@ -96,7 +96,7 @@ func (db *Database) CreateChannel(name string, icon string, recipient_id string,
 }
 
 func (db *Database) ModifyChannel(id string, name string, icon string, user *User) (*Channel, int) {
-	channels := db.mongo.Collection("channels")
+	channels := db.Mongo.Collection("channels")
 
 	channel, statusCode := db.GetChannel(id, user)
 	if statusCode != http.StatusOK {
@@ -145,7 +145,7 @@ func (db *Database) ModifyChannel(id string, name string, icon string, user *Use
 }
 
 func (db *Database) DeleteChannel(id string, user *User) (*Channel, int) {
-	channelsCollection := db.mongo.Collection("channels")
+	channelsCollection := db.Mongo.Collection("channels")
 
 	channel, statusCode := db.GetChannel(id, user)
 	if statusCode != http.StatusOK {
@@ -167,7 +167,7 @@ func (db *Database) DeleteChannel(id string, user *User) (*Channel, int) {
 }
 
 func (db *Database) GetChannel(id string, user *User) (*Channel, int) {
-	channelsCollection := db.mongo.Collection("channels")
+	channelsCollection := db.Mongo.Collection("channels")
 	object_id, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, http.StatusBadRequest
@@ -183,7 +183,7 @@ func (db *Database) GetChannel(id string, user *User) (*Channel, int) {
 }
 
 func (db *Database) GetChannelWithoutUser(id string) (*Channel, int) {
-	channelsCollection := db.mongo.Collection("channels")
+	channelsCollection := db.Mongo.Collection("channels")
 	object_id, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, http.StatusBadRequest
@@ -199,7 +199,7 @@ func (db *Database) GetChannelWithoutUser(id string) (*Channel, int) {
 }
 
 func (db *Database) GetChannels(user *User) []Channel {
-	channelsCollection := db.mongo.Collection("channels")
+	channelsCollection := db.Mongo.Collection("channels")
 
 	var channels []Channel
 	cursor, err := channelsCollection.Find(context.TODO(), bson.M{"recipients": user.ID})

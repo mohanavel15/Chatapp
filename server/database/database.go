@@ -9,7 +9,7 @@ import (
 )
 
 type Database struct {
-	mongo *mongo.Database
+	Mongo *mongo.Database
 }
 
 func NewDatabase(MONGO_URI string, MONGO_DATABASE string) *Database {
@@ -28,5 +28,7 @@ func NewDatabase(MONGO_URI string, MONGO_DATABASE string) *Database {
 	}
 
 	db := client.Database(MONGO_DATABASE)
-	return &Database{mongo: db}
+	return &Database{
+		Mongo: db,
+	}
 }

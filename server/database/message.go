@@ -48,7 +48,7 @@ func (db *Database) CreateMessage(content string, channel_id string, system_mess
 		}
 	}
 
-	messages := db.mongo.Collection("messages")
+	messages := db.Mongo.Collection("messages")
 
 	new_message := Message{
 		ID:            primitive.NewObjectID(),
@@ -81,7 +81,7 @@ func (db *Database) EditMessage(id string, channel_id string, content string, us
 		return nil, http.StatusForbidden
 	}
 
-	messages := db.mongo.Collection("messages")
+	messages := db.Mongo.Collection("messages")
 	_, err := messages.UpdateOne(context.TODO(), bson.M{"_id": message.ID}, bson.M{"$set": bson.M{"content": content, "updated_at": time.Now().Unix()}})
 	if err != nil {
 		return nil, http.StatusInternalServerError
@@ -107,7 +107,7 @@ func (db *Database) DeleteMessage(id string, channel_id string, user *User) (*Me
 		return nil, http.StatusForbidden
 	}
 
-	messages := db.mongo.Collection("messages")
+	messages := db.Mongo.Collection("messages")
 	_, err := messages.DeleteOne(context.TODO(), bson.M{"_id": message.ID})
 	if err != nil {
 		return nil, http.StatusInternalServerError
@@ -127,7 +127,7 @@ func (db *Database) GetMessage(id string, channel_id string, user *User) (*Messa
 		return nil, nil, statusCode
 	}
 
-	messages := db.mongo.Collection("messages")
+	messages := db.Mongo.Collection("messages")
 
 	var message Message
 	err = messages.FindOne(context.TODO(), bson.M{"_id": object_id}).Decode(&message)
@@ -144,7 +144,7 @@ func (db *Database) GetMessages(channel_id string, limit int64, offset int64, us
 		return nil, statusCode
 	}
 
-	messages := db.mongo.Collection("messages")
+	messages := db.Mongo.Collection("messages")
 	cur, err := messages.Find(context.TODO(), bson.M{"channel_id": channel.ID}, options.Find().SetSort(bson.M{"created_at": -1}).SetLimit(limit).SetSkip(offset))
 	if err != nil {
 		return nil, http.StatusInternalServerError

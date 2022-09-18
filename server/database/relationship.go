@@ -9,7 +9,7 @@ import (
 )
 
 func (db *Database) GetRelationship(from primitive.ObjectID, to primitive.ObjectID) (*Relationship, int) {
-	relationshipsCollection := db.mongo.Collection("relationships")
+	relationshipsCollection := db.Mongo.Collection("relationships")
 
 	var relationship Relationship
 	err := relationshipsCollection.FindOne(context.TODO(), bson.M{"from_user_id": from, "to_user_id": to}).Decode(&relationship)
@@ -21,7 +21,7 @@ func (db *Database) GetRelationship(from primitive.ObjectID, to primitive.Object
 }
 
 func (db *Database) GetRelationships(user_id primitive.ObjectID) []Relationship {
-	relationshipsCollection := db.mongo.Collection("relationships")
+	relationshipsCollection := db.Mongo.Collection("relationships")
 
 	cursor, err := relationshipsCollection.Find(context.TODO(), bson.M{"from_user_id": user_id})
 	if err != nil {
