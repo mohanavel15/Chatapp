@@ -5,14 +5,12 @@ import (
 	"Chatapp/websocket"
 	"encoding/json"
 	"net/http"
-
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Context struct {
 	Res  http.ResponseWriter
 	Req  *http.Request
-	Db   *mongo.Database
+	Db   *database.Database
 	User database.User
 	Conn *websocket.Connections
 }

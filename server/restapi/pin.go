@@ -16,7 +16,7 @@ func GetPins(ctx *Context) {
 	vars := mux.Vars(ctx.Req)
 	channel_id := vars["id"]
 
-	pins := ctx.Db.Collection("pins")
+	pins := ctx.Db.Mongo.Collection("pins")
 
 	object_id, err := primitive.ObjectIDFromHex(channel_id)
 	if err != nil {
@@ -40,12 +40,12 @@ func GetPins(ctx *Context) {
 
 	messages_res := []response.Message{}
 	for _, message := range pinned_messages {
-		message, _, statusCode := database.GetMessage(message.MessageID.Hex(), message.ChannelID.Hex(), &ctx.User, ctx.Db)
+		message, _, statusCode := ctx.Db.GetMessage(message.MessageID.Hex(), message.ChannelID.Hex(), &ctx.User)
 		if statusCode != http.StatusOK {
 			continue
 		}
 
-		author, statstatusCode := database.GetUser(message.AccountID.Hex(), ctx.Db)
+		author, statstatusCode := ctx.Db.GetUser(message.AccountID.Hex())
 		if statstatusCode != http.StatusOK {
 			continue
 		}
@@ -62,9 +62,9 @@ func PinMsg(ctx *Context) {
 	channel_id := vars["id"]
 	message_id := vars["mid"]
 
-	pins := ctx.Db.Collection("pins")
+	pins := ctx.Db.Mongo.Collection("pins")
 
-	message, _, statusCode := database.GetMessage(message_id, channel_id, &ctx.User, ctx.Db)
+	message, _, statusCode := ctx.Db.GetMessage(message_id, channel_id, &ctx.User)
 	if statusCode != http.StatusOK {
 		ctx.Res.WriteHeader(statusCode)
 		return
@@ -89,7 +89,7 @@ func PinMsg(ctx *Context) {
 		return
 	}
 
-	author, statusCode := database.GetUser(message.AccountID.Hex(), ctx.Db)
+	author, statusCode := ctx.Db.GetUser(message.AccountID.Hex())
 	if statusCode != http.StatusOK {
 		return
 	}
@@ -106,9 +106,9 @@ func UnpinMsg(ctx *Context) {
 	channel_id := vars["id"]
 	message_id := vars["mid"]
 
-	pins := ctx.Db.Collection("pins")
+	pins := ctx.Db.Mongo.Collection("pins")
 
-	message, _, statusCode := database.GetMessage(message_id, channel_id, &ctx.User, ctx.Db)
+	message, _, statusCode := ctx.Db.GetMessage(message_id, channel_id, &ctx.User)
 	if statusCode != http.StatusOK {
 		ctx.Res.WriteHeader(statusCode)
 		return
@@ -126,7 +126,7 @@ func UnpinMsg(ctx *Context) {
 		return
 	}
 
-	author, statusCode := database.GetUser(message.AccountID.Hex(), ctx.Db)
+	author, statusCode := ctx.Db.GetUser(message.AccountID.Hex())
 	if statusCode != http.StatusOK {
 		return
 	}

@@ -1,9 +1,9 @@
 package main
 
 import (
+	"Chatapp/database"
 	"Chatapp/restapi"
 	"Chatapp/websocket"
-	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -12,11 +12,9 @@ import (
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var db *mongo.Database
+var db *database.Database
 var handler *websocket.EventHandler
 
 var conns = websocket.NewConnections()
@@ -29,21 +27,7 @@ var (
 )
 
 func main() {
-	clientOptions := options.Client().ApplyURI(MONGO_URI)
-	client, err := mongo.Connect(context.TODO(), clientOptions)
-
-	if err != nil {
-		log.Fatalf("Failed to connect database: %s", err)
-	} else {
-		log.Println("Successfully connected database")
-	}
-
-	err = client.Ping(context.TODO(), nil)
-	if err != nil {
-		log.Fatalf("Failed to ping database: %s", err)
-	}
-
-	db = client.Database(MONGO_DATABASE)
+	db = database.NewDatabase(MONGO_URI, MONGO_DATABASE)
 
 	handler = &websocket.EventHandler{}
 	handler.Add("CONNECT", websocket.ConnectUser)
@@ -118,7 +102,7 @@ func main() {
 		IdleTimeout:  time.Second,
 	}
 
-	if err = server.ListenAndServe(); err != nil {
+	if err := server.ListenAndServe(); err != nil {
 		log.Fatalln(err.Error())
 	}
 }

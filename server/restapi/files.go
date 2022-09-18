@@ -14,16 +14,15 @@ import (
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func GetAvatars(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
+func GetAvatars(w http.ResponseWriter, r *http.Request, db *database.Database) {
 	vars := mux.Vars(r)
 	user_id := vars["user_id"]
 	avatar_id := vars["avatar_id"]
 	filename := vars["filename"]
 
-	user, statusCode := database.GetUser(user_id, db)
+	user, statusCode := db.GetUser(user_id)
 	if statusCode != http.StatusOK {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -45,22 +44,14 @@ func GetAvatars(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
 	io.Copy(w, data)
 }
 
-func GetIcons(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
+func GetIcons(w http.ResponseWriter, r *http.Request, db *database.Database) {
 	vars := mux.Vars(r)
 	channel_id := vars["channel_id"]
 	icon_id := vars["icon_id"]
 	filename := vars["filename"]
 
-	channelsCollection := db.Collection("channels")
-	object_id, err := primitive.ObjectIDFromHex(channel_id)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	var channel database.Channel
-	err = channelsCollection.FindOne(context.TODO(), bson.M{"_id": object_id}).Decode(&channel)
-	if err != nil {
+	channel, statusCode := db.GetChannelWithoutUser(channel_id)
+	if statusCode != http.StatusOK {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -81,7 +72,7 @@ func GetIcons(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
 	io.Copy(w, data)
 }
 
-func GetAttachments(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
+func GetAttachments(w http.ResponseWriter, r *http.Request, db *database.Database) {
 	vars := mux.Vars(r)
 	channel_id := vars["channel_id"]
 	message_id := vars["message_id"]
@@ -101,7 +92,7 @@ func GetAttachments(w http.ResponseWriter, r *http.Request, db *mongo.Database) 
 	}
 
 	var message database.Message
-	messageCollection := db.Collection("messages")
+	messageCollection := db.Mongo.Collection("messages")
 	err = messageCollection.FindOne(context.TODO(), bson.M{"_id": message_oject_id, "channel_id": channel_object_id}).Decode(&message)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)

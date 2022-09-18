@@ -21,10 +21,10 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func Register(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
+func Register(w http.ResponseWriter, r *http.Request, db *database.Database) {
 	var request request.Signup
 	_ = json.NewDecoder(r.Body).Decode(&request)
-	collection := db.Collection("users")
+	collection := db.Mongo.Collection("users")
 
 	username := strings.ToLower(strings.TrimSpace(request.Username))
 	password := strings.TrimSpace(request.Password)
@@ -90,11 +90,11 @@ func Register(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func Login(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
+func Login(w http.ResponseWriter, r *http.Request, db *database.Database) {
 	var request request.Signin
 	_ = json.NewDecoder(r.Body).Decode(&request)
-	users := db.Collection("users")
-	sessions := db.Collection("sessions")
+	users := db.Mongo.Collection("users")
+	sessions := db.Mongo.Collection("sessions")
 
 	username := strings.ToLower(strings.TrimSpace(request.Username))
 	password := strings.TrimSpace(request.Password)
@@ -158,38 +158,38 @@ func Login(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
 	json.NewEncoder(w).Encode(response)
 }
 
-func Logout(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
+func Logout(w http.ResponseWriter, r *http.Request, db *database.Database) {
 	access_token := r.Header.Get("Authorization")
 	if access_token == "" {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
-	is_valid, session := utils.ValidateAccessToken(access_token, db)
+	is_valid, session := utils.ValidateAccessToken(access_token, db.Mongo)
 	if !is_valid {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
-	sessions := db.Collection("sessions")
+	sessions := db.Mongo.Collection("sessions")
 	sessions.DeleteOne(context.TODO(), bson.M{"_id": session.ID})
 	w.WriteHeader(http.StatusOK)
 }
 
-func Signout(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
+func Signout(w http.ResponseWriter, r *http.Request, db *database.Database) {
 	access_token := r.Header.Get("Authorization")
 	if access_token == "" {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
-	is_valid, session := utils.ValidateAccessToken(access_token, db)
+	is_valid, session := utils.ValidateAccessToken(access_token, db.Mongo)
 	if !is_valid {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
-	collection := db.Collection("sessions")
+	collection := db.Mongo.Collection("sessions")
 	collection.DeleteMany(context.TODO(), bson.M{"account_id": session.AccountID})
 	w.WriteHeader(http.StatusOK)
 }
@@ -197,7 +197,7 @@ func Signout(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
 func ChangePassword(ctx *Context) {
 	var request request.ChangePassword
 	_ = json.NewDecoder(ctx.Req.Body).Decode(&request)
-	collection := ctx.Db.Collection("users")
+	collection := ctx.Db.Mongo.Collection("users")
 
 	currentPassword := strings.TrimSpace(request.CurrentPassword)
 	newPassword := strings.TrimSpace(request.NewPassword)
@@ -227,7 +227,7 @@ func ChangePassword(ctx *Context) {
 	ctx.Res.WriteHeader(http.StatusOK)
 }
 
-func Refresh(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
+func Refresh(w http.ResponseWriter, r *http.Request, db *database.Database) {
 	var request request.Refresh
 	_ = json.NewDecoder(r.Body).Decode(&request)
 
@@ -240,7 +240,7 @@ func Refresh(w http.ResponseWriter, r *http.Request, db *mongo.Database) {
 	}
 
 	var session database.Session
-	collection := db.Collection("sessions")
+	collection := db.Mongo.Collection("sessions")
 	err := collection.FindOne(context.TODO(), bson.M{"access_token": accessToken}).Decode(&session)
 
 	if err != nil {

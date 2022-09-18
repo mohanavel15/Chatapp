@@ -53,7 +53,7 @@ func EditUser(ctx *Context) {
 		Avatar: avatarB64,
 	}
 
-	users := ctx.Db.Collection("users")
+	users := ctx.Db.Mongo.Collection("users")
 	_, err = users.UpdateOne(context.TODO(), bson.M{"_id": ctx.User.ID}, bson.M{"$set": bson.M{"avatar": avatar_db}})
 	if err != nil {
 		ctx.Res.WriteHeader(http.StatusInternalServerError)

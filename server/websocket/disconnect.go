@@ -1,7 +1,6 @@
 package websocket
 
 import (
-	"Chatapp/database"
 	"Chatapp/response"
 )
 
@@ -11,7 +10,7 @@ func Disconnect(ws *Ws) {
 		return
 	}
 
-	channels := database.GetChannels(ws.User, ws.Db)
+	channels := ws.Db.GetChannels(ws.User)
 	for _, channel := range channels {
 		status := response.Status{
 			UserID:    ws.User.ID.Hex(),
@@ -23,7 +22,7 @@ func Disconnect(ws *Ws) {
 		ws.Conns.BroadcastToChannel(channel.ID.Hex(), "STATUS_UPDATE", status)
 	}
 
-	relationships := database.GetRelationships(ws.User.ID, ws.Db)
+	relationships := ws.Db.GetRelationships(ws.User.ID)
 	for _, relationship := range relationships {
 		if relationship.Type != 1 {
 			continue

@@ -14,9 +14,9 @@ import (
 func GetAllBans(ctx *Context) {
 	url_vars := mux.Vars(ctx.Req)
 	channel_id := url_vars["id"]
-	banCollection := ctx.Db.Collection("bans")
+	banCollection := ctx.Db.Mongo.Collection("bans")
 
-	channel, statusCode := database.GetChannel(channel_id, &ctx.User, ctx.Db)
+	channel, statusCode := ctx.Db.GetChannel(channel_id, &ctx.User)
 	if statusCode != http.StatusOK {
 		ctx.Res.WriteHeader(statusCode)
 		return
@@ -42,12 +42,12 @@ func GetAllBans(ctx *Context) {
 			continue
 		}
 
-		BannedBy, statusCode := database.GetUser(ban.BannedBy.Hex(), ctx.Db)
+		BannedBy, statusCode := ctx.Db.GetUser(ban.BannedBy.Hex())
 		if statusCode != http.StatusOK {
 			continue
 		}
 
-		BannedUser, statusCode := database.GetUser(ban.BannedUser.Hex(), ctx.Db)
+		BannedUser, statusCode := ctx.Db.GetUser(ban.BannedUser.Hex())
 		if statusCode != http.StatusOK {
 			continue
 		}
@@ -62,7 +62,7 @@ func GetBan(ctx *Context) {
 	url_vars := mux.Vars(ctx.Req)
 	channel_id := url_vars["id"]
 	ban_id := url_vars["bid"]
-	banCollection := ctx.Db.Collection("bans")
+	banCollection := ctx.Db.Mongo.Collection("bans")
 
 	ban_object_id, err := primitive.ObjectIDFromHex(ban_id)
 	if err != nil {
@@ -70,7 +70,7 @@ func GetBan(ctx *Context) {
 		return
 	}
 
-	channel, statusCode := database.GetChannel(channel_id, &ctx.User, ctx.Db)
+	channel, statusCode := ctx.Db.GetChannel(channel_id, &ctx.User)
 	if statusCode != http.StatusOK {
 		ctx.Res.WriteHeader(statusCode)
 		return
@@ -88,13 +88,13 @@ func GetBan(ctx *Context) {
 		return
 	}
 
-	BannedBy, statusCode := database.GetUser(ban.BannedBy.Hex(), ctx.Db)
+	BannedBy, statusCode := ctx.Db.GetUser(ban.BannedBy.Hex())
 	if statusCode != http.StatusOK {
 		ctx.Res.WriteHeader(http.StatusNotFound)
 		return
 	}
 
-	BannedUser, statusCode := database.GetUser(ban.BannedUser.Hex(), ctx.Db)
+	BannedUser, statusCode := ctx.Db.GetUser(ban.BannedUser.Hex())
 	if statusCode != http.StatusOK {
 		ctx.Res.WriteHeader(http.StatusNotFound)
 		return
@@ -108,7 +108,7 @@ func DeleteBan(ctx *Context) {
 	url_vars := mux.Vars(ctx.Req)
 	channel_id := url_vars["id"]
 	ban_id := url_vars["bid"]
-	banCollection := ctx.Db.Collection("bans")
+	banCollection := ctx.Db.Mongo.Collection("bans")
 
 	ban_object_id, err := primitive.ObjectIDFromHex(ban_id)
 	if err != nil {
@@ -116,7 +116,7 @@ func DeleteBan(ctx *Context) {
 		return
 	}
 
-	channel, statusCode := database.GetChannel(channel_id, &ctx.User, ctx.Db)
+	channel, statusCode := ctx.Db.GetChannel(channel_id, &ctx.User)
 	if statusCode != http.StatusOK {
 		ctx.Res.WriteHeader(statusCode)
 		return

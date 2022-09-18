@@ -1,7 +1,6 @@
 package restapi
 
 import (
-	"Chatapp/database"
 	"Chatapp/request"
 	"Chatapp/response"
 	"encoding/json"
@@ -25,7 +24,7 @@ func CreateChannel(ctx *Context) {
 		return
 	}
 
-	channel, statusCode := database.CreateChannel(name, icon, recipientID, &ctx.User, ctx.Db)
+	channel, statusCode := ctx.Db.CreateChannel(name, icon, recipientID, &ctx.User)
 	if statusCode != http.StatusOK {
 		ctx.Res.WriteHeader(statusCode)
 		return
@@ -33,7 +32,7 @@ func CreateChannel(ctx *Context) {
 
 	recipients := []response.User{}
 	if channel.Type == 1 {
-		recipient, _ := database.GetUser(recipientID, ctx.Db)
+		recipient, _ := ctx.Db.GetUser(recipientID)
 		recipients = append(recipients, response.NewUser(recipient, ctx.Conn.GetUserStatus(recipient.ID.Hex())))
 	} else {
 		recipients = append(recipients, response.NewUser(&ctx.User, ctx.Conn.GetUserStatus(ctx.User.ID.Hex())))
@@ -52,14 +51,14 @@ func CreateChannel(ctx *Context) {
 
 func GetChannels(ctx *Context) {
 	res_channels := response.Channels{}
-	channels := database.GetChannels(&ctx.User, ctx.Db)
+	channels := ctx.Db.GetChannels(&ctx.User)
 	for _, channel := range channels {
 		recipients := []response.User{}
 		for _, recipient := range channel.Recipients {
 			if channel.Type == 1 && recipient.Hex() == ctx.User.ID.Hex() {
 				continue
 			}
-			recipient, _ := database.GetUser(recipient.Hex(), ctx.Db)
+			recipient, _ := ctx.Db.GetUser(recipient.Hex())
 			recipients = append(recipients, response.NewUser(recipient, ctx.Conn.GetUserStatus(recipient.ID.Hex())))
 		}
 
@@ -73,7 +72,7 @@ func GetChannel(ctx *Context) {
 	url_vars := mux.Vars(ctx.Req)
 	channel_id := url_vars["id"]
 
-	channel, statusCode := database.GetChannel(channel_id, &ctx.User, ctx.Db)
+	channel, statusCode := ctx.Db.GetChannel(channel_id, &ctx.User)
 	if statusCode != http.StatusOK {
 		ctx.Res.WriteHeader(statusCode)
 		return
@@ -84,7 +83,7 @@ func GetChannel(ctx *Context) {
 		if channel.Type == 1 && recipient.Hex() == ctx.User.ID.Hex() {
 			continue
 		}
-		recipient, _ := database.GetUser(recipient.Hex(), ctx.Db)
+		recipient, _ := ctx.Db.GetUser(recipient.Hex())
 		recipients = append(recipients, response.NewUser(recipient, ctx.Conn.GetUserStatus(recipient.ID.Hex())))
 	}
 
@@ -106,7 +105,7 @@ func EditChannel(ctx *Context) {
 		return
 	}
 
-	channel, statusCode := database.ModifyChannel(channel_id, name, icon, &ctx.User, ctx.Db)
+	channel, statusCode := ctx.Db.ModifyChannel(channel_id, name, icon, &ctx.User)
 	if statusCode != http.StatusOK {
 		ctx.Res.WriteHeader(statusCode)
 		return
@@ -114,7 +113,7 @@ func EditChannel(ctx *Context) {
 
 	recipients := []response.User{}
 	for _, recipient := range channel.Recipients {
-		recipient, _ := database.GetUser(recipient.Hex(), ctx.Db)
+		recipient, _ := ctx.Db.GetUser(recipient.Hex())
 		recipients = append(recipients, response.NewUser(recipient, ctx.Conn.GetUserStatus(recipient.ID.Hex())))
 	}
 
@@ -128,7 +127,7 @@ func DeleteChannel(ctx *Context) {
 	url_vars := mux.Vars(ctx.Req)
 	channel_id := url_vars["id"]
 
-	channel, statusCode := database.DeleteChannel(channel_id, &ctx.User, ctx.Db)
+	channel, statusCode := ctx.Db.DeleteChannel(channel_id, &ctx.User)
 	if statusCode != http.StatusOK {
 		ctx.Res.WriteHeader(statusCode)
 		return
@@ -136,7 +135,7 @@ func DeleteChannel(ctx *Context) {
 
 	recipients := []response.User{}
 	for _, recipient := range channel.Recipients {
-		recipient, _ := database.GetUser(recipient.Hex(), ctx.Db)
+		recipient, _ := ctx.Db.GetUser(recipient.Hex())
 		recipients = append(recipients, response.NewUser(recipient, ctx.Conn.GetUserStatus(recipient.ID.Hex())))
 	}
 
@@ -147,7 +146,7 @@ func DeleteChannel(ctx *Context) {
 	ctx.Conn.BroadcastToChannel(channel.ID.Hex(), "CHANNEL_MODIFY", res_channel)
 
 	recipient_leave := fmt.Sprintf(RECIPIENT_LEAVE, ctx.User.Username)
-	message, statusCode := database.CreateMessage(recipient_leave, res_channel.ID, true, nil, ctx.Db)
+	message, statusCode := ctx.Db.CreateMessage(recipient_leave, res_channel.ID, true, nil)
 
 	if statusCode != http.StatusOK {
 		return

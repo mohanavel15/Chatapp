@@ -1,7 +1,6 @@
 package websocket
 
 import (
-	"Chatapp/database"
 	"Chatapp/response"
 	"Chatapp/utils"
 	"encoding/json"
@@ -23,7 +22,7 @@ func ConnectUser(ctx *Context) {
 		return
 	}
 
-	is_valid, session := utils.ValidateAccessToken(token, ctx.Db)
+	is_valid, session := utils.ValidateAccessToken(token, ctx.Db.Mongo)
 	if !is_valid {
 		ws_message := WS_Message{
 			Event: "INVAILD_SESSION",
@@ -33,7 +32,7 @@ func ConnectUser(ctx *Context) {
 		return
 	}
 
-	get_user, statusCode := database.GetUser(session.AccountID.Hex(), ctx.Db)
+	get_user, statusCode := ctx.Db.GetUser(session.AccountID.Hex())
 	if statusCode != http.StatusOK {
 		return
 	}
@@ -45,14 +44,14 @@ func ConnectUser(ctx *Context) {
 	ctx.Ws.Conns.AddUser(get_user.ID.Hex(), ctx.Ws)
 
 	res_channels := response.Channels{}
-	channels := database.GetChannels(get_user, ctx.Db)
+	channels := ctx.Db.GetChannels(get_user)
 	for _, channel := range channels {
 		recipients := []response.User{}
 		for _, recipient := range channel.Recipients {
 			if channel.Type == 1 && recipient.Hex() == get_user.ID.Hex() {
 				continue
 			}
-			recipient, _ := database.GetUser(recipient.Hex(), ctx.Db)
+			recipient, _ := ctx.Db.GetUser(recipient.Hex())
 			recipients = append(recipients, response.NewUser(recipient, ctx.Ws.Conns.GetUserStatus(recipient.ID.Hex())))
 		}
 		res_channels = append(res_channels, response.NewChannel(&channel, recipients))
@@ -67,7 +66,7 @@ func ConnectUser(ctx *Context) {
 		ctx.Ws.Conns.AddUserToChannel(get_user.ID.Hex(), channel.ID.Hex())
 	}
 
-	relationships := database.GetRelationships(get_user.ID, ctx.Db)
+	relationships := ctx.Db.GetRelationships(get_user.ID)
 	for _, relationship := range relationships {
 		if relationship.Type != 1 {
 			continue

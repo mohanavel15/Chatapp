@@ -18,9 +18,9 @@ func JoinInvite(ctx *Context) {
 	vars := mux.Vars(ctx.Req)
 	invite_code := vars["id"]
 
-	inviteCollection := ctx.Db.Collection("invites")
-	channelCollection := ctx.Db.Collection("channels")
-	banCollection := ctx.Db.Collection("bans")
+	inviteCollection := ctx.Db.Mongo.Collection("invites")
+	channelCollection := ctx.Db.Mongo.Collection("channels")
+	banCollection := ctx.Db.Mongo.Collection("bans")
 
 	var invite database.Invites
 	err := inviteCollection.FindOne(context.TODO(), bson.M{"invite_code": invite_code}).Decode(&invite)
@@ -55,7 +55,7 @@ func JoinInvite(ctx *Context) {
 		if channel.Type == 1 && recipient.Hex() == ctx.User.ID.Hex() {
 			continue
 		}
-		recipient, _ := database.GetUser(recipient.Hex(), ctx.Db)
+		recipient, _ := ctx.Db.GetUser(recipient.Hex())
 		recipients = append(recipients, response.NewUser(recipient, ctx.Conn.GetUserStatus(recipient.ID.Hex())))
 	}
 
@@ -65,7 +65,7 @@ func JoinInvite(ctx *Context) {
 	ctx.Conn.BroadcastToChannel(res_channel.ID, "CHANNEL_MODIFY", res_channel)
 
 	invite_join := fmt.Sprintf(INVITE_JOIN, ctx.User.Username)
-	message, statusCode := database.CreateMessage(invite_join, res_channel.ID, true, nil, ctx.Db)
+	message, statusCode := ctx.Db.CreateMessage(invite_join, res_channel.ID, true, nil)
 
 	if statusCode != http.StatusOK {
 		return
@@ -78,9 +78,9 @@ func JoinInvite(ctx *Context) {
 func GetInvites(ctx *Context) {
 	vars := mux.Vars(ctx.Req)
 	channel_id := vars["id"]
-	inviteCollection := ctx.Db.Collection("invites")
+	inviteCollection := ctx.Db.Mongo.Collection("invites")
 
-	channel, statusCode := database.GetChannel(channel_id, &ctx.User, ctx.Db)
+	channel, statusCode := ctx.Db.GetChannel(channel_id, &ctx.User)
 	if statusCode != http.StatusOK {
 		ctx.Res.WriteHeader(statusCode)
 		return
@@ -118,9 +118,9 @@ func CreateInvite(ctx *Context) {
 	vars := mux.Vars(ctx.Req)
 	channel_id := vars["id"]
 
-	inviteCollection := ctx.Db.Collection("invites")
+	inviteCollection := ctx.Db.Mongo.Collection("invites")
 
-	channel, statusCode := database.GetChannel(channel_id, &ctx.User, ctx.Db)
+	channel, statusCode := ctx.Db.GetChannel(channel_id, &ctx.User)
 	if statusCode != http.StatusOK {
 		ctx.Res.WriteHeader(statusCode)
 		return
@@ -157,9 +157,9 @@ func DeleteInvite(ctx *Context) {
 	channel_id := vars["id"]
 	invite_code := vars["iid"]
 
-	inviteCollection := ctx.Db.Collection("invites")
+	inviteCollection := ctx.Db.Mongo.Collection("invites")
 
-	channel, statusCode := database.GetChannel(channel_id, &ctx.User, ctx.Db)
+	channel, statusCode := ctx.Db.GetChannel(channel_id, &ctx.User)
 	if statusCode != http.StatusOK {
 		ctx.Res.WriteHeader(statusCode)
 		return

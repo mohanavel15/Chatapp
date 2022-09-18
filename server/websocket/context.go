@@ -1,12 +1,14 @@
 package websocket
 
-import "go.mongodb.org/mongo-driver/mongo"
+import (
+	"Chatapp/database"
+)
 
 type Context struct {
 	Ws    *Ws
 	Event string
 	Data  []byte
-	Db    *mongo.Database
+	Db    *database.Database
 }
 
 func (ctx *Context) Send(data []byte) {

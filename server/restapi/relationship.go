@@ -12,12 +12,12 @@ import (
 )
 
 func GetRelationships(ctx *Context) {
-	relationships := database.GetRelationships(ctx.User.ID, ctx.Db)
+	relationships := ctx.Db.GetRelationships(ctx.User.ID)
 
 	var res_relationships []response.Relationship
 
 	for _, relationship := range relationships {
-		user, statusCode := database.GetUser(relationship.ToUserID.Hex(), ctx.Db)
+		user, statusCode := ctx.Db.GetUser(relationship.ToUserID.Hex())
 		if statusCode != http.StatusOK {
 			continue
 		}
@@ -44,7 +44,7 @@ func GetRelationship(ctx *Context) {
 		return
 	}
 
-	relationshipsCollection := ctx.Db.Collection("relationships")
+	relationshipsCollection := ctx.Db.Mongo.Collection("relationships")
 
 	var relationship database.Relationship
 	err = relationshipsCollection.FindOne(context.TODO(), bson.M{"from_user_id": ctx.User.ID, "to_user_id": relationship_id}).Decode(&relationship)
@@ -53,7 +53,7 @@ func GetRelationship(ctx *Context) {
 		return
 	}
 
-	user, statusCode := database.GetUser(relationship.ToUserID.Hex(), ctx.Db)
+	user, statusCode := ctx.Db.GetUser(relationship.ToUserID.Hex())
 	if statusCode != http.StatusOK {
 		ctx.Res.WriteHeader(http.StatusNotFound)
 		return
@@ -73,9 +73,9 @@ func GetRelationship(ctx *Context) {
 func ChangeRelationshipToDefault(ctx *Context) {
 	url_vars := mux.Vars(ctx.Req)
 	relationship_id := url_vars["rid"]
-	relationshipsCollection := ctx.Db.Collection("relationships")
+	relationshipsCollection := ctx.Db.Mongo.Collection("relationships")
 
-	relationship_user, statusCode := database.GetUser(relationship_id, ctx.Db)
+	relationship_user, statusCode := ctx.Db.GetUser(relationship_id)
 	if statusCode != http.StatusOK {
 		ctx.Res.WriteHeader(statusCode)
 		return
@@ -147,9 +147,9 @@ func ChangeRelationshipToDefault(ctx *Context) {
 func ChangeRelationshipToFriend(ctx *Context) {
 	url_vars := mux.Vars(ctx.Req)
 	relationship_id := url_vars["rid"]
-	relationshipsCollection := ctx.Db.Collection("relationships")
+	relationshipsCollection := ctx.Db.Mongo.Collection("relationships")
 
-	relationship_user, statusCode := database.GetUser(relationship_id, ctx.Db)
+	relationship_user, statusCode := ctx.Db.GetUser(relationship_id)
 	if statusCode != http.StatusOK {
 		ctx.Res.WriteHeader(statusCode)
 		return
@@ -229,9 +229,9 @@ func ChangeRelationshipToFriend(ctx *Context) {
 func ChangeRelationshipToBlock(ctx *Context) {
 	url_vars := mux.Vars(ctx.Req)
 	relationship_id := url_vars["rid"]
-	relationshipsCollection := ctx.Db.Collection("relationships")
+	relationshipsCollection := ctx.Db.Mongo.Collection("relationships")
 
-	relationship_user, statusCode := database.GetUser(relationship_id, ctx.Db)
+	relationship_user, statusCode := ctx.Db.GetUser(relationship_id)
 	if statusCode != http.StatusOK {
 		ctx.Res.WriteHeader(statusCode)
 		return

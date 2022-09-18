@@ -4,14 +4,10 @@ import (
 	"Chatapp/database"
 	"Chatapp/restapi"
 	"Chatapp/utils"
-	"context"
 	"net/http"
-
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type IDBFunction func(w http.ResponseWriter, r *http.Request, db *mongo.Database)
+type IDBFunction func(w http.ResponseWriter, r *http.Request, db *database.Database)
 type AuthFunction func(ctx *restapi.Context)
 
 func IncludeDB(function IDBFunction) http.HandlerFunc {
@@ -30,17 +26,15 @@ func Authenticated(function AuthFunction) http.HandlerFunc {
 			return
 		}
 
-		is_valid, session := utils.ValidateAccessToken(access_token, db)
+		is_valid, session := utils.ValidateAccessToken(access_token, db.Mongo)
 		if !is_valid {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 
-		var user database.User
-		users := db.Collection("users")
+		user, statusCode := db.GetUser(session.AccountID.Hex())
 
-		err := users.FindOne(context.TODO(), bson.M{"_id": session.AccountID}).Decode(&user)
-		if err != nil {
+		if statusCode != http.StatusOK {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
@@ -49,7 +43,7 @@ func Authenticated(function AuthFunction) http.HandlerFunc {
 			Res:  w,
 			Req:  r,
 			Db:   db,
-			User: user,
+			User: *user,
 			Conn: conns,
 		}
 

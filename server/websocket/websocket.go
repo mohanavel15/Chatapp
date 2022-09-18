@@ -8,13 +8,12 @@ import (
 	"strings"
 
 	"github.com/gorilla/websocket"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Ws struct {
 	Conn    *websocket.Conn
 	Handler *EventHandler
-	Db      *mongo.Database
+	Db      *database.Database
 	User    *database.User
 	Conns   *Connections
 }

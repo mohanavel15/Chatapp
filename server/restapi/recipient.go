@@ -30,9 +30,9 @@ func AddRecipient(ctx *Context) {
 	channel_id := url_vars["id"]
 	user_id := url_vars["uid"]
 
-	channelCollection := ctx.Db.Collection("channels")
+	channelCollection := ctx.Db.Mongo.Collection("channels")
 
-	channel, statusCode := database.GetChannel(channel_id, &ctx.User, ctx.Db)
+	channel, statusCode := ctx.Db.GetChannel(channel_id, &ctx.User)
 	if statusCode != http.StatusOK {
 		ctx.Res.WriteHeader(statusCode)
 		return
@@ -43,13 +43,13 @@ func AddRecipient(ctx *Context) {
 		return
 	}
 
-	user, statusCode := database.GetUser(user_id, ctx.Db)
+	user, statusCode := ctx.Db.GetUser(user_id)
 	if statusCode != http.StatusOK {
 		ctx.Res.WriteHeader(statusCode)
 		return
 	}
 
-	relationship, statusCode := database.GetRelationship(ctx.User.ID, user.ID, ctx.Db)
+	relationship, statusCode := ctx.Db.GetRelationship(ctx.User.ID, user.ID)
 	if statusCode != http.StatusOK {
 		ctx.Res.WriteHeader(statusCode)
 		return
@@ -71,7 +71,7 @@ func AddRecipient(ctx *Context) {
 
 	recipients := []response.User{}
 	for _, recipient := range channel.Recipients {
-		recipient, _ := database.GetUser(recipient.Hex(), ctx.Db)
+		recipient, _ := ctx.Db.GetUser(recipient.Hex())
 		recipients = append(recipients, response.NewUser(recipient, ctx.Conn.GetUserStatus(recipient.ID.Hex())))
 	}
 
@@ -81,7 +81,7 @@ func AddRecipient(ctx *Context) {
 	ctx.Conn.BroadcastToChannel(res_channel.ID, "CHANNEL_MODIFY", res_channel)
 
 	add := fmt.Sprintf(ADD_RECIPIENT, ctx.User.Username, user.Username)
-	message, statusCode := database.CreateMessage(add, channel_id, true, nil, ctx.Db)
+	message, statusCode := ctx.Db.CreateMessage(add, channel_id, true, nil)
 
 	if statusCode != http.StatusOK {
 		return
@@ -102,10 +102,10 @@ func RemoveRecipient(ctx *Context) {
 	isBan := request_.IsBan
 	reason := strings.TrimSpace(request_.Reason)
 
-	channelCollection := ctx.Db.Collection("channels")
-	bansCollection := ctx.Db.Collection("bans")
+	channelCollection := ctx.Db.Mongo.Collection("channels")
+	bansCollection := ctx.Db.Mongo.Collection("bans")
 
-	channel, statusCode := database.GetChannel(channel_id, &ctx.User, ctx.Db)
+	channel, statusCode := ctx.Db.GetChannel(channel_id, &ctx.User)
 	if statusCode != http.StatusOK {
 		ctx.Res.WriteHeader(statusCode)
 		return
@@ -116,7 +116,7 @@ func RemoveRecipient(ctx *Context) {
 		return
 	}
 
-	user, statusCode := database.GetUser(user_id, ctx.Db)
+	user, statusCode := ctx.Db.GetUser(user_id)
 	if statusCode != http.StatusOK {
 		ctx.Res.WriteHeader(statusCode)
 		return
@@ -149,7 +149,7 @@ func RemoveRecipient(ctx *Context) {
 	result.Decode(&channel)
 	recipients := []response.User{}
 	for _, recipient := range channel.Recipients {
-		recipient, _ := database.GetUser(recipient.Hex(), ctx.Db)
+		recipient, _ := ctx.Db.GetUser(recipient.Hex())
 		recipients = append(recipients, response.NewUser(recipient, ctx.Conn.GetUserStatus(recipient.ID.Hex())))
 	}
 
@@ -171,7 +171,7 @@ func RemoveRecipient(ctx *Context) {
 		remove = fmt.Sprint(remove, " ", fmt.Sprintf(REASON, reason))
 	}
 
-	message, statusCode := database.CreateMessage(remove, channel_id, true, nil, ctx.Db)
+	message, statusCode := ctx.Db.CreateMessage(remove, channel_id, true, nil)
 
 	if statusCode != http.StatusOK {
 		return

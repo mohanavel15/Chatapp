@@ -29,7 +29,7 @@ func GetMessages(ctx *Context) {
 		limit = 100
 	}
 
-	messages, statusCode := database.GetMessages(channel_id, limit, offset, &ctx.User, ctx.Db)
+	messages, statusCode := ctx.Db.GetMessages(channel_id, limit, offset, &ctx.User)
 	if statusCode != http.StatusOK {
 		ctx.Res.WriteHeader(statusCode)
 		return
@@ -42,7 +42,7 @@ func GetMessages(ctx *Context) {
 			continue
 		}
 
-		user, statusCode := database.GetUser(message.AccountID.Hex(), ctx.Db)
+		user, statusCode := ctx.Db.GetUser(message.AccountID.Hex())
 		if statusCode != http.StatusOK {
 			continue
 		}
@@ -57,7 +57,7 @@ func GetMessage(ctx *Context) {
 	channel_id := vars["id"]
 	message_id := vars["mid"]
 
-	message, _, statusCode := database.GetMessage(message_id, channel_id, &ctx.User, ctx.Db)
+	message, _, statusCode := ctx.Db.GetMessage(message_id, channel_id, &ctx.User)
 	if statusCode != http.StatusOK {
 		ctx.Res.WriteHeader(statusCode)
 		return
@@ -69,7 +69,7 @@ func GetMessage(ctx *Context) {
 		var user response.User
 		message_res = response.NewMessage(message, user)
 	} else {
-		user, statusCode := database.GetUser(message.AccountID.Hex(), ctx.Db)
+		user, statusCode := ctx.Db.GetUser(message.AccountID.Hex())
 		if statusCode != http.StatusOK {
 			ctx.Res.WriteHeader(statusCode)
 			return
@@ -101,7 +101,7 @@ func CreateMessage(ctx *Context) {
 			return
 		}
 
-		message, statusCode := database.CreateMessage(content, channel_id, false, &ctx.User, ctx.Db)
+		message, statusCode := ctx.Db.CreateMessage(content, channel_id, false, &ctx.User)
 		if statusCode != http.StatusOK {
 			ctx.Res.WriteHeader(statusCode)
 			return
@@ -142,14 +142,14 @@ func CreateMessage(ctx *Context) {
 		}
 
 		content = strings.TrimSpace(content)
-		message, statusCode := database.CreateMessage(content, channel_id, false, &ctx.User, ctx.Db)
+		message, statusCode := ctx.Db.CreateMessage(content, channel_id, false, &ctx.User)
 		if statusCode != http.StatusOK {
 			ctx.Res.WriteHeader(statusCode)
 			return
 		}
 		message.Attachments = []database.Attachment{db_attachment}
 
-		messageCollection := ctx.Db.Collection("messages")
+		messageCollection := ctx.Db.Mongo.Collection("messages")
 		messageCollection.UpdateOne(context.TODO(), bson.M{"_id": message.ID}, bson.M{"$set": bson.M{"attachments": message.Attachments}})
 
 		message_res := response.NewMessage(message, response.NewUser(&ctx.User, 0))
@@ -178,7 +178,7 @@ func EditMessage(ctx *Context) {
 		return
 	}
 
-	message, statusCode := database.EditMessage(message_id, channel_id, content, &ctx.User, ctx.Db)
+	message, statusCode := ctx.Db.EditMessage(message_id, channel_id, content, &ctx.User)
 	if statusCode != http.StatusOK {
 		ctx.Res.WriteHeader(statusCode)
 		return
@@ -195,13 +195,13 @@ func DeleteMessage(ctx *Context) {
 	channel_id := vars["id"]
 	message_id := vars["mid"]
 
-	message, statusCode := database.DeleteMessage(message_id, channel_id, &ctx.User, ctx.Db)
+	message, statusCode := ctx.Db.DeleteMessage(message_id, channel_id, &ctx.User)
 	if statusCode != http.StatusOK {
 		ctx.Res.WriteHeader(statusCode)
 		return
 	}
 
-	user, statusCode := database.GetUser(message.AccountID.Hex(), ctx.Db)
+	user, statusCode := ctx.Db.GetUser(message.AccountID.Hex())
 	if statusCode != http.StatusOK {
 		ctx.Res.WriteHeader(statusCode)
 		return
