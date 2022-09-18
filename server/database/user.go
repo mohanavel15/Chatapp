@@ -6,12 +6,11 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func GetUser(id string, db *mongo.Database) (*User, int) {
+func (db *Database) GetUser(id string) (*User, int) {
 	var user User
-	users := db.Collection("users")
+	users := db.mongo.Collection("users")
 
 	object_id, err := primitive.ObjectIDFromHex(id)
 	if err != nil {

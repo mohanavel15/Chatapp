@@ -10,15 +10,14 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func CreateChannel(name string, icon string, recipient_id string, user *User, db *mongo.Database) (*Channel, int) {
-	channels := db.Collection("channels")
+func (db *Database) CreateChannel(name string, icon string, recipient_id string, user *User) (*Channel, int) {
+	channels := db.mongo.Collection("channels")
 
 	if recipient_id != "" {
-		recipient, statusCode := GetUser(recipient_id, db)
+		recipient, statusCode := db.GetUser(recipient_id)
 		if statusCode != http.StatusOK {
 			return nil, statusCode
 		}
@@ -96,10 +95,10 @@ func CreateChannel(name string, icon string, recipient_id string, user *User, db
 	}
 }
 
-func ModifyChannel(id string, name string, icon string, user *User, db *mongo.Database) (*Channel, int) {
-	channels := db.Collection("channels")
+func (db *Database) ModifyChannel(id string, name string, icon string, user *User) (*Channel, int) {
+	channels := db.mongo.Collection("channels")
 
-	channel, statusCode := GetChannel(id, user, db)
+	channel, statusCode := db.GetChannel(id, user)
 	if statusCode != http.StatusOK {
 		return nil, statusCode
 	}
@@ -145,10 +144,10 @@ func ModifyChannel(id string, name string, icon string, user *User, db *mongo.Da
 	return channel, http.StatusOK
 }
 
-func DeleteChannel(id string, user *User, db *mongo.Database) (*Channel, int) {
-	channelsCollection := db.Collection("channels")
+func (db *Database) DeleteChannel(id string, user *User) (*Channel, int) {
+	channelsCollection := db.mongo.Collection("channels")
 
-	channel, statusCode := GetChannel(id, user, db)
+	channel, statusCode := db.GetChannel(id, user)
 	if statusCode != http.StatusOK {
 		return nil, statusCode
 	}
@@ -167,8 +166,8 @@ func DeleteChannel(id string, user *User, db *mongo.Database) (*Channel, int) {
 	return channel, http.StatusOK
 }
 
-func GetChannel(id string, user *User, db *mongo.Database) (*Channel, int) {
-	channelsCollection := db.Collection("channels")
+func (db *Database) GetChannel(id string, user *User) (*Channel, int) {
+	channelsCollection := db.mongo.Collection("channels")
 	object_id, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, http.StatusBadRequest
@@ -183,8 +182,8 @@ func GetChannel(id string, user *User, db *mongo.Database) (*Channel, int) {
 	return &channel, http.StatusOK
 }
 
-func GetChannelWithoutUser(id string, db *mongo.Database) (*Channel, int) {
-	channelsCollection := db.Collection("channels")
+func (db *Database) GetChannelWithoutUser(id string) (*Channel, int) {
+	channelsCollection := db.mongo.Collection("channels")
 	object_id, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, http.StatusBadRequest
@@ -199,8 +198,8 @@ func GetChannelWithoutUser(id string, db *mongo.Database) (*Channel, int) {
 	return &channel, http.StatusOK
 }
 
-func GetChannels(user *User, db *mongo.Database) []Channel {
-	channelsCollection := db.Collection("channels")
+func (db *Database) GetChannels(user *User) []Channel {
+	channelsCollection := db.mongo.Collection("channels")
 
 	var channels []Channel
 	cursor, err := channelsCollection.Find(context.TODO(), bson.M{"recipients": user.ID})

@@ -6,11 +6,10 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func GetRelationship(from primitive.ObjectID, to primitive.ObjectID, db *mongo.Database) (*Relationship, int) {
-	relationshipsCollection := db.Collection("relationships")
+func (db *Database) GetRelationship(from primitive.ObjectID, to primitive.ObjectID) (*Relationship, int) {
+	relationshipsCollection := db.mongo.Collection("relationships")
 
 	var relationship Relationship
 	err := relationshipsCollection.FindOne(context.TODO(), bson.M{"from_user_id": from, "to_user_id": to}).Decode(&relationship)
@@ -21,8 +20,8 @@ func GetRelationship(from primitive.ObjectID, to primitive.ObjectID, db *mongo.D
 	return &relationship, http.StatusOK
 }
 
-func GetRelationships(user_id primitive.ObjectID, db *mongo.Database) []Relationship {
-	relationshipsCollection := db.Collection("relationships")
+func (db *Database) GetRelationships(user_id primitive.ObjectID) []Relationship {
+	relationshipsCollection := db.mongo.Collection("relationships")
 
 	cursor, err := relationshipsCollection.Find(context.TODO(), bson.M{"from_user_id": user_id})
 	if err != nil {
