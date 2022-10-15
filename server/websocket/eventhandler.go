@@ -14,6 +14,7 @@ func (eh *EventHandler) Handle(ctx Context) {
 	if handler, ok := eh.HandleFunc[ctx.Event]; ok {
 		eh.mutex.Unlock()
 		handler(&ctx)
+		return
 	}
 	eh.mutex.Unlock()
 }
