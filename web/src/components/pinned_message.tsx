@@ -23,7 +23,7 @@ function PinnedMessage({ message }: {message: MessageOBJ}) {
             }
         }).then(res => {
             if (res.status === 200) {
-                channel_ctx.DeletePinnedMessage(message.channel_id, message.id);
+                channel_ctx.DeletePinnedMessage(message);
             }
         })
     }

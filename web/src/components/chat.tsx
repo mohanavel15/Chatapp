@@ -20,13 +20,13 @@ function Chat({ channel_id }: { channel_id: string }) {
 	const MessageElement = useMemo(() => {
 		let messagesList: JSX.Element[] = [];
 
-		let msg_channel = channel_context.messages.get(channel_id);
+		let messages = channel_context.messages.get(channel_id);
 
-		if (!msg_channel) {
-			msg_channel = new Map<String, MessageOBJ>()
+		if (!messages) {
+			messages = [] as MessageOBJ[]
 		}
 
-		const msgs = Array.from(msg_channel.values()).sort((a, b) => { return a.created_at - b.created_at;});
+		const msgs = messages.sort((a, b) => { return a.created_at - b.created_at;});
 
 		let preDate: string
 		msgs.forEach((message) => {

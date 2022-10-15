@@ -123,9 +123,9 @@ function Message({ message }: {message: MessageOBJ}) {
     }, [isBlocked])
 
     useEffect(() => {
-        if (message.author.id === "00000000-0000-0000-0000-000000000000" && message.author.username === "System") {
+        if (message.system_message) {
             setTimeout(() => {
-                channel_context.DeleteMessage(message.channel_id, message.id);
+                channel_context.DeleteMessage(message);
             }, 15000);
         }
     }, [message])

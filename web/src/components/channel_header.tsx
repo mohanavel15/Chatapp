@@ -22,7 +22,7 @@ function ChannelHeader({ channel_id }: { channel_id: string }) {
         setPinnedMessage([])
         if (showPinnedMessage) {
             const pin_channel = channel_context.pinnedMessages.get(channel_id);
-            if (pin_channel !== undefined && pin_channel.size > 0) {
+            if (pin_channel !== undefined && pin_channel.length > 0) {
                 pin_channel.forEach(msg => {
                     setPinnedMessage(prev => [...prev, <PinnedMessage key={msg.id} message={msg} />])
                 });

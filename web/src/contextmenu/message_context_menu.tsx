@@ -19,9 +19,13 @@ export default function MessageContextMenu(props:propsMsgCtxProps) {
 
     const [isPinned, setIsPinned] = useState(false);
     useEffect(() => {
-        const pinnedMessage = channel_ctx.pinnedMessages.get(message.channel_id)?.get(message.id);
+        const pinnedMessage = channel_ctx.pinnedMessages.get(message.channel_id);
         if (pinnedMessage !== undefined) {
-            setIsPinned(true);
+            for (let i = 0; i < pinnedMessage.length; i++) {
+                const messageFound = pinnedMessage[i].id === message.id
+                setIsPinned(messageFound ? true : false)
+                if (messageFound) break
+            }
         } else {
             setIsPinned(false);
         }
@@ -42,7 +46,7 @@ export default function MessageContextMenu(props:propsMsgCtxProps) {
             }
         }).then(res => {
             if (res.status === 200) {
-                channel_ctx.UpdatePinnedMessage(message.channel_id, message.id, message);
+                channel_ctx.UpdatePinnedMessage(message);
             }
         })
     }
@@ -56,7 +60,7 @@ export default function MessageContextMenu(props:propsMsgCtxProps) {
             }
         }).then(res => {
             if (res.status === 200) {
-                channel_ctx.DeletePinnedMessage(message.channel_id, message.id);
+                channel_ctx.DeletePinnedMessage(message);
             }
         })
     }

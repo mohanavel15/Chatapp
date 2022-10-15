@@ -79,11 +79,11 @@ function Channel() {
 						channel_context.setChannel(prev => new Map(prev.set(channel.id, channel)));
 						
 						GetMessages(token, channel.id).then((msgs: MessageOBJ[]) => {
-							msgs.forEach(msg => channel_context.UpdateMessage(channel.id, msg.id, msg))
+							msgs.forEach(msg => channel_context.InsertMessage(msg))
 						})
 
 						GetPinnedMessages(token, channel.id).then((msgs: MessageOBJ[]) => {
-							msgs.forEach(msg => channel_context.UpdatePinnedMessage(channel.id, msg.id, msg))
+							msgs.forEach(msg => channel_context.InsertPinnedMessage(msg))
 						})
 					});
 					break
@@ -101,17 +101,17 @@ function Channel() {
 				
 				case "MESSAGE_CREATE":
 					const message: MessageOBJ = payload.data;
-					channel_context.UpdateMessage(message.channel_id, message.id ,message);
+					channel_context.InsertMessage(message);
 					break
 
 				case "MESSAGE_MODIFY":
 					const edited_message: MessageOBJ = payload.data;
-					channel_context.UpdateMessage(edited_message.channel_id, edited_message.id ,edited_message);
+					channel_context.UpdateMessage(edited_message);
 					break
 				
 				case "MESSAGE_DELETE":
 					const deleted_message: MessageOBJ = payload.data;
-					channel_context.DeleteMessage(deleted_message.channel_id, deleted_message.id);
+					channel_context.DeleteMessage(deleted_message);
 					break
 				
 				case "CHANNEL_CREATE":
@@ -131,12 +131,12 @@ function Channel() {
 
 				case "MESSAGE_PINNED":
 					const pinned_message: MessageOBJ = payload.data;
-					channel_context.UpdatePinnedMessage(pinned_message.channel_id, pinned_message.id, pinned_message);
+					channel_context.InsertPinnedMessage(pinned_message);
 					break
 
 				case "MESSAGE_UNPINNED":
 					const upinned_message: MessageOBJ = payload.data;
-					channel_context.DeletePinnedMessage(upinned_message.channel_id, upinned_message.id);
+					channel_context.DeletePinnedMessage(upinned_message);
 					break
 				
 				case "RELATIONSHIP_CREATE":
