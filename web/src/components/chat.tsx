@@ -26,30 +26,25 @@ function Chat({ channel_id }: { channel_id: string }) {
 			messages = [] as MessageOBJ[]
 		}
 
-		const msgs = messages.sort((a, b) => { return a.created_at - b.created_at;});
-
 		let preDate: string
-		msgs.forEach((message) => {
-				if (message.channel_id === channel_id) {
-					let date = new Date(message.created_at * 1000).toLocaleDateString();
-					if (preDate === undefined || preDate !== date) {
-						messagesList.push(<div key={date} className="date-divider">{date}</div>);
-						preDate = date;
+		messages.forEach((message) => {
+			let date = new Date(message.created_at * 1000).toLocaleDateString();
+			if (preDate === undefined || preDate !== date) {
+				messagesList.push(<div key={date} className="date-divider">{date}</div>);
+				preDate = date;
+			}
+			messagesList.push(
+				<div key={message.id} onContextMenu={(event) => {
+					event.preventDefault();
+					ctx_menu_context.closeAll();
+					ctx_menu_context.setMsgCtxMenu({x: event.clientX, y: event.clientY, message: message});
+					ctx_menu_context.setShowMsgCtxMenu(true);
 					}
-
-					messagesList.push(
-					<div key={message.id} onContextMenu={(event) => {
-							event.preventDefault();
-							ctx_menu_context.closeAll();
-							ctx_menu_context.setMsgCtxMenu({x: event.clientX, y: event.clientY, message: message});
-							ctx_menu_context.setShowMsgCtxMenu(true);
-						}
-					}>
+				}>
 					<Message message={message} />
-					</div>
-					)
-				}
-			});
+				</div>
+			)
+		});
 
 		return messagesList;
 	}, [channel_context.messages, channel_id]);

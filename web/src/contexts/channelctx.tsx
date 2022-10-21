@@ -11,11 +11,13 @@ export interface ChannelContext {
 	InsertMessage: (message: MessageOBJ) => void
 	UpdateMessage: (message: MessageOBJ) => void
 	DeleteMessage: (message: MessageOBJ) => void
+	SetMessages: (channel_id: string, messages: MessageOBJ[]) => void
 
 	pinnedMessages: Map<String, MessageOBJ[]>;
 	InsertPinnedMessage: (message: MessageOBJ) => void
 	UpdatePinnedMessage: (message: MessageOBJ) => void
 	DeletePinnedMessage: (message: MessageOBJ) => void
+	SetPinnedMessages: (channel_id: string, messages: MessageOBJ[]) => void
 }
 
 export const ChannelsContext = createContext<ChannelContext>(undefined!);
@@ -78,6 +80,10 @@ export default function ChannelCTX({ children }: {children: React.ReactChild}) {
 		})
 	}
 
+	const SetMessages = (channel_id: string, messages: MessageOBJ[]) => {
+		setMessages(p => new Map<String, MessageOBJ[]>(p).set(channel_id, messages))
+	}
+
 	const InsertPinnedMessage = (message: MessageOBJ) => {
 		setPinnedMessages(p => {
 			let messages = p.get(message.channel_id)
@@ -131,6 +137,10 @@ export default function ChannelCTX({ children }: {children: React.ReactChild}) {
 		})
 	}
 
+	const SetPinnedMessages = (channel_id: string, messages: MessageOBJ[]) => {
+		setPinnedMessages(p => new Map<String, MessageOBJ[]>(p).set(channel_id, messages))
+	}
+	
 	const context_value: ChannelContext = {
 		channels: channels,
 		setChannel: setChannel,
@@ -139,10 +149,12 @@ export default function ChannelCTX({ children }: {children: React.ReactChild}) {
 		InsertMessage: InsertMessage,
 		UpdateMessage: UpdateMessage,
 		DeleteMessage: DeleteMessage,
+		SetMessages: SetMessages,
 		pinnedMessages: pinnedMessages,
 		InsertPinnedMessage: InsertPinnedMessage,
 		UpdatePinnedMessage: UpdatePinnedMessage,
 		DeletePinnedMessage: DeletePinnedMessage,
+		SetPinnedMessages: SetPinnedMessages,
 	}
 
 	return (

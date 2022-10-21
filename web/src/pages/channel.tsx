@@ -79,11 +79,11 @@ function Channel() {
 						channel_context.setChannel(prev => new Map(prev.set(channel.id, channel)));
 						
 						GetMessages(token, channel.id).then((msgs: MessageOBJ[]) => {
-							msgs.forEach(msg => channel_context.InsertMessage(msg))
+							channel_context.SetMessages(channel.id, msgs.reverse())
 						})
 
 						GetPinnedMessages(token, channel.id).then((msgs: MessageOBJ[]) => {
-							msgs.forEach(msg => channel_context.InsertPinnedMessage(msg))
+							channel_context.SetPinnedMessages(channel.id, msgs.reverse())
 						})
 					});
 					break
