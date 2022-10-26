@@ -37,69 +37,72 @@ func main() {
 	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "PATCH", "DELETE"})
 	origins := handlers.AllowedOrigins([]string{"*"})
 
+	api := router.PathPrefix("/api").Subrouter()
 	// Auth
-	router.HandleFunc("/register", IncludeDB(restapi.Register)).Methods("POST")
-	router.HandleFunc("/login", IncludeDB(restapi.Login)).Methods("POST")
-	router.HandleFunc("/logout", IncludeDB(restapi.Logout)).Methods("POST")
-	router.HandleFunc("/refresh", IncludeDB(restapi.Refresh)).Methods("POST")
-	router.HandleFunc("/signout", IncludeDB(restapi.Signout)).Methods("POST")
-	router.HandleFunc("/changepassword", Authenticated(restapi.ChangePassword)).Methods("POST")
+	api.HandleFunc("/register", IncludeDB(restapi.Register)).Methods("POST")
+	api.HandleFunc("/login", IncludeDB(restapi.Login)).Methods("POST")
+	api.HandleFunc("/logout", IncludeDB(restapi.Logout)).Methods("POST")
+	api.HandleFunc("/refresh", IncludeDB(restapi.Refresh)).Methods("POST")
+	api.HandleFunc("/signout", IncludeDB(restapi.Signout)).Methods("POST")
+	api.HandleFunc("/changepassword", Authenticated(restapi.ChangePassword)).Methods("POST")
 	// Channels
-	router.HandleFunc("/channels/{id}", Authenticated(restapi.GetChannel)).Methods("GET")
-	router.HandleFunc("/channels/{id}", Authenticated(restapi.EditChannel)).Methods("PATCH")
-	router.HandleFunc("/channels/{id}", Authenticated(restapi.DeleteChannel)).Methods("DELETE")
+	api.HandleFunc("/channels/{id}", Authenticated(restapi.GetChannel)).Methods("GET")
+	api.HandleFunc("/channels/{id}", Authenticated(restapi.EditChannel)).Methods("PATCH")
+	api.HandleFunc("/channels/{id}", Authenticated(restapi.DeleteChannel)).Methods("DELETE")
 	// Recipients
-	router.HandleFunc("/channels/{id}/recipients/{uid}", Authenticated(restapi.AddRecipient)).Methods("PUT")
-	router.HandleFunc("/channels/{id}/recipients/{uid}", Authenticated(restapi.RemoveRecipient)).Methods("DELETE")
+	api.HandleFunc("/channels/{id}/recipients/{uid}", Authenticated(restapi.AddRecipient)).Methods("PUT")
+	api.HandleFunc("/channels/{id}/recipients/{uid}", Authenticated(restapi.RemoveRecipient)).Methods("DELETE")
 	// Messages
-	router.HandleFunc("/channels/{id}/messages", Authenticated(restapi.GetMessages)).Methods("GET")
-	router.HandleFunc("/channels/{id}/messages", Authenticated(restapi.CreateMessage)).Methods("POST")
-	router.HandleFunc("/channels/{id}/messages/{mid}", Authenticated(restapi.GetMessage)).Methods("GET")
-	router.HandleFunc("/channels/{id}/messages/{mid}", Authenticated(restapi.EditMessage)).Methods("PATCH")
-	router.HandleFunc("/channels/{id}/messages/{mid}", Authenticated(restapi.DeleteMessage)).Methods("DELETE")
+	api.HandleFunc("/channels/{id}/messages", Authenticated(restapi.GetMessages)).Methods("GET")
+	api.HandleFunc("/channels/{id}/messages", Authenticated(restapi.CreateMessage)).Methods("POST")
+	api.HandleFunc("/channels/{id}/messages/{mid}", Authenticated(restapi.GetMessage)).Methods("GET")
+	api.HandleFunc("/channels/{id}/messages/{mid}", Authenticated(restapi.EditMessage)).Methods("PATCH")
+	api.HandleFunc("/channels/{id}/messages/{mid}", Authenticated(restapi.DeleteMessage)).Methods("DELETE")
 	// Pin Messages
-	router.HandleFunc("/channels/{id}/pins", Authenticated(restapi.GetPins)).Methods("GET")
-	router.HandleFunc("/channels/{id}/pins/{mid}", Authenticated(restapi.PinMsg)).Methods("PUT")
-	router.HandleFunc("/channels/{id}/pins/{mid}", Authenticated(restapi.UnpinMsg)).Methods("DELETE")
+	api.HandleFunc("/channels/{id}/pins", Authenticated(restapi.GetPins)).Methods("GET")
+	api.HandleFunc("/channels/{id}/pins/{mid}", Authenticated(restapi.PinMsg)).Methods("PUT")
+	api.HandleFunc("/channels/{id}/pins/{mid}", Authenticated(restapi.UnpinMsg)).Methods("DELETE")
 	// Invites
-	router.HandleFunc("/invites/{id}", Authenticated(restapi.JoinInvite)).Methods("GET")
-	router.HandleFunc("/channels/{id}/invites", Authenticated(restapi.GetInvites)).Methods("GET")
-	router.HandleFunc("/channels/{id}/invites", Authenticated(restapi.CreateInvite)).Methods("POST")
-	router.HandleFunc("/channels/{id}/invites/{iid}", Authenticated(restapi.DeleteInvite)).Methods("DELETE")
+	api.HandleFunc("/invites/{id}", Authenticated(restapi.JoinInvite)).Methods("GET")
+	api.HandleFunc("/channels/{id}/invites", Authenticated(restapi.GetInvites)).Methods("GET")
+	api.HandleFunc("/channels/{id}/invites", Authenticated(restapi.CreateInvite)).Methods("POST")
+	api.HandleFunc("/channels/{id}/invites/{iid}", Authenticated(restapi.DeleteInvite)).Methods("DELETE")
 	// Bans
-	router.HandleFunc("/channels/{id}/bans", Authenticated(restapi.GetAllBans)).Methods("GET")
-	router.HandleFunc("/channels/{id}/bans/{bid}", Authenticated(restapi.GetBan)).Methods("GET")
-	router.HandleFunc("/channels/{id}/bans/{bid}", Authenticated(restapi.DeleteBan)).Methods("DELETE")
+	api.HandleFunc("/channels/{id}/bans", Authenticated(restapi.GetAllBans)).Methods("GET")
+	api.HandleFunc("/channels/{id}/bans/{bid}", Authenticated(restapi.GetBan)).Methods("GET")
+	api.HandleFunc("/channels/{id}/bans/{bid}", Authenticated(restapi.DeleteBan)).Methods("DELETE")
 	// Users
-	router.HandleFunc("/users/@me", Authenticated(restapi.GetUser)).Methods("GET")
-	router.HandleFunc("/users/@me", Authenticated(restapi.EditUser)).Methods("PATCH")
-	router.HandleFunc("/users/@me/channels", Authenticated(restapi.GetChannels)).Methods("GET")
-	router.HandleFunc("/users/@me/channels", Authenticated(restapi.CreateChannel)).Methods("POST")
+	api.HandleFunc("/users/@me", Authenticated(restapi.GetUser)).Methods("GET")
+	api.HandleFunc("/users/@me", Authenticated(restapi.EditUser)).Methods("PATCH")
+	api.HandleFunc("/users/@me/channels", Authenticated(restapi.GetChannels)).Methods("GET")
+	api.HandleFunc("/users/@me/channels", Authenticated(restapi.CreateChannel)).Methods("POST")
 	// Relationship
-	router.HandleFunc("/users/@me/relationships", Authenticated(restapi.GetRelationships)).Methods("GET")
-	router.HandleFunc("/users/@me/relationships/{rid}", Authenticated(restapi.GetRelationship)).Methods("GET")
-	router.HandleFunc("/users/@me/relationships/{rid}/default", Authenticated(restapi.ChangeRelationshipToDefault)).Methods("PUT")
-	router.HandleFunc("/users/@me/relationships/{rid}/friend", Authenticated(restapi.ChangeRelationshipToFriend)).Methods("PUT")
-	router.HandleFunc("/users/@me/relationships/{rid}/block", Authenticated(restapi.ChangeRelationshipToBlock)).Methods("PUT")
-	// Gateway
-	router.HandleFunc("/ws", Gateway)
+	api.HandleFunc("/users/@me/relationships", Authenticated(restapi.GetRelationships)).Methods("GET")
+	api.HandleFunc("/users/@me/relationships/{rid}", Authenticated(restapi.GetRelationship)).Methods("GET")
+	api.HandleFunc("/users/@me/relationships/{rid}/default", Authenticated(restapi.ChangeRelationshipToDefault)).Methods("PUT")
+	api.HandleFunc("/users/@me/relationships/{rid}/friend", Authenticated(restapi.ChangeRelationshipToFriend)).Methods("PUT")
+	api.HandleFunc("/users/@me/relationships/{rid}/block", Authenticated(restapi.ChangeRelationshipToBlock)).Methods("PUT")
 	// Files
-	router.HandleFunc("/avatars/{user_id}/{avatar_id}/{filename}", IncludeDB(restapi.GetAvatars)).Methods("GET")
-	router.HandleFunc("/icons/{channel_id}/{icon_id}/{filename}", IncludeDB(restapi.GetIcons)).Methods("GET")
-	router.HandleFunc("/attachments/{channel_id}/{message_id}/{attachment_id}/{filename}", IncludeDB(restapi.GetAttachments)).Methods("GET")
+	api.HandleFunc("/avatars/{user_id}/{avatar_id}/{filename}", IncludeDB(restapi.GetAvatars)).Methods("GET")
+	api.HandleFunc("/icons/{channel_id}/{icon_id}/{filename}", IncludeDB(restapi.GetIcons)).Methods("GET")
+	api.HandleFunc("/attachments/{channel_id}/{message_id}/{attachment_id}/{filename}", IncludeDB(restapi.GetAttachments)).Methods("GET")
+	// Gateway
+	api.HandleFunc("/ws", Gateway)
 
-	after_cors := handlers.CORS(headers, methods, origins)(router)
-	after_recovery := handlers.RecoveryHandler()(after_cors)
+	router.PathPrefix("/assets/").Handler(http.StripPrefix("/assets/", http.FileServer(http.Dir("./web/dist/assets/"))))
+	router.PathPrefix("/").HandlerFunc((func(w http.ResponseWriter, r *http.Request) { http.ServeFile(w, r, "./web/dist/index.html") }))
 
+	router.Use(handlers.CORS(headers, methods, origins))
+	router.Use(handlers.RecoveryHandler())
 	server_uri := fmt.Sprintf("%s:%s", HOST, PORT)
 	log.Println("Listening on ", server_uri)
 
 	server := http.Server{
 		Addr:         server_uri,
-		Handler:      after_recovery,
-		ReadTimeout:  time.Second,
-		WriteTimeout: time.Second,
-		IdleTimeout:  time.Second,
+		Handler:      router,
+		ReadTimeout:  time.Second * 3,
+		WriteTimeout: time.Second * 3,
+		IdleTimeout:  time.Second * 3,
 	}
 
 	if err := server.ListenAndServe(); err != nil {
