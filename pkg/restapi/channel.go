@@ -1,8 +1,8 @@
 package restapi
 
 import (
-	"Chatapp/request"
-	"Chatapp/response"
+	"Chatapp/pkg/request"
+	"Chatapp/pkg/response"
 	"encoding/json"
 	"fmt"
 	"net/http"

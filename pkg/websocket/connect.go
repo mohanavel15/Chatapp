@@ -1,8 +1,8 @@
 package websocket
 
 import (
-	"Chatapp/response"
-	"Chatapp/utils"
+	"Chatapp/pkg/response"
+	"Chatapp/pkg/utils"
 	"encoding/json"
 	"log"
 	"net/http"

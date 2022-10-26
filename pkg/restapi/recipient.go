@@ -1,9 +1,9 @@
 package restapi
 
 import (
-	"Chatapp/database"
-	"Chatapp/request"
-	"Chatapp/response"
+	"Chatapp/pkg/database"
+	"Chatapp/pkg/request"
+	"Chatapp/pkg/response"
 	"context"
 	"encoding/json"
 	"fmt"

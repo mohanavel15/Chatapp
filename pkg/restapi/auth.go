@@ -1,10 +1,10 @@
 package restapi
 
 import (
-	"Chatapp/database"
-	"Chatapp/request"
-	"Chatapp/response"
-	"Chatapp/utils"
+	"Chatapp/pkg/database"
+	"Chatapp/pkg/request"
+	"Chatapp/pkg/response"
+	"Chatapp/pkg/utils"
 	"context"
 	"time"
 

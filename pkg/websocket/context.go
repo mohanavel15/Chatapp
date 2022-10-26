@@ -1,7 +1,7 @@
 package websocket
 
 import (
-	"Chatapp/database"
+	"Chatapp/pkg/database"
 )
 
 type Context struct {

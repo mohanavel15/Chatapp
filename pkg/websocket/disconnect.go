@@ -1,7 +1,7 @@
 package websocket
 
 import (
-	"Chatapp/response"
+	"Chatapp/pkg/response"
 )
 
 func Disconnect(ws *Ws) {

@@ -1,6 +1,6 @@
 package websocket
 
-import "Chatapp/response"
+import "Chatapp/pkg/response"
 
 type Connect struct {
 	Token string

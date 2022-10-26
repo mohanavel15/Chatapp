@@ -1,7 +1,7 @@
 package response
 
 import (
-	"Chatapp/database"
+	"Chatapp/pkg/database"
 	"fmt"
 )
 

@@ -1,6 +1,6 @@
 package response
 
-import "Chatapp/database"
+import "Chatapp/pkg/database"
 
 type Ban struct {
 	ID         string `json:"id"`

@@ -1,7 +1,7 @@
 package websocket
 
 import (
-	"Chatapp/database"
+	"Chatapp/pkg/database"
 	"encoding/json"
 	"fmt"
 	"log"

@@ -1,9 +1,9 @@
 package main
 
 import (
-	"Chatapp/database"
-	"Chatapp/restapi"
-	"Chatapp/websocket"
+	"Chatapp/pkg/database"
+	"Chatapp/pkg/restapi"
+	"Chatapp/pkg/websocket"
 	"fmt"
 	"log"
 	"net/http"

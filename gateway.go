@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	ws "Chatapp/websocket"
+	ws "Chatapp/pkg/websocket"
 
 	"github.com/gorilla/websocket"
 )
