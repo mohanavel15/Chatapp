@@ -1,7 +1,7 @@
 class RoutesCls {
-    ip = '127.0.0.1:5000';
-    host = 'http://' + this.ip;
-    ws = 'ws://' + this.ip + '/ws';
+    ip = '127.0.0.1:3000';
+    host = 'http://' + this.ip + '/api';
+    ws = 'ws://' + this.ip + '/api/ws';
 
     signin = this.host + '/login';
     signup = this.host + '/register';

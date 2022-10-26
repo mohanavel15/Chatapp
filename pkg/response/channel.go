@@ -34,7 +34,7 @@ func NewChannel(channel *database.Channel, recipients []User) Channel {
 
 func GetIconUrl(channel *database.Channel) string {
 	url := fmt.Sprint(channel.ID.Hex(), "/", channel.Icon.ID.Hex(), "/unknown."+channel.Icon.Ext)
-	fullUrl := fmt.Sprint("http://localhost:5000/icons/", url)
+	fullUrl := fmt.Sprint("http://localhost:3000/api/icons/", url)
 	return fullUrl
 }
 

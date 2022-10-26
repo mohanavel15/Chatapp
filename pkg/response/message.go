@@ -50,7 +50,7 @@ type Attachment struct {
 func NewAttachments(message *database.Message) []Attachment {
 	res_attachments := []Attachment{}
 	for _, attachment := range message.Attachments {
-		url := fmt.Sprintf("http://127.0.0.1:5000/attachments/%s/%s/%s/%s", message.ChannelID.Hex(), message.ID.Hex(), attachment.ID.Hex(), attachment.Filename)
+		url := fmt.Sprintf("http://127.0.0.1:3000/api/attachments/%s/%s/%s/%s", message.ChannelID.Hex(), message.ID.Hex(), attachment.ID.Hex(), attachment.Filename)
 		res_attachment := Attachment{
 			ID:          attachment.ID.Hex(),
 			Filename:    attachment.Filename,

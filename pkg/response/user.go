@@ -15,7 +15,7 @@ type User struct {
 
 func GetUrl(user *database.User) string {
 	url := fmt.Sprint(user.ID.Hex(), "/", user.Avatar.ID.Hex(), "/unknown."+user.Avatar.Ext)
-	fullUrl := fmt.Sprint("http://localhost:5000/avatars/", url)
+	fullUrl := fmt.Sprint("http://localhost:3000/api/avatars/", url)
 	return fullUrl
 }
 
