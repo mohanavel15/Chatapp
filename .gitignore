@@ -1,11 +1,5 @@
-/server/.env
-/server/build
-/server/Chatapp
-/server/files
-
-/web/node_modules
-/web/build
-
+.env
+Chatapp
+node_modules
 docker-compose.yml
-pnpm-lock.yaml
 dist
