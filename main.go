@@ -41,9 +41,7 @@ func main() {
 	// Auth
 	api.HandleFunc("/register", IncludeDB(restapi.Register)).Methods("POST")
 	api.HandleFunc("/login", IncludeDB(restapi.Login)).Methods("POST")
-	api.HandleFunc("/logout", IncludeDB(restapi.Logout)).Methods("POST")
-	api.HandleFunc("/refresh", IncludeDB(restapi.Refresh)).Methods("POST")
-	api.HandleFunc("/signout", IncludeDB(restapi.Signout)).Methods("POST")
+	api.HandleFunc("/logout", Authenticated(restapi.Logout)).Methods("POST")
 	api.HandleFunc("/changepassword", Authenticated(restapi.ChangePassword)).Methods("POST")
 	// Channels
 	api.HandleFunc("/channels/{id}", Authenticated(restapi.GetChannel)).Methods("GET")

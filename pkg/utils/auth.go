@@ -10,6 +10,7 @@ import (
 
 	"github.com/golang-jwt/jwt"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -22,7 +23,7 @@ func GenerateJWT(id string) (string, error) {
 
 	claims["id"] = id
 	claims["iat"] = time.Now().Unix()
-	claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
+	claims["exp"] = time.Now().Unix() * 2
 
 	tokenString, err := token.SignedString(secret_key)
 
@@ -33,28 +34,37 @@ func GenerateJWT(id string) (string, error) {
 	return tokenString, nil
 }
 
-func ValidateAccessToken(AccessToken string, db *mongo.Database) (bool, database.Session) {
-	id, err := ValidateJWT(AccessToken)
+func ValidateAccessToken(AccessToken string, db *mongo.Database) (bool, database.User) {
+	var user database.User
+
+	claims, err := ValidateJWT(AccessToken)
+	log.Println(err)
 	if err != nil {
-		return false, database.Session{}
+		return false, user
 	}
 
-	var session database.Session
-	collection := db.Collection("sessions")
-	err = collection.FindOne(context.TODO(), bson.M{"access_token": AccessToken}).Decode(&session)
+	collection := db.Collection("users")
+	id, err := primitive.ObjectIDFromHex(claims["id"].(string))
+	if err != nil {
+		return false, user
+	}
+
+	err = collection.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&user)
 
 	if err != nil {
-		return false, database.Session{}
+		return false, user
 	}
 
-	if session.AccountID.Hex() != id {
-		return false, database.Session{}
+	iat := int64(claims["iat"].(float64))
+
+	if user.LastLogout >= iat {
+		return false, user
 	}
 
-	return true, session
+	return true, user
 }
 
-func ValidateJWT(tokenString string) (string, error) {
+func ValidateJWT(tokenString string) (jwt.MapClaims, error) {
 	secret_key := []byte(JWT_SECRET)
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -64,13 +74,12 @@ func ValidateJWT(tokenString string) (string, error) {
 	})
 
 	if err != nil {
-		return "", err
+		return jwt.MapClaims{}, err
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		uuid := claims["id"].(string)
-		return uuid, nil
+		return claims, nil
 	} else {
-		return "", fmt.Errorf("token is invalid")
+		return jwt.MapClaims{}, fmt.Errorf("token is invalid")
 	}
 }
