@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"Chatapp/pkg/restapi"
 	ws "Chatapp/pkg/websocket"
 
 	"github.com/gorilla/websocket"
@@ -14,9 +15,9 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-func Gateway(w http.ResponseWriter, r *http.Request) {
+func Gateway(ctx *restapi.Context) {
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
-	conn, err := upgrader.Upgrade(w, r, nil)
+	conn, err := upgrader.Upgrade(ctx.Res, ctx.Req, nil)
 
 	if err != nil {
 		log.Println(err)
@@ -25,10 +26,11 @@ func Gateway(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ws := &ws.Ws{
-		Conn:    conn,
-		Handler: handler,
-		Db:      db,
-		Conns:   conns,
+		Conn: conn,
+		//Handler: handler,
+		Db:    db,
+		User:  &ctx.User,
+		Conns: conns,
 	}
 
 	ws.ReadLoop()

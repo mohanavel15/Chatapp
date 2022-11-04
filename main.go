@@ -15,7 +15,8 @@ import (
 )
 
 var db *database.Database
-var handler *websocket.EventHandler
+
+//var handler *websocket.EventHandler
 
 var conns = websocket.NewConnections()
 
@@ -29,8 +30,8 @@ var (
 func main() {
 	db = database.NewDatabase(MONGO_URI, MONGO_DATABASE)
 
-	handler = &websocket.EventHandler{}
-	handler.Add("CONNECT", websocket.ConnectUser)
+	//handler = &websocket.EventHandler{}
+	//handler.Add("CONNECT", websocket.ConnectUser)
 
 	router := mux.NewRouter()
 	headers := handlers.AllowedHeaders([]string{"Content-Type", "Authorization"})
@@ -85,7 +86,7 @@ func main() {
 	api.HandleFunc("/icons/{channel_id}/{icon_id}/{filename}", IncludeDB(restapi.GetIcons)).Methods("GET")
 	api.HandleFunc("/attachments/{channel_id}/{message_id}/{attachment_id}/{filename}", IncludeDB(restapi.GetAttachments)).Methods("GET")
 	// Gateway
-	api.HandleFunc("/ws", Gateway)
+	api.HandleFunc("/ws", Authenticated(Gateway))
 
 	router.PathPrefix("/assets/").Handler(http.StripPrefix("/assets/", http.FileServer(http.Dir("./web/dist/assets/"))))
 	router.PathPrefix("/").HandlerFunc((func(w http.ResponseWriter, r *http.Request) { http.ServeFile(w, r, "./web/dist/index.html") }))
