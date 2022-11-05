@@ -1,13 +1,8 @@
 import Routes from "../config";
 import { ChannelOBJ } from "../models/models";
 
-export async function GetChannels(access_token: string) {
-    const response = await fetch(Routes.Channels, {
-        method: 'GET',
-        headers: {
-            'Authorization': access_token,
-        }
-    });
+export async function GetChannels() {
+    const response = await fetch(Routes.Channels);
     if (!response.ok) {
         return [] as ChannelOBJ[];
     }
@@ -16,12 +11,11 @@ export async function GetChannels(access_token: string) {
     return channels;
 }
 
-export async function CreateChannel(access_token: string, name: string, icon: string | ArrayBuffer | null) {
+export async function CreateChannel(name: string, icon: string | ArrayBuffer | null) {
     const url = Routes.currentUser+"/channels";
     const response = await fetch(url, {
         method: "POST",
         headers: {
-            "Authorization": access_token,
             "Content-Type": "application/json"
         },
         body: JSON.stringify({ name: name, icon: icon })
@@ -35,12 +29,11 @@ export async function CreateChannel(access_token: string, name: string, icon: st
     return channel_;
 }
 
-export async function EditChannel(access_token: string, channel_id: string, name: string, icon: string) {
+export async function EditChannel(channel_id: string, name: string, icon: string) {
     const url = Routes.Channels+"/"+channel_id;
     const response = await fetch(url, {
         method: "PATCH",
         headers: {
-            "Authorization": access_token,
             "Content-Type": "application/json"
         },
         body: JSON.stringify({ name: name, icon: icon })
@@ -48,23 +41,19 @@ export async function EditChannel(access_token: string, channel_id: string, name
     return response;
 }
 
-export async function DeleteChannel(access_token: string, channel_id: string) {
+export async function DeleteChannel(channel_id: string) {
     const url = Routes.Channels+"/"+channel_id;
     const response = await fetch(url, {
         method: "DELETE",
-        headers: {
-            "Authorization": access_token,
-        }
     })
     return response;
 }
 
-export async function GetDMChannel(access_token: string, user_id: string) {
+export async function GetDMChannel(user_id: string) {
     const url = Routes.currentUser+"/channels"
     const response = await fetch(url, {
         method: "POST",
         headers: {
-            "Authorization": access_token,
             "Content-Type": "application/json"
         },
         body: JSON.stringify({ recipient_id: user_id })
