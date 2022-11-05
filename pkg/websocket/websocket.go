@@ -38,7 +38,7 @@ func (ws *Ws) ReadLoop() {
 		data, err := ws.Read()
 		if err != nil {
 			log.Println(err)
-			Disconnect(ws)
+			ws.Disconnect()
 			return
 		}
 		ws.HandleWSMessage(data)

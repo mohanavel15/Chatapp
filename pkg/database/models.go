@@ -7,13 +7,13 @@ import (
 )
 
 type User struct {
-	ID        primitive.ObjectID `bson:"_id"`
-	Avatar    Avatar             `bson:"avatar"`
-	Username  string             `bson:"username"`
-	Email     string             `bson:"email"`
-	Password  []byte             `bson:"password"`
-	CreatedAt int64              `bson:"created_at"`
-	UpdatedAt int64              `bson:"updated_at"`
+	ID         primitive.ObjectID `bson:"_id"`
+	Avatar     Avatar             `bson:"avatar"`
+	Username   string             `bson:"username"`
+	Email      string             `bson:"email"`
+	Password   []byte             `bson:"password"`
+	CreatedAt  int64              `bson:"created_at"`
+	LastLogout int64              `bson:"last_logout"`
 }
 
 type Avatar struct {
@@ -21,13 +21,6 @@ type Avatar struct {
 	Avatar string             `bson:"avatar"`
 	Type   string             `bson:"type"`
 	Ext    string             `bson:"ext"`
-}
-
-type Session struct {
-	ID          primitive.ObjectID `bson:"_id"`
-	AccessToken string             `bson:"access_token"`
-	ClientToken string             `bson:"client_token"`
-	AccountID   primitive.ObjectID `bson:"account_id"`
 }
 
 type Relationship struct {

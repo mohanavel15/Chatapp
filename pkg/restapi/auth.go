@@ -3,7 +3,6 @@ package restapi
 import (
 	"Chatapp/pkg/database"
 	"Chatapp/pkg/request"
-	"Chatapp/pkg/response"
 	"Chatapp/pkg/utils"
 	"context"
 	"time"
@@ -14,10 +13,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -78,12 +75,12 @@ func Register(w http.ResponseWriter, r *http.Request, db *database.Database) {
 	}
 
 	new_account := database.User{
-		ID:        primitive.NewObjectID(),
-		Username:  request.Username,
-		Email:     request.Email,
-		Password:  hashedPassword,
-		CreatedAt: time.Now().Unix(),
-		UpdatedAt: time.Now().Unix(),
+		ID:         primitive.NewObjectID(),
+		Username:   request.Username,
+		Email:      request.Email,
+		Password:   hashedPassword,
+		CreatedAt:  time.Now().Unix(),
+		LastLogout: 0,
 	}
 
 	collection.InsertOne(context.TODO(), &new_account)
@@ -91,14 +88,13 @@ func Register(w http.ResponseWriter, r *http.Request, db *database.Database) {
 }
 
 func Login(w http.ResponseWriter, r *http.Request, db *database.Database) {
+	users := db.Mongo.Collection("users")
+
 	var request request.Signin
 	_ = json.NewDecoder(r.Body).Decode(&request)
-	users := db.Mongo.Collection("users")
-	sessions := db.Mongo.Collection("sessions")
 
 	username := strings.ToLower(strings.TrimSpace(request.Username))
 	password := strings.TrimSpace(request.Password)
-	clientToken := strings.TrimSpace(request.ClientToken)
 
 	if username == "" || password == "" {
 		w.WriteHeader(http.StatusBadRequest)
@@ -134,64 +130,26 @@ func Login(w http.ResponseWriter, r *http.Request, db *database.Database) {
 		return
 	}
 
-	response := response.Signin_Response{
-		AccessToken: accessToken,
-		ClientToken: clientToken,
+	cookie := http.Cookie{
+		Name:     "access_token",
+		Value:    accessToken,
+		Path:     "/",
+		Expires:  time.Now().Add(time.Hour * 24 * 356 * 100),
+		HttpOnly: true,
 	}
-
-	if clientToken != "" {
-		err := sessions.FindOneAndUpdate(context.TODO(), bson.M{"client_token": clientToken}, bson.M{"$set": bson.M{"access_token": accessToken}}).Err()
-		if err == nil {
-			json.NewEncoder(w).Encode(response)
-			return
-		}
-	}
-
-	session := database.Session{
-		ID:          primitive.NewObjectID(),
-		AccessToken: accessToken,
-		ClientToken: uuid.New().String(),
-		AccountID:   user.ID,
-	}
-	sessions.InsertOne(context.TODO(), &session)
-	response.ClientToken = session.ClientToken
-	json.NewEncoder(w).Encode(response)
+	http.SetCookie(w, &cookie)
 }
 
-func Logout(w http.ResponseWriter, r *http.Request, db *database.Database) {
-	access_token := r.Header.Get("Authorization")
-	if access_token == "" {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
-	is_valid, session := utils.ValidateAccessToken(access_token, db.Mongo)
-	if !is_valid {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
-	sessions := db.Mongo.Collection("sessions")
-	sessions.DeleteOne(context.TODO(), bson.M{"_id": session.ID})
-	w.WriteHeader(http.StatusOK)
-}
-
-func Signout(w http.ResponseWriter, r *http.Request, db *database.Database) {
-	access_token := r.Header.Get("Authorization")
-	if access_token == "" {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
-	is_valid, session := utils.ValidateAccessToken(access_token, db.Mongo)
-	if !is_valid {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
-	collection := db.Mongo.Collection("sessions")
-	collection.DeleteMany(context.TODO(), bson.M{"account_id": session.AccountID})
-	w.WriteHeader(http.StatusOK)
+func Logout(ctx *Context) {
+	users := ctx.Db.Mongo.Collection("users")
+	users.UpdateOne(context.TODO(), bson.M{"_id": ctx.User.ID}, bson.M{"$set": bson.M{"last_logout": time.Now().Unix()}})
+	http.SetCookie(ctx.Res, &http.Cookie{
+		Name:     "access_token",
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		MaxAge:   -1,
+	})
 }
 
 func ChangePassword(ctx *Context) {
@@ -225,64 +183,4 @@ func ChangePassword(ctx *Context) {
 	ctx.User.Password = hashedPassword
 	collection.UpdateOne(context.TODO(), bson.M{"_id": ctx.User.ID}, bson.M{"$set": bson.M{"password": hashedPassword}})
 	ctx.Res.WriteHeader(http.StatusOK)
-}
-
-func Refresh(w http.ResponseWriter, r *http.Request, db *database.Database) {
-	var request request.Refresh
-	_ = json.NewDecoder(r.Body).Decode(&request)
-
-	accessToken := strings.TrimSpace(request.AccessToken)
-	clientToken := strings.TrimSpace(request.ClientToken)
-
-	if accessToken == "" || clientToken == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	var session database.Session
-	collection := db.Mongo.Collection("sessions")
-	err := collection.FindOne(context.TODO(), bson.M{"access_token": accessToken}).Decode(&session)
-
-	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Something went wrong"))
-		return
-	}
-
-	id, err := utils.ValidateJWT(request.AccessToken)
-	if err == nil && session.AccountID.Hex() == id {
-		w.WriteHeader(http.StatusNoContent)
-		return
-	}
-
-	if err.Error() != "Token is expired" || session.ClientToken != request.ClientToken {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	newAccessToken, err := utils.GenerateJWT(session.AccountID.Hex())
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Failed to generate access token"))
-		return
-	}
-
-	session.AccessToken = newAccessToken
-	_, err = collection.ReplaceOne(context.TODO(), bson.M{"_id": session.ID}, session)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Something went wrong"))
-		return
-	}
-
-	response := response.Signin_Response{
-		AccessToken: newAccessToken,
-		ClientToken: request.ClientToken,
-	}
-
-	json.NewEncoder(w).Encode(response)
 }

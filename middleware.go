@@ -5,6 +5,7 @@ import (
 	"Chatapp/pkg/restapi"
 	"Chatapp/pkg/utils"
 	"net/http"
+	"time"
 )
 
 type IDBFunction func(w http.ResponseWriter, r *http.Request, db *database.Database)
@@ -18,24 +19,22 @@ func IncludeDB(function IDBFunction) http.HandlerFunc {
 
 func Authenticated(function AuthFunction) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
-		access_token := r.Header.Get("Authorization")
-
-		if access_token == "" {
+		cookie, err := r.Cookie("access_token")
+		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
-			return
 		}
 
-		is_valid, session := utils.ValidateAccessToken(access_token, db.Mongo)
+		is_valid, user := utils.ValidateAccessToken(cookie.Value, db.Mongo)
+
 		if !is_valid {
 			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
-
-		user, statusCode := db.GetUser(session.AccountID.Hex())
-
-		if statusCode != http.StatusOK {
-			w.WriteHeader(http.StatusUnauthorized)
+			http.SetCookie(w, &http.Cookie{
+				Name:     "access_token",
+				Value:    "",
+				Path:     "/",
+				HttpOnly: true,
+				Expires:  time.Now().Add(time.Hour * -1),
+			})
 			return
 		}
 
@@ -43,7 +42,7 @@ func Authenticated(function AuthFunction) http.HandlerFunc {
 			Res:  w,
 			Req:  r,
 			Db:   db,
-			User: *user,
+			User: user,
 			Conn: conns,
 		}
 

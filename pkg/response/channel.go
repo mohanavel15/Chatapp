@@ -38,8 +38,6 @@ func GetIconUrl(channel *database.Channel) string {
 	return fullUrl
 }
 
-type Channels []Channel
-
 type Invite struct {
 	InviteCode string `json:"invite_code"`
 	CreatedAt  string `json:"created_at"`

@@ -14,11 +14,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var db *database.Database
-var handler *websocket.EventHandler
-
-var conns = websocket.NewConnections()
-
 var (
 	HOST           = os.Getenv("SERVER_HOST")
 	PORT           = os.Getenv("SERVER_PORT")
@@ -26,24 +21,25 @@ var (
 	MONGO_DATABASE = os.Getenv("MONGO_DATABASE")
 )
 
-func main() {
-	db = database.NewDatabase(MONGO_URI, MONGO_DATABASE)
-
+var (
+	db      = database.NewDatabase(MONGO_URI, MONGO_DATABASE)
 	handler = &websocket.EventHandler{}
-	handler.Add("CONNECT", websocket.ConnectUser)
+	conns   = websocket.NewConnections()
+)
 
+func main() {
 	router := mux.NewRouter()
 	headers := handlers.AllowedHeaders([]string{"Content-Type", "Authorization"})
 	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "PATCH", "DELETE"})
 	origins := handlers.AllowedOrigins([]string{"*"})
+	router.Use(handlers.CORS(headers, methods, origins))
+	router.Use(handlers.RecoveryHandler())
 
 	api := router.PathPrefix("/api").Subrouter()
 	// Auth
 	api.HandleFunc("/register", IncludeDB(restapi.Register)).Methods("POST")
 	api.HandleFunc("/login", IncludeDB(restapi.Login)).Methods("POST")
-	api.HandleFunc("/logout", IncludeDB(restapi.Logout)).Methods("POST")
-	api.HandleFunc("/refresh", IncludeDB(restapi.Refresh)).Methods("POST")
-	api.HandleFunc("/signout", IncludeDB(restapi.Signout)).Methods("POST")
+	api.HandleFunc("/logout", Authenticated(restapi.Logout)).Methods("POST")
 	api.HandleFunc("/changepassword", Authenticated(restapi.ChangePassword)).Methods("POST")
 	// Channels
 	api.HandleFunc("/channels/{id}", Authenticated(restapi.GetChannel)).Methods("GET")
@@ -87,13 +83,11 @@ func main() {
 	api.HandleFunc("/icons/{channel_id}/{icon_id}/{filename}", IncludeDB(restapi.GetIcons)).Methods("GET")
 	api.HandleFunc("/attachments/{channel_id}/{message_id}/{attachment_id}/{filename}", IncludeDB(restapi.GetAttachments)).Methods("GET")
 	// Gateway
-	api.HandleFunc("/ws", Gateway)
+	api.HandleFunc("/ws", Authenticated(Gateway))
 
 	router.PathPrefix("/assets/").Handler(http.StripPrefix("/assets/", http.FileServer(http.Dir("./web/dist/assets/"))))
 	router.PathPrefix("/").HandlerFunc((func(w http.ResponseWriter, r *http.Request) { http.ServeFile(w, r, "./web/dist/index.html") }))
 
-	router.Use(handlers.CORS(headers, methods, origins))
-	router.Use(handlers.RecoveryHandler())
 	server_uri := fmt.Sprintf("%s:%s", HOST, PORT)
 	log.Println("Listening on ", server_uri)
 

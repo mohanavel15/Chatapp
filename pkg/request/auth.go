@@ -7,9 +7,8 @@ type Signup struct {
 }
 
 type Signin struct {
-	Username    string `json:"username"`
-	Password    string `json:"password"`
-	ClientToken string `json:"client_token"`
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 type ChangePassword struct {
