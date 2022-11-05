@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-func ConnectUser(ws *Ws) {
+func (ws *Ws) ConnectUser() {
 	user := ws.User
 	res_user := response.NewUser(user, 1)
 

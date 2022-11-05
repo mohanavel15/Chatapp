@@ -4,7 +4,7 @@ import (
 	"Chatapp/pkg/response"
 )
 
-func Disconnect(ws *Ws) {
+func (ws *Ws) Disconnect() {
 	if ws.User == nil {
 		ws.Close()
 		return
