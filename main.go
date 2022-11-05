@@ -14,12 +14,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var db *database.Database
-
-//var handler *websocket.EventHandler
-
-var conns = websocket.NewConnections()
-
 var (
 	HOST           = os.Getenv("SERVER_HOST")
 	PORT           = os.Getenv("SERVER_PORT")
@@ -27,16 +21,19 @@ var (
 	MONGO_DATABASE = os.Getenv("MONGO_DATABASE")
 )
 
+var (
+	db      = database.NewDatabase(MONGO_URI, MONGO_DATABASE)
+	handler = &websocket.EventHandler{}
+	conns   = websocket.NewConnections()
+)
+
 func main() {
-	db = database.NewDatabase(MONGO_URI, MONGO_DATABASE)
-
-	//handler = &websocket.EventHandler{}
-	//handler.Add("CONNECT", websocket.ConnectUser)
-
 	router := mux.NewRouter()
 	headers := handlers.AllowedHeaders([]string{"Content-Type", "Authorization"})
 	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "PATCH", "DELETE"})
 	origins := handlers.AllowedOrigins([]string{"*"})
+	router.Use(handlers.CORS(headers, methods, origins))
+	router.Use(handlers.RecoveryHandler())
 
 	api := router.PathPrefix("/api").Subrouter()
 	// Auth
@@ -91,8 +88,6 @@ func main() {
 	router.PathPrefix("/assets/").Handler(http.StripPrefix("/assets/", http.FileServer(http.Dir("./web/dist/assets/"))))
 	router.PathPrefix("/").HandlerFunc((func(w http.ResponseWriter, r *http.Request) { http.ServeFile(w, r, "./web/dist/index.html") }))
 
-	router.Use(handlers.CORS(headers, methods, origins))
-	router.Use(handlers.RecoveryHandler())
 	server_uri := fmt.Sprintf("%s:%s", HOST, PORT)
 	log.Println("Listening on ", server_uri)
 

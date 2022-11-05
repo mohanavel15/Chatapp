@@ -26,12 +26,13 @@ func Gateway(ctx *restapi.Context) {
 	}
 
 	ws := &ws.Ws{
-		Conn: conn,
-		//Handler: handler,
-		Db:    db,
-		User:  &ctx.User,
-		Conns: conns,
+		Conn:    conn,
+		Handler: handler,
+		Db:      db,
+		User:    &ctx.User,
+		Conns:   conns,
 	}
 
+	ws.ConnectUser()
 	ws.ReadLoop()
 }
