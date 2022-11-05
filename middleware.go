@@ -22,6 +22,7 @@ func Authenticated(function AuthFunction) http.HandlerFunc {
 		cookie, err := r.Cookie("access_token")
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
+			return
 		}
 
 		is_valid, user := utils.ValidateAccessToken(cookie.Value, db.Mongo)

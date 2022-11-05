@@ -38,7 +38,6 @@ func ValidateAccessToken(AccessToken string, db *mongo.Database) (bool, database
 	var user database.User
 
 	claims, err := ValidateJWT(AccessToken)
-	log.Println(err)
 	if err != nil {
 		return false, user
 	}
