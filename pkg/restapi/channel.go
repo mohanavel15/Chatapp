@@ -50,7 +50,7 @@ func CreateChannel(ctx *Context) {
 }
 
 func GetChannels(ctx *Context) {
-	res_channels := response.Channels{}
+	res_channels := []response.Channel{}
 	channels := ctx.Db.GetChannels(&ctx.User)
 	for _, channel := range channels {
 		recipients := []response.User{}
