@@ -30,19 +30,19 @@ export default function Relationship({ relationship_obj }: { relationship_obj: R
   }
 
   function Accept() {
-    RelationshipToFriend(user_ctx.accessToken, relationship_obj.id).then(res_relationship => {
+    RelationshipToFriend(relationship_obj.id).then(res_relationship => {
       user_ctx.setRelationships(prevRelationships => new Map(prevRelationships.set(res_relationship.id, res_relationship)));
     })
   }
 
   function Decline() {
-    RelationshipToDefault(user_ctx.accessToken, relationship_obj.id).then(res_relationship => {
+    RelationshipToDefault(relationship_obj.id).then(res_relationship => {
       user_ctx.setRelationships(prevRelationships => new Map(prevRelationships.set(res_relationship.id, res_relationship)));
     })
   }
 
   function Message() {
-    GetDMChannel(user_ctx.accessToken, relationship_obj.id).then(response => {
+    GetDMChannel(relationship_obj.id).then(response => {
       if (response.status === 200) {
         response.json().then(dm_channel => {
           if (!channel_ctx.channels.has(dm_channel.id)) {

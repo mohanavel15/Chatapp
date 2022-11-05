@@ -11,7 +11,7 @@ function KickBan() {
     const reasonRef = useRef<HTMLTextAreaElement>(undefined!);
 
     function handleKickOrBan() {
-        RemoveRecipient(user_ctx.accessToken, state_context.ChannelOBJ.id, state_context.KickBanMember ? state_context.KickBanMember.id : '', reasonRef.current.value, isBan);
+        RemoveRecipient(state_context.ChannelOBJ.id, state_context.KickBanMember ? state_context.KickBanMember.id : '', reasonRef.current.value, isBan);
         cancelBan();
     }
 

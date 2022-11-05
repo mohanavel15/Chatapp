@@ -12,7 +12,7 @@ export default function DeleteChannel() {
     function HandleDeleteChannel(e: React.MouseEvent<Element, MouseEvent>) {
         const channel_id = state_context.ChannelOBJ.id;
         e.preventDefault();
-        APIDeleteChannel(user_ctx.accessToken, channel_id).then(response => {
+        APIDeleteChannel(channel_id).then(response => {
             if (response.status === 200) {
                 channel_ctx.deleteChannel(channel_id)
             }

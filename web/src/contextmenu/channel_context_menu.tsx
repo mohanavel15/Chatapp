@@ -21,19 +21,19 @@ export default function ChannelContextMenu(props: propsChannelCtxProps) {
     const [relationshipStatus, setRelationshipStatus] = useState(0);
 
     const relationshipToDefault = () => {
-        RelationshipToDefault(user_ctx.accessToken, props.channel.recipients[0].id).then(relationship => {
+        RelationshipToDefault(props.channel.recipients[0].id).then(relationship => {
             user_ctx.setRelationships(prevRel => new Map(prevRel.set(relationship.id, relationship)))
         })
     }
 
     const relationshipToFriend = () => {
-        RelationshipToFriend(user_ctx.accessToken, props.channel.recipients[0].id).then(relationship => {
+        RelationshipToFriend(props.channel.recipients[0].id).then(relationship => {
             user_ctx.setRelationships(prevRel => new Map(prevRel.set(relationship.id, relationship)))
         })
     }
 
     const relationshipToBlock = () => {
-        RelationshipToBlock(user_ctx.accessToken, props.channel.recipients[0].id).then(relationship => {
+        RelationshipToBlock(props.channel.recipients[0].id).then(relationship => {
             user_ctx.setRelationships(prevRel => new Map(prevRel.set(relationship.id, relationship)))
         })
     }

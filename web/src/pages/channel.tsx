@@ -46,12 +46,6 @@ function Channel() {
 			const gateway = new WebSocket(Routes.ws);
 			gateway.onopen = () => {
 				console.log("Connecting to the server");
-				gateway.send(
-					JSON.stringify({
-						event: "CONNECT",
-						data: { token: localStorage.getItem("access_token") }
-					})
-				);
 			}
 			return gateway;
 		}
@@ -74,15 +68,14 @@ function Channel() {
 					user_ctx.setUsername(ready.user.username);
 					user_ctx.setAvatar(ready.user.avatar);
 
-					const token = localStorage.getItem("access_token") || ""
 					ready.channels.forEach((channel: ChannelOBJ) => {
 						channel_context.setChannel(prev => new Map(prev.set(channel.id, channel)));
 						
-						GetMessages(token, channel.id).then((msgs: MessageOBJ[]) => {
+						GetMessages(channel.id).then((msgs: MessageOBJ[]) => {
 							channel_context.SetMessages(channel.id, msgs.reverse())
 						})
 
-						GetPinnedMessages(token, channel.id).then((msgs: MessageOBJ[]) => {
+						GetPinnedMessages(channel.id).then((msgs: MessageOBJ[]) => {
 							channel_context.SetPinnedMessages(channel.id, msgs.reverse())
 						})
 					});

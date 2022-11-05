@@ -24,12 +24,12 @@ export default function CreateChannel() {
             let reader = new FileReader();
             reader.readAsDataURL(icon_input.current.files[0]);
             reader.onload = () => {
-                APICreateChannel(user.accessToken, channelName, reader.result).then(new_channel => {
+                APICreateChannel(channelName, reader.result).then(new_channel => {
                     channel_context.setChannel(p => new Map(p.set(new_channel.id, new_channel)))
                 })
             }
         } else {
-            APICreateChannel(user.accessToken, channelName, "").then(new_channel => {
+            APICreateChannel(channelName, "").then(new_channel => {
                 channel_context.setChannel(p => new Map(p.set(new_channel.id, new_channel)))
             })
         }

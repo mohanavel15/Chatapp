@@ -32,7 +32,7 @@ export default function MemberContextMenu(props:propsMsgCtxProps) {
     }
 
     function Message() {
-        GetDMChannel(user_ctx.accessToken, props.member.id).then(response => {
+        GetDMChannel(props.member.id).then(response => {
             if (response.status === 200) {
                 response.json().then(dm_channel => {
                     if (!channel_context.channels.has(dm_channel.id)) {
@@ -47,7 +47,7 @@ export default function MemberContextMenu(props:propsMsgCtxProps) {
     }
 
     const deleteFriend = () => {
-        RelationshipToDefault(user_ctx.accessToken, props.member.id).then(relationship => {
+        RelationshipToDefault(props.member.id).then(relationship => {
             user_ctx.setRelationships(prevRelationships => new Map(prevRelationships.set(props.member.id, relationship)));
             setIsFriend(0);
         });
@@ -74,8 +74,8 @@ export default function MemberContextMenu(props:propsMsgCtxProps) {
     return (
         <div className='ContextMenu' style={style}>
             { props.member.id !== user_ctx.id && <button className='CtxBtn' onClick={Message}>Message</button> }
-            { props.member.id !== user_ctx.id && isFriend === 0 && <button className='CtxBtn' onClick={() => RelationshipToFriend(user_ctx.accessToken, props.member.id)}>Add Friend</button> }
-            { props.member.id !== user_ctx.id && isFriend === 3 && <button className='CtxBtn' onClick={() => RelationshipToFriend(user_ctx.accessToken, props.member.id)}>Accept Request</button> }
+            { props.member.id !== user_ctx.id && isFriend === 0 && <button className='CtxBtn' onClick={() => RelationshipToFriend(props.member.id)}>Add Friend</button> }
+            { props.member.id !== user_ctx.id && isFriend === 3 && <button className='CtxBtn' onClick={() => RelationshipToFriend(props.member.id)}>Accept Request</button> }
             { props.member.id !== user_ctx.id && isFriend === 3 && <button className='CtxDelBtn' onClick={deleteFriend}>Decline Request</button> }
             { props.member.id !== user_ctx.id && isFriend === 4 && <button className='CtxDelBtn' onClick={deleteFriend}>Cancel Request</button> }
             { props.member.id !== user_ctx.id && isFriend === 1 && <button className='CtxDelBtn' onClick={deleteFriend}>Remove Friend</button> }
