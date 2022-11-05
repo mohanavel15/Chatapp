@@ -134,7 +134,7 @@ func Login(w http.ResponseWriter, r *http.Request, db *database.Database) {
 		Name:     "access_token",
 		Value:    accessToken,
 		Path:     "/",
-		Expires:  time.Now().Add(time.Hour * 24 * 356 * 100),
+		Expires:  time.Now().Add(time.Hour * 24 * 365 * 100),
 		HttpOnly: true,
 	}
 	http.SetCookie(w, &cookie)

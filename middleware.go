@@ -5,7 +5,6 @@ import (
 	"Chatapp/pkg/restapi"
 	"Chatapp/pkg/utils"
 	"net/http"
-	"time"
 )
 
 type IDBFunction func(w http.ResponseWriter, r *http.Request, db *database.Database)
@@ -34,7 +33,7 @@ func Authenticated(function AuthFunction) http.HandlerFunc {
 				Value:    "",
 				Path:     "/",
 				HttpOnly: true,
-				Expires:  time.Now().Add(time.Hour * -1),
+				MaxAge:   -1,
 			})
 			return
 		}

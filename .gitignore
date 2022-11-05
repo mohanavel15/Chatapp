@@ -3,3 +3,4 @@ Chatapp
 node_modules
 docker-compose.yml
 dist
+.vscode
