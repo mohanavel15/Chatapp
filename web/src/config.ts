@@ -1,5 +1,5 @@
 class RoutesCls {
-    ip = '127.0.0.1:3000';
+    ip = 'localhost:3000';
     host = 'http://' + this.ip + '/api';
     ws = 'ws://' + this.ip + '/api/ws';
 

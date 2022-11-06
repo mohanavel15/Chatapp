@@ -24,7 +24,7 @@ export default function FriendContextMenu(props: propsChannelCtxProps) {
     }
 
     const deleteFriend = () => {
-        RelationshipToDefault(user_ctx.accessToken, props.friend_obj.id).then(res_relationship => {
+        RelationshipToDefault(props.friend_obj.id).then(res_relationship => {
             user_ctx.setRelationships(prevRelationships => new Map(prevRelationships.set(res_relationship.id, res_relationship)));
         })
     }
