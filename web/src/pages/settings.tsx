@@ -6,6 +6,7 @@ import { faX, faCamera } from '@fortawesome/free-solid-svg-icons';
 import { UserContext } from "../contexts/usercontext";
 import { useNavigate } from "react-router-dom";
 import Routes from '../config';
+import { ChangePassword, Logout } from '../api/auth';
 
 function Settings() {
     const state_context: StateContext = useContext(StatesContext);
@@ -31,7 +32,6 @@ function Settings() {
                 fetch(Routes.currentUser, {
                     method: "PATCH",
                     headers: {
-                        "Authorization": user_ctx.accessToken,
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({ avatar: reader.result })
@@ -44,20 +44,9 @@ function Settings() {
         }
     }
 
-    function logout(signout: boolean) {
-        let url = Routes.logout;
-        if (signout) {
-            url = Routes.signout;
-        }
-        
-        fetch(url, {
-            method: "POST",
-            headers: {
-                "Authorization": user_ctx.accessToken
-            }
-        }).then(response => {
+    function logout() {
+        Logout().then(response => {
             if (response.status === 200) {
-                localStorage.removeItem('access_token');
                 navigate("/login");
             }
         })
@@ -69,17 +58,7 @@ function Settings() {
             return;
         }
         if (new_password_ref.current.value === confirm_password_ref.current.value) {
-            fetch(Routes.changePassword, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": user_ctx.accessToken
-                },
-                body: JSON.stringify({
-                    "current_password": password_ref.current.value,
-                    "new_password": new_password_ref.current.value
-                })
-            }).then(response => {
+            ChangePassword(password_ref.current.value, new_password_ref.current.value).then(response => {
                 if (response.status === 200) {
                     alert("Successfully changed password!")
                 }
@@ -138,8 +117,7 @@ function Settings() {
                 </div>
                 <div className='settings-content-item'>
                 <h3 className='settings-content-item-title'>Logout</h3>
-                <button className='btn-red' onClick={() => logout(false)}>Logout</button> 
-                <button className='btn-red' onClick={() => logout(true)}>Sign out</button>
+                <button className='btn-red' onClick={logout}>Logout</button> 
                 </div>
             </div>
         </div>

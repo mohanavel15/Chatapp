@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Routes from "../config";
+import { Login as APILogin } from "../api/auth";
 
 function Login() {
 	const Username = useRef<HTMLInputElement>(undefined!);
@@ -12,21 +12,9 @@ function Login() {
 	
 	const [loading, setLoading] = useState<boolean>(false);
 
-	useEffect(() => {
-		const access_token = localStorage.getItem("access_token");
-		if (access_token !== null && access_token !== "" && access_token !== "undefined" && access_token !== undefined) {
-			navigate("/channels/@me");
-		}
-	});
-
 	async function HandleResponse(response: Response) {
 		if (response.status === 200) {
 			setShowError(false);
-			const obj = await response.json();
-			const access_token = obj.access_token
-			const client_token = obj.client_token
-			localStorage.setItem("access_token", access_token)
-			localStorage.setItem("client_token", client_token)
 			navigate("/channels/@me");
 		} else {
 			setShowError(true);
@@ -44,20 +32,7 @@ function Login() {
 		if (username_text === undefined || password_text === undefined) {
 			return;
 		}
-
-		const client_token = localStorage.getItem("client_token") || "";
-
-		fetch(Routes.signin, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify({
-				"username": username_text,
-				"password": password_text,
-				"client_token": client_token
-			})
-		}).then(response => {HandleResponse(response); setLoading(false)})
+		APILogin(username_text, password_text).then(response => { HandleResponse(response); setLoading(false) })
   	}
 
 	return (
