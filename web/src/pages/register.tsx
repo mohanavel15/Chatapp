@@ -48,11 +48,10 @@ function Register() {
 	return (
 		<form onSubmit={HandleRegister} className="h-full flex flex-col items-center justify-evenly">
 			<h1> Create An Account </h1>
-			<input id="login-input" type="text" placeholder="Username" ref={Username} required />
-			<input id="login-input" type="email" placeholder="Email" ref={Email} required />
-			<input id="login-input" type="password" placeholder="Password" ref={Password} required />
-			<button id="login-button" type="submit">Register</button>
-			<p>Already have an account? <Link to="/login">Login</Link></p>
+			<input className="w-3/4 h-12 bg-zinc-700" type="text" placeholder="Username" ref={Username} required />
+			<input className="w-3/4 h-12 bg-zinc-700" type="email" placeholder="Email" ref={Email} required />
+			<input className="w-3/4 h-12 bg-zinc-700" type="password" placeholder="Password" ref={Password} required />
+			<button className="w-3/4 h-12 bg-zinc-700" type="submit">Register</button>
 		</form>
 	);
 }

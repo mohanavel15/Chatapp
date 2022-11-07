@@ -39,10 +39,9 @@ function Login() {
 	return (
 		<form onSubmit={HandleLogin} className="h-full flex flex-col items-center justify-evenly">
 			<h1> Welcome Back! </h1>
-			<input id="login-input" type="text" placeholder="Username" ref={Username} required />
-			<input id="login-input" type="password" placeholder="Password" ref={Password} required />
-			<button id="login-button" type="submit"> Login </button>
-			<p>Don't have an account? <Link to="/register">Register</Link></p>
+			<input className="w-3/4 h-12 bg-zinc-700" type="text" placeholder="Username" ref={Username} required />
+			<input className="w-3/4 h-12 bg-zinc-700" type="password" placeholder="Password" ref={Password} required />
+			<button className="w-3/4 h-12 bg-zinc-700" type="submit"> Login </button>
 		</form>
 	);
 }
