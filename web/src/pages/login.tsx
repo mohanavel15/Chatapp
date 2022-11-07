@@ -1,25 +1,26 @@
-import { useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useContext, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { Login as APILogin } from "../api/auth";
+import { LoginContext } from "../contexts/Login";
+import { UserContext } from "../contexts/usercontext";
 
 function Login() {
+	const user_ctx = useContext(UserContext);
+	const login_ctx = useContext(LoginContext);
+
 	const Username = useRef<HTMLInputElement>(undefined!);
 	const Password = useRef<HTMLInputElement>(undefined!);
-	const navigate = useNavigate();
-
-	const [error, setError] = useState<string>('');
-	const [showError, setShowError] = useState<boolean>(false);
 	
 	const [loading, setLoading] = useState<boolean>(false);
 
 	async function HandleResponse(response: Response) {
 		if (response.status === 200) {
-			setShowError(false);
-			navigate("/channels/@me");
+			login_ctx.setShowError(false);
+			user_ctx.setIsLoggedIn(true)
 		} else {
-			setShowError(true);
+			login_ctx.setShowError(true);
 			response.text().then(text => {
-				setError(text);
+				login_ctx.setError(text);
 			});
 		}
 	}
@@ -36,25 +37,13 @@ function Login() {
   	}
 
 	return (
-		<div className="Login">
-			{ showError && <div className='error-message-container'>{ error }</div> }
-			<div className="login-container">
-				{ loading && <div className="loading-animation"></div> }
-				{ !loading && 
-				<form onSubmit={HandleLogin}>
-					<br />
-					<h1> Welcome Back! </h1>
-					<p>Username</p>
-					<input id="login-input" type="text" placeholder="Username" ref={Username} required />
-					<p>Password</p>
-					<input id="login-input" type="password" placeholder="Password" ref={Password} required />
-					<button id="login-button" type="submit"> Login </button>
-					<br />
-					<p>Don't have an account? <Link to="/register">Register</Link></p>
-				</form>
-				}
-			</div>
-		</div>
+		<form onSubmit={HandleLogin} className="h-full flex flex-col items-center justify-evenly">
+			<h1> Welcome Back! </h1>
+			<input id="login-input" type="text" placeholder="Username" ref={Username} required />
+			<input id="login-input" type="password" placeholder="Password" ref={Password} required />
+			<button id="login-button" type="submit"> Login </button>
+			<p>Don't have an account? <Link to="/register">Register</Link></p>
+		</form>
 	);
 }
 

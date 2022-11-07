@@ -1,6 +1,7 @@
-import { useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Routes from "../config";
+import { LoginContext } from "../contexts/Login";
 
 function Register() {
 	const navigate = useNavigate();
@@ -8,20 +9,19 @@ function Register() {
 	const Email = useRef<HTMLInputElement>(undefined!);
 	const Password = useRef<HTMLInputElement>(undefined!);
 
-	const [error, setError] = useState<string>('');
-	const [showError, setShowError] = useState<boolean>(false);
+	const login_ctx = useContext(LoginContext)
 
 	const [loading, setLoading] = useState<boolean>(false);
 
 	function HandleResponse(response: Response) {
 		if (response.status === 200) {
-			setShowError(false);
+			login_ctx.setShowError(false);
 			alert("Successfully registered!")
 			navigate("/login")
 		} else {
-			setShowError(true);
+			login_ctx.setShowError(true);
 			response.text().then(text => {
-				setError(text);
+				login_ctx.setError(text);
 			});
 		}
 	}
@@ -44,30 +44,16 @@ function Register() {
 				"password": password_text
 			})
 		}).then(response => { HandleResponse(response); setLoading(false)})
-
 	}
 	return (
-		<div className="Login">
-			{ showError && <div className='error-message-container'>{ error }</div> }
-			<div className="login-container">
-				{ loading && <div className="loading-animation"></div> }
-				{ !loading && 
-				<form onSubmit={HandleRegister}>
-					<br />
-					<h1> Create An Account </h1>
-					<p>Username</p>
-					<input id="login-input" type="text" placeholder="Username" ref={Username} required />
-					<p>Email</p>
-					<input id="login-input" type="email" placeholder="Email" ref={Email} required />
-					<p>Password</p>
-					<input id="login-input" type="password" placeholder="Password" ref={Password} required />
-					<button id="login-button" type="submit">Register</button>
-					<br />
-					<p>Already have an account? <Link to="/login">Login</Link></p>
-				</form>
-				}
-			</div>
-		</div>
+		<form onSubmit={HandleRegister} className="h-full flex flex-col items-center justify-evenly">
+			<h1> Create An Account </h1>
+			<input id="login-input" type="text" placeholder="Username" ref={Username} required />
+			<input id="login-input" type="email" placeholder="Email" ref={Email} required />
+			<input id="login-input" type="password" placeholder="Password" ref={Password} required />
+			<button id="login-button" type="submit">Register</button>
+			<p>Already have an account? <Link to="/login">Login</Link></p>
+		</form>
 	);
 }
 

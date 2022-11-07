@@ -11,8 +11,10 @@ export interface UserContextOBJ {
     setUsername:React.Dispatch<React.SetStateAction<string>>;
     setAvatar:React.Dispatch<React.SetStateAction<string>>;
     relationships: Map<String,Relationship>;
-	setRelationships: React.Dispatch<React.SetStateAction<Map<String, Relationship>>>
-    deleterelationship: (key: String) => void
+	setRelationships: React.Dispatch<React.SetStateAction<Map<String, Relationship>>>;
+    deleterelationship: (key: String) => void;
+    isLoggedIn: boolean;
+    setIsLoggedIn:React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const UserContext = createContext<UserContextOBJ>(undefined!);
@@ -22,15 +24,19 @@ function UserCTX({ children }: { children: React.ReactChild }) {
     const [username, setUsername] = useState<string>("");
     const [avatar, setAvatar] = useState<string>("");
 	const [relationships, setRelationships, deleterelationship] = useMap<Relationship>(new Map<String,Relationship>());
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     useEffect(() => {
         fetch(Routes.currentUser).then(response => {
             if (response.status === 200) {
+                setIsLoggedIn(true)
                 response.json().then(user => {
                     setId(user.id);
                     setUsername(user.username);
                     setAvatar(user.avatar);
                 });
+            } else {
+                setIsLoggedIn(false)
             }
         })
     }, []);
@@ -55,7 +61,9 @@ function UserCTX({ children }: { children: React.ReactChild }) {
         setAvatar: setAvatar,
         relationships: relationships,
         setRelationships: setRelationships,
-        deleterelationship: deleterelationship
+        deleterelationship: deleterelationship,
+        isLoggedIn: isLoggedIn,
+        setIsLoggedIn: setIsLoggedIn
     }
     
     return (

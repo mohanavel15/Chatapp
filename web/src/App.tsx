@@ -20,31 +20,42 @@ import './css/settings.css';
 
 import States from "./contexts/states";
 import ChannelCTX from "./contexts/channelctx";
-import UserCTX from "./contexts/usercontext";
 import CtxMenuCtx from "./contexts/context_menu_ctx";
+import LoginContainer from "./pages/LoginContainer";
+import LoginContextProvider from "./contexts/Login";
 
 function App() {
   	return (
-		<div className="App">
+		<div className="h-screen w-full bg-black text-white">
 			<BrowserRouter>
 				<RouterRoutes>
-					<Route path="/">
-						<Route index element={<Home />} />
-						<Route path="channels/:id" element={
-							<ChannelCTX>
-								<States>
+					<Route path="/" element={<Home />} />
+					<Route path="channels/:id" element={
+						<ChannelCTX>
+							<States>
 								<CtxMenuCtx>
-									<UserCTX>
-										<Channel />
-									</UserCTX>
+									<Channel />
 								</CtxMenuCtx>
-								</States>
-							</ChannelCTX>
+							</States>
+						</ChannelCTX>
+					} />
+					<Route path="/" element={
+						<LoginContextProvider>
+							<LoginContainer />
+						</LoginContextProvider>
+					}>
+						<Route path="login" element={
+							<LoginContextProvider>
+								<Login />
+							</LoginContextProvider>
 						} />
-						<Route path="login" element={<Login />} />
-						<Route path="register" element={<Register />} />
-						<Route path="*" element={<NoPage />} />
+						<Route path="register" element={
+							<LoginContextProvider>
+								<Register />
+							</LoginContextProvider>
+						} />
 					</Route>
+					<Route path="*" element={<NoPage />} />
 				</RouterRoutes>
 			</BrowserRouter>
 		</div>
