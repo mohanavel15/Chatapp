@@ -23,37 +23,40 @@ import ChannelCTX from "./contexts/channelctx";
 import CtxMenuCtx from "./contexts/context_menu_ctx";
 import LoginContainer from "./pages/LoginContainer";
 import LoginContextProvider from "./contexts/Login";
+import Chat from "./components/chat";
+import MessageCTX from "./contexts/messagectx";
+import ChannelHome from "./components/channel_home";
 
 function App() {
   	return (
 		<div className="h-screen w-full bg-black text-white">
 			<BrowserRouter>
 				<RouterRoutes>
-					<Route path="/" element={<Home />} />
-					<Route path="channels/:id" element={
-						<ChannelCTX>
-							<States>
-								<CtxMenuCtx>
-									<Channel />
-								</CtxMenuCtx>
-							</States>
-						</ChannelCTX>
-					} />
-					<Route path="/" element={
+					<Route path="/" element={<Home />}>
+						<Route path="channels" element={
+							<ChannelCTX>
+								<States>
+									<CtxMenuCtx>
+										<Channel />
+									</CtxMenuCtx>
+								</States>
+							</ChannelCTX>
+							}>
+							<Route path=":id" element={ 
+								<MessageCTX>
+									<Chat />
+								</MessageCTX>
+							 } />
+						</Route>
+						<Route path="relationships" element={ <ChannelHome /> } />
+					</Route>
+					<Route path="/auth" element={
 						<LoginContextProvider>
 							<LoginContainer />
 						</LoginContextProvider>
 					}>
-						<Route path="login" element={
-							<LoginContextProvider>
-								<Login />
-							</LoginContextProvider>
-						} />
-						<Route path="register" element={
-							<LoginContextProvider>
-								<Register />
-							</LoginContextProvider>
-						} />
+						<Route path="login" element={ <Login /> } />
+						<Route path="register" element={ <Register /> } />
 					</Route>
 					<Route path="*" element={<NoPage />} />
 				</RouterRoutes>

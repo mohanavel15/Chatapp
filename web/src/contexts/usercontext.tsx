@@ -42,6 +42,9 @@ function UserCTX({ children }: { children: React.ReactChild }) {
     }, []);
 
     useEffect(() => {
+        if (!isLoggedIn) {
+            return
+        }
         GetRelationships().then(relationships => {
             relationships.forEach(relationship => {
                 setRelationships(prevRelationships => {
@@ -50,7 +53,7 @@ function UserCTX({ children }: { children: React.ReactChild }) {
                 });
             });
         });
-    }, []);
+    }, [isLoggedIn]);
 
     const context_value: UserContextOBJ = {
         id: id,

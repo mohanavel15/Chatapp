@@ -1,8 +1,8 @@
 import { useState, useContext, useEffect, useRef } from 'react'
 import { UserContextOBJ, UserContext } from "../contexts/usercontext";
 import { ContextMenuCtx, ContextMenu } from "../contexts/context_menu_ctx";
-import Relationship from './relationship';
 import { RelationshipToFriend } from '../api/relationship';
+import Relationship from './relationship';
 
 function ChannelHome() {
 	const user_ctx:UserContextOBJ = useContext(UserContext);
@@ -48,10 +48,6 @@ function ChannelHome() {
 		})
 	}, [TopBarSelected, user_ctx.relationships])
 
-	const active_button_style: React.CSSProperties = {
-        backgroundColor: "#393d42",
-    }
-
 	function SendFriendRequest() {
 		if (FriendUserUUID.current !== undefined) {
 			if (FriendUserUUID.current.value !== "") {
@@ -64,22 +60,13 @@ function ChannelHome() {
 	}
 	
 	return (
-		<div className="Friends">
-			<div className='Friends-Top-Bar'>
-				{TopBarSelected === 0 && <button className='Friends-Top-Bar-Button' style={active_button_style} onClick={() => {setTopBarSelected(0)}}>Online</button> }
-				{TopBarSelected !== 0 && <button className='Friends-Top-Bar-Button' onClick={() => {setTopBarSelected(0)}}>Online</button> }
-				
-				{TopBarSelected === 1 && <button className='Friends-Top-Bar-Button' style={active_button_style} onClick={() => {setTopBarSelected(1)}}>All</button> }
-				{TopBarSelected !== 1 && <button className='Friends-Top-Bar-Button' onClick={() => {setTopBarSelected(1)}}>All</button> }
-				
-				{TopBarSelected === 2 && <button className='Friends-Top-Bar-Button' style={active_button_style} onClick={() => {setTopBarSelected(2)}}>Pending</button> }
-				{TopBarSelected !== 2 && <button className='Friends-Top-Bar-Button' onClick={() => {setTopBarSelected(2)}}>Pending</button> }
-
-				{TopBarSelected === 3 && <button className='Friends-Top-Bar-Button' style={active_button_style} onClick={() => {setTopBarSelected(3)}}>Blocked</button> }
-				{TopBarSelected !== 3 && <button className='Friends-Top-Bar-Button' onClick={() => {setTopBarSelected(3)}}>Blocked</button> }
-				
-				{TopBarSelected === 4 && <button className='Friends-Top-Bar-Button FTB-AddButton' style={active_button_style} onClick={() => {setTopBarSelected(4)}}>Add Friend</button> }
-				{TopBarSelected !== 4 && <button className='Friends-Top-Bar-Button FTB-AddButton' onClick={() => {setTopBarSelected(4)}}>Add Friend</button> }
+		<div className="h-screen w-full">
+			<div className='h-12 flex items-center border-b border-zinc-800'>
+				<button className={`mx-2 p-1 rounded cursor-pointer ${ TopBarSelected === 0 && "bg-zinc-700" } hover:bg-zinc-800`} onClick={() => {setTopBarSelected(0)}}>Online</button>
+				<button className={`mx-2 p-1 rounded cursor-pointer ${ TopBarSelected === 1 && "bg-zinc-700" } hover:bg-zinc-800`} onClick={() => {setTopBarSelected(1)}}>All</button> 
+				<button className={`mx-2 p-1 rounded cursor-pointer ${ TopBarSelected === 2 && "bg-zinc-700" } hover:bg-zinc-800`} onClick={() => {setTopBarSelected(2)}}>Pending</button>
+				<button className={`mx-2 p-1 rounded cursor-pointer ${ TopBarSelected === 3 && "bg-zinc-700" } hover:bg-zinc-800`} onClick={() => {setTopBarSelected(3)}}>Blocked</button>
+				<button className={`mx-2 p-1 rounded cursor-pointer ${ TopBarSelected === 4 ? "bg-green-600" : "text-green-500" }`} onClick={() => {setTopBarSelected(4)}}>Add Friend</button>
 			</div>
 				{TopBarSelected === 0 && <h3 className='Friends-List-Title'>Online — {elements.length}</h3>}
 				{TopBarSelected === 1 && <h3 className='Friends-List-Title'>All — {elements.length}</h3>}

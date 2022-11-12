@@ -1,20 +1,11 @@
-import { useState, useEffect, useContext } from "react";
-import { useNavigate } from "react-router-dom";
-import { UserContext } from "../contexts/usercontext";
+import { Outlet } from "react-router-dom";
+import NavBar from "../components/NavBar";
 
 function Home() {
-  const user_ctx = useContext(UserContext)
-  const navigate = useNavigate();
-  
-  useEffect(() => {
-    if (!user_ctx.isLoggedIn) {
-      navigate("/login");
-    }
-  }, [user_ctx.isLoggedIn])
-
   return (
-    <div>
-      <h1> Hello, {user_ctx.username} </h1>
+    <div className="h-screen w-full flex flex-col-reverse md:flex-row">
+      <NavBar />
+      <Outlet />
     </div>
   );
 }
