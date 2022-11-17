@@ -4,18 +4,25 @@ import Message from './message';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFaceLaughBeam, faCirclePlus, faFile, faCircleXmark } from '@fortawesome/free-solid-svg-icons'
 import ChannelHeader from './channel_header';
-import { MessageOBJ } from '../models/models';
+import { MessageOBJ, ChannelOBJ } from '../models/models';
 import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
 import { ContextMenuCtx, ContextMenu } from "../contexts/context_menu_ctx";
 import { UserContextOBJ, UserContext } from "../contexts/usercontext";
+import { BsPlusCircleFill } from 'react-icons/bs';
 
 import Routes from '../config';
+import { useParams } from 'react-router-dom';
 
-function Chat({ channel_id }: { channel_id: string }) {
+function Chat() {
+	const parameter  = useParams<string>();
+	let channel_id = parameter.id || "";
+
     // Emoji picker https://www.cluemediator.com/how-to-add-emoji-picker-in-the-react
 	const channel_context: ChannelContext = useContext(ChannelsContext);
     const [Input_message, setInput_message] = useState('');
     const [showPicker, setShowPicker] = useState(false);
+
+	const channel: ChannelOBJ = channel_context.channels.get(channel_id) || {} as ChannelOBJ;
 	
 	const MessageElement = useMemo(() => {
 		let messagesList: JSX.Element[] = [];
@@ -79,7 +86,6 @@ function Chat({ channel_id }: { channel_id: string }) {
 				fetch(url, {
 					method: "POST",
 					headers: {
-						"Authorization": user_ctx.accessToken,
 						"Content-Type": "application/json"
 					},
 					body: JSON.stringify({ content: Input_message })
@@ -93,9 +99,6 @@ function Chat({ channel_id }: { channel_id: string }) {
 				formData.append('file', file_input.current.files[0]);
 				fetch(url, {
 					method: "POST",
-					headers: {
-						"Authorization": user_ctx.accessToken,
-					},
 					body: formData
 				})
 			}
@@ -129,27 +132,28 @@ function Chat({ channel_id }: { channel_id: string }) {
 	}
 
     return (
-        <div className="Chat">
-				<div className="chat-message">
-					{MessageElement}
-				</div>
-			<div className="chat-input">
-				{ hasFile && 
+        <div className="relative h-full w-full flex-col flex">
+			<ChannelHeader channel={channel} />
+			<div className="bg-stone-800 overflow-x-hidden overflow-y-scroll">
+				{MessageElement}
+			</div>
+			<div className="h-16 flex items-center justify-evenly">
+				{/* { hasFile && 
 				<div className='input-file-container'>
 					{fileJSX}
 				</div>
-				}
-				<button id="chat-file" onClick={() => { file_input.current.click() }}>
+				} */}
+				{/* <button aria-label='upload file' id="chat-file" onClick={() => { file_input.current.click() }}>
 					<FontAwesomeIcon icon={faCirclePlus} />
 				</button>
-				<input type="file" ref={file_input} name="filename" hidden onChange={onFileChange}></input>
-				<button id="chat-emoji-picker" onClick={() => setShowPicker(val => !val)}>
+				<button aria-label='emoji picker' id="chat-emoji-picker" onClick={() => setShowPicker(val => !val)}>
 					<FontAwesomeIcon icon={faFaceLaughBeam} />
-				</button>
-				<input id="chat-text" type="text" placeholder="Type a message..." onKeyPress={updateChat} value={Input_message} onChange={onInputChange}/>
+				</button> */}
+				<input type="file" ref={file_input} name="filename" hidden onChange={onFileChange} />
+				<BsPlusCircleFill size={26} onClick={() => file_input.current.click() } />
+				<input className='w-[85%] h-8 rounded-md bg-zinc-800' type="text" placeholder="Type a message..." onKeyPress={updateChat} value={Input_message} onChange={onInputChange}/>
 			</div>
-			{showPicker && <div className="EmojiPicker"><Picker onEmojiClick={onEmojiClick} /></div>}
-			<ChannelHeader channel_id={channel_id} />
+			{/* {showPicker && <div className="EmojiPicker"><Picker onEmojiClick={onEmojiClick} /></div>} */}
 		</div>
     );
   }
