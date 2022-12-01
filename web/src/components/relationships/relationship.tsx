@@ -1,14 +1,14 @@
 import React, { useContext } from 'react'
-import { Relationship as RelationshipOBJ } from '../models/relationship'
-import { UserContext, UserContextOBJ } from '../contexts/usercontext'
-import { ChannelsContext, ChannelContext } from '../contexts/channelctx';
+import { Relationship as RelationshipOBJ } from '../../models/relationship'
+import { UserContext, UserContextOBJ } from '../../contexts/usercontext'
+import { ChannelsContext, ChannelContext } from '../../contexts/channelctx';
 import { useNavigate } from "react-router-dom";
-import { ChannelOBJ } from '../models/models';
-import { setDefaultAvatar } from '../utils/errorhandle';
+import { ChannelOBJ } from '../../models/models';
+import { setDefaultAvatar } from '../../utils/errorhandle';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle, faDotCircle, IconDefinition, faCheck, faX, faMessage } from '@fortawesome/free-solid-svg-icons';
-import { RelationshipToDefault, RelationshipToFriend } from '../api/relationship';
-import { GetDMChannel } from '../api/channel';
+import { RelationshipToDefault, RelationshipToFriend } from '../../api/relationship';
+import { GetDMChannel } from '../../api/channel';
 
 export default function Relationship({ relationship_obj }: { relationship_obj: RelationshipOBJ }) {
   const user_ctx: UserContextOBJ = useContext(UserContext);

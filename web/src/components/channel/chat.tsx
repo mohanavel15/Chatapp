@@ -3,14 +3,14 @@ import React, { useState, useContext, useRef, useMemo } from 'react';
 import Message from './message';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFaceLaughBeam, faCirclePlus, faFile, faCircleXmark } from '@fortawesome/free-solid-svg-icons'
-import ChannelHeader from './channel_header';
-import { MessageOBJ, ChannelOBJ } from '../models/models';
-import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
-import { ContextMenuCtx, ContextMenu } from "../contexts/context_menu_ctx";
-import { UserContextOBJ, UserContext } from "../contexts/usercontext";
+import Header from './header';
+import { MessageOBJ, ChannelOBJ } from '../../models/models';
+import { ChannelsContext, ChannelContext } from "../../contexts/channelctx";
+import { ContextMenuCtx, ContextMenu } from "../../contexts/context_menu_ctx";
+import { UserContextOBJ, UserContext } from "../../contexts/usercontext";
 import { BsPlusCircleFill } from 'react-icons/bs';
 
-import Routes from '../config';
+import Routes from '../../config';
 import { useParams } from 'react-router-dom';
 
 function Chat() {
@@ -133,11 +133,11 @@ function Chat() {
 
     return (
         <div className="relative h-full w-full flex-col flex">
-			<ChannelHeader channel={channel} />
-			<div className="bg-stone-800 overflow-x-hidden overflow-y-scroll">
+			<Header channel={channel} />
+			<div className="my-16 overflow-x-hidden overflow-y-scroll">
 				{MessageElement}
 			</div>
-			<div className="h-16 flex items-center justify-evenly">
+			<div className="h-16 absolute bottom-0 w-full flex items-center justify-evenly border-t border-zinc-800">
 				{/* { hasFile && 
 				<div className='input-file-container'>
 					{fileJSX}

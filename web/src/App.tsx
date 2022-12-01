@@ -23,9 +23,9 @@ import ChannelCTX from "./contexts/channelctx";
 import CtxMenuCtx from "./contexts/context_menu_ctx";
 import LoginContainer from "./pages/LoginContainer";
 import LoginContextProvider from "./contexts/Login";
-import Chat from "./components/chat";
+import Chat from "./components/channel/chat";
 import MessageCTX from "./contexts/messagectx";
-import ChannelHome from "./components/channel_home";
+import Relationships from "./components/relationships";
 
 function App() {
   	return (
@@ -48,7 +48,7 @@ function App() {
 								</MessageCTX>
 							 } />
 						</Route>
-						<Route path="relationships" element={ <ChannelHome /> } />
+						<Route path="relationships" element={ <Relationships /> } />
 					</Route>
 					<Route path="/auth" element={
 						<LoginContextProvider>

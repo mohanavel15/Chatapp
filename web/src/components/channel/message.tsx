@@ -1,12 +1,12 @@
 import { useState, useEffect, useContext, useRef } from "react";
-import { setDefaultAvatar } from '../utils/errorhandle';
-import { MessageContext } from "../contexts/messagectx";
-import { MessageOBJ } from "../models/models";
+import { setDefaultAvatar } from '../../utils/errorhandle';
+import { MessageContext } from "../../contexts/messagectx";
+import { MessageOBJ } from "../../models/models";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPencil } from '@fortawesome/free-solid-svg-icons'
-import { ChannelsContext, ChannelContext } from '../contexts/channelctx';
-import { UserContextOBJ, UserContext } from "../contexts/usercontext";
-import Routes from "../config";
+import { ChannelsContext, ChannelContext } from '../../contexts/channelctx';
+import { UserContextOBJ, UserContext } from "../../contexts/usercontext";
+import Routes from "../../config";
 import AttachmentDefault from "./attachment/default";
 import AttachmentImage from "./attachment/image";
 import AttachmentVideo from "./attachment/video";
@@ -80,7 +80,6 @@ function Message({ message }: {message: MessageOBJ}) {
         fetch(url, {
             method: "PATCH",
             headers: {
-                "Authorization": user_ctx.accessToken,
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({ content: msg })

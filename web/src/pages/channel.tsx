@@ -1,13 +1,12 @@
-import { useParams } from "react-router-dom";
-import { useContext, useEffect } from "react";
+import { Outlet, useParams } from "react-router-dom";
+import { useContext, useEffect, useState } from "react";
 import { IMessageEvent } from "websocket";
 
 import { MessageOBJ, ChannelOBJ, ReadyOBJ, Status } from "../models/models";
-import { Relationship } from "../models/relationship";
+import { Relationship as RelationshipOBJ  } from "../models/relationship";
 import Settings from "./settings"; 
 
 import SideBar from "../components/sidebar";
-import Chat from "../components/chat";
 import MembersBar from "../components/members_bar";
 
 import CreateChannel from "../components/createchannel";
@@ -31,10 +30,12 @@ import Routes from '../config';
 import { Refresh } from "../utils/api";
 import { GetMessages } from "../api/message";
 import { GetPinnedMessages } from "../api/pinned_msgs"
+import NavBar from "../components/NavBar";
+import Relationship from "../components/Relationships";
+import ChatScreen from "../components/ChatScreen";
 
 function Channel() {
-	const parameter  = useParams<string>();
-	let channel_id = parameter.id || "@me";
+	const [screen, setScreen] = useState<0 | 1>(1)
 
     const user_ctx:UserContextOBJ = useContext(UserContext);
 	const state_context: StateContext = useContext(StatesContext);
@@ -133,17 +134,17 @@ function Channel() {
 					break
 				
 				case "RELATIONSHIP_CREATE":
-					const new_relationship: Relationship = payload.data;
+					const new_relationship: RelationshipOBJ = payload.data;
 					user_ctx.setRelationships(prevRelationship => new Map(prevRelationship.set(new_relationship.id, new_relationship)));
 					break
 
 				case "RELATIONSHIP_MODIFY":
-					const relationship: Relationship = payload.data;
+					const relationship: RelationshipOBJ = payload.data;
 					user_ctx.setRelationships(prevRelationship => new Map(prevRelationship.set(relationship.id, relationship)));
 					break
 
 				case "RELATIONSHIP_DELETE":
-					const relationship_: Relationship = payload.data;
+					const relationship_: RelationshipOBJ = payload.data;
 					user_ctx.deleterelationship(relationship_.id);
 			}
 
@@ -193,11 +194,6 @@ function Channel() {
 		};
 	}, []);
 
-	let currentChannel = channel_context.channels.get(channel_id);
-	if (currentChannel === undefined) {
-		currentChannel = { id: "@me", name: "@me",icon: "", owner_id: "", type: 0, created_at: "", recipients: [{ id: "@me", username: "@me", avatar: "", status:0, created_at: 0 }]};
-	}
-
 	useEffect(() => {
 		const handleClick = () => { 
 			ctx_menu_context.closeAll();
@@ -206,12 +202,11 @@ function Channel() {
 		return () => window.removeEventListener('click', handleClick);
 	}, []);
 
-	useEffect(() => {
-		state_context.setEditChannel(false);
-	}, [channel_id]);
-
 	return (
-		<div className="Channel">
+		<div className="h-screen w-full flex flex-col-reverse md:flex-row">
+			<SideBar />
+			<Outlet />
+			{/*
 			{ !state_context.Settings && 
 					<MessageCTX>
 					<>
@@ -235,7 +230,7 @@ function Channel() {
 					</>
 					</MessageCTX>
 			}
-			{ state_context.Settings && <Settings /> }
+			{ state_context.Settings && <Settings /> } */}
 		</div>
 	);
 }
