@@ -32,15 +32,17 @@ function App() {
 		<div className="h-screen w-full bg-black text-white">
 			<BrowserRouter>
 				<RouterRoutes>
-					<Route path="/" element={<Home />}>
+					<Route path="/" element={
+						<ChannelCTX>
+							<Home />
+						</ChannelCTX>
+					}>
 						<Route path="channels" element={
-							<ChannelCTX>
 								<States>
 									<CtxMenuCtx>
 										<Channel />
 									</CtxMenuCtx>
 								</States>
-							</ChannelCTX>
 							}>
 							<Route path=":id" element={ 
 								<MessageCTX>

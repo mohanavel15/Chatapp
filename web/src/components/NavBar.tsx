@@ -18,7 +18,7 @@ export default function NavBar() {
     const navigate = useNavigate()
     const user:UserContextOBJ = useContext(UserContext);
     return (
-        <div className={`h-12 w-full md:h-full md:w-12 ${ hideNavBar ? 'hidden' : 'flex' } md:flex md:flex-col items-center border-t md:border-t-0 md:border-r border-zinc-800`}>
+        <div className={`h-12 w-full md:h-full md:w-12 ${ hideNavBar ? 'hidden' : 'flex' } md:flex md:flex-col items-center justify-evenly md:justify-start border-t md:border-t-0 md:border-r border-zinc-800`}>
             <img src={user.avatar} alt="avatar" className="w-8 h-8 m-2 hover:cursor-pointer" onError={setDefaultAvatar} />
             <MdOutlineChatBubbleOutline size={32} className="m-2 hover:cursor-pointer" onClick={ () => navigate("/channels") } />
             <MdOutlinePeopleAlt size={32} className="m-2 hover:cursor-pointer" onClick={ () => navigate("/relationships") } />

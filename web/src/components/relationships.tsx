@@ -61,7 +61,7 @@ function Relationships() {
 	
 	return (
 		<div className="relative h-full w-full">
-			<div className='h-12 flex items-center border-b border-zinc-800'>
+			<div className='h-12 flex justify-evenly md:justify-start items-center border-b border-zinc-800'>
 				<button className={`mx-2 p-1 rounded cursor-pointer ${ TopBarSelected === 0 && "bg-zinc-700" } hover:bg-zinc-800`} onClick={() => {setTopBarSelected(0)}}>Online</button>
 				<button className={`mx-2 p-1 rounded cursor-pointer ${ TopBarSelected === 1 && "bg-zinc-700" } hover:bg-zinc-800`} onClick={() => {setTopBarSelected(1)}}>All</button> 
 				<button className={`mx-2 p-1 rounded cursor-pointer ${ TopBarSelected === 2 && "bg-zinc-700" } hover:bg-zinc-800`} onClick={() => {setTopBarSelected(2)}}>Pending</button>
@@ -80,7 +80,7 @@ function Relationships() {
 					</div>
 				</div>
 			}
-			<div className='h-full overflow-y-scroll'>
+			<div className='relative h-full overflow-y-scroll'>
 				{elements}
 			</div>
 		</div>
