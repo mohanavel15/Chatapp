@@ -36,6 +36,13 @@ func JoinInvite(ctx *Context) {
 		return
 	}
 
+	for _, recipient := range channel.Recipients {
+		if recipient == ctx.User.ID {
+			ctx.Res.WriteHeader(http.StatusNotModified)
+			return
+		}
+	}
+
 	err = banCollection.FindOne(context.TODO(), bson.M{"banned_user": ctx.User.ID, "channel_id": channel.ID}).Err()
 	if err == nil {
 		ctx.Res.WriteHeader(http.StatusForbidden)
