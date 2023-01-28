@@ -26,11 +26,14 @@ import LoginContextProvider from "./contexts/Login";
 import Chat from "./components/channel/chat";
 import MessageCTX from "./contexts/messagectx";
 import Relationships from "./components/relationships";
+import Settings from "./pages/settings";
+import UserCTX from "./contexts/usercontext";
 
 function App() {
   	return (
 		<div className="h-screen w-full bg-black text-white">
 			<BrowserRouter>
+				<UserCTX>
 				<RouterRoutes>
 					<Route path="/" element={
 						<ChannelCTX>
@@ -51,6 +54,7 @@ function App() {
 							 } />
 						</Route>
 						<Route path="relationships" element={ <Relationships /> } />
+						<Route path="settings" element={ <Settings /> } />
 					</Route>
 					<Route path="/auth" element={
 						<LoginContextProvider>
@@ -62,6 +66,7 @@ function App() {
 					</Route>
 					<Route path="*" element={<NoPage />} />
 				</RouterRoutes>
+				</UserCTX>
 			</BrowserRouter>
 		</div>
   	);

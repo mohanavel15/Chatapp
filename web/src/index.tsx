@@ -6,9 +6,7 @@ import UserCTX from './contexts/usercontext';
 
 ReactDOM.render(
   <React.StrictMode>
-    <UserCTX>
-      <App />
-    </UserCTX>
+    <App />
   </React.StrictMode>,
   document.getElementById('root')
 );

@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { MdOutlineChatBubbleOutline, MdOutlinePeopleAlt } from "react-icons/md";
+import { HiOutlineCog } from "react-icons/hi";
 import { useLocation, useNavigate } from "react-router-dom";
 import { UserContextOBJ, UserContext } from "../contexts/usercontext";
 import { setDefaultAvatar } from '../utils/errorhandle';
@@ -22,6 +23,7 @@ export default function NavBar() {
             <img src={user.avatar} alt="avatar" className="w-8 h-8 m-2 hover:cursor-pointer" onError={setDefaultAvatar} />
             <MdOutlineChatBubbleOutline size={32} className="m-2 hover:cursor-pointer" onClick={ () => navigate("/channels") } />
             <MdOutlinePeopleAlt size={32} className="m-2 hover:cursor-pointer" onClick={ () => navigate("/relationships") } />
+            <HiOutlineCog size={32} className="m-2 hover:cursor-pointer" onClick={ () => navigate("/settings") } />
         </div>
     )
 }
