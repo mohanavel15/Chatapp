@@ -9,7 +9,7 @@ import Routes from '../config';
 import { ChangePassword, Logout } from '../api/auth';
 
 function Settings() {
-    const state_context: StateContext = useContext(StatesContext);
+    const naviagte = useNavigate();
     const user_ctx = useContext(UserContext);
 
     const password_ref = useRef<HTMLInputElement>(undefined!);
@@ -90,7 +90,7 @@ function Settings() {
         <div className='settings'>
             <div className='settings-header'>
                 <h2>Settings</h2>
-                <button className='settings-close' onClick={() => state_context.setSettings(false)}> <FontAwesomeIcon icon={faX} /> </button>
+                <button className='settings-close' onClick={() => naviagte(-1)}> <FontAwesomeIcon icon={faX} /> </button>
             </div>
             <div className='settings-content'>
                 <div className='settings-content-item'>

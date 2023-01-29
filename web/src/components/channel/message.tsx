@@ -121,14 +121,6 @@ function Message({ message }: {message: MessageOBJ}) {
         }
     }, [isBlocked])
 
-    useEffect(() => {
-        if (message.system_message) {
-            setTimeout(() => {
-                channel_context.DeleteMessage(message);
-            }, 15000);
-        }
-    }, [message])
-
     function onInputChange(event: React.ChangeEvent<HTMLInputElement>) {
 		const inputstr = event.target.value;
 		if (inputstr.length <= 2000) {
