@@ -28,6 +28,7 @@ import MessageCTX from "./contexts/messagectx";
 import Relationships from "./components/relationships";
 import Settings from "./pages/settings";
 import UserCTX from "./contexts/usercontext";
+import PopUpProvider from "./contexts/popup";
 
 function App() {
   	return (
@@ -37,7 +38,11 @@ function App() {
 				<RouterRoutes>
 					<Route path="/" element={
 						<ChannelCTX>
-							<Home />
+							<PopUpProvider>
+								<CtxMenuCtx>
+								<Home />
+								</CtxMenuCtx>
+							</PopUpProvider>
 						</ChannelCTX>
 					}>
 						<Route path="channels" element={
