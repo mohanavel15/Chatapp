@@ -4,6 +4,7 @@ import { useContext, useEffect, useState } from 'react';
 import { ChannelOBJ } from '../models/models';
 import ChannelList from './channel_list';
 import { useLocation } from 'react-router-dom';
+import SideBarHeader from './SideBarHeader';
 
 function SideBar() {
 	const [channels_element, setChannels_element] = useState<JSX.Element[]>([])
@@ -55,6 +56,7 @@ function SideBar() {
 
 	return (
 		<div className={`h-full w-full lg:w-64 ${location.pathname !== "/channels" ? "hidden" : "block"} lg:block md:border-r border-zinc-800`}>
+			<SideBarHeader />
 			{channels_element}
 		</div>
 	);
