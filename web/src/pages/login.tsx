@@ -1,11 +1,10 @@
 import { useContext, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Login as APILogin } from "../api/auth";
 import { LoginContext } from "../contexts/Login";
 import { UserContext } from "../contexts/usercontext";
 
 function Login() {
-	const user_ctx = useContext(UserContext);
 	const login_ctx = useContext(LoginContext);
 
 	const Username = useRef<HTMLInputElement>(undefined!);
@@ -16,7 +15,7 @@ function Login() {
 	async function HandleResponse(response: Response) {
 		if (response.status === 200) {
 			login_ctx.setShowError(false);
-			user_ctx.setIsLoggedIn(true)
+			useNavigate()("/")
 		} else {
 			login_ctx.setShowError(true);
 			response.text().then(text => {
