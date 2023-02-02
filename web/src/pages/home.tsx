@@ -4,18 +4,25 @@ import { GetMessages } from "../api/message";
 import { GetPinnedMessages } from "../api/pinned_msgs";
 import NavBar from "../components/NavBar";
 import Routes from "../config";
+import ChannelContextMenu from "../contextmenu/channel_context_menu";
+import FriendContextMenu from "../contextmenu/friend_context_menu";
+import MemberContextMenu from "../contextmenu/member_context_menu";
+import MessageContextMenu from "../contextmenu/message_context_menu";
 import { ChannelContext, ChannelsContext } from "../contexts/channelctx";
+import CtxMenuCtx, { ContextMenu, ContextMenuCtx } from "../contexts/context_menu_ctx";
+import { PopUpContext } from "../contexts/popup";
 import { UserContext, UserContextOBJ } from "../contexts/usercontext";
 import { ChannelOBJ, MessageOBJ, ReadyOBJ, Status } from "../models/models";
-import { Relationship as RelationshipOBJ  } from "../models/relationship";
+import { Relationship as RelationshipOBJ } from "../models/relationship";
 import { Refresh } from "../utils/api";
+import PopUp from "./popup";
 
 function Home() {
-  const user_ctx:UserContextOBJ = useContext(UserContext);
-	//const state_context: StateContext = useContext(StatesContext);
+	const user_ctx: UserContextOBJ = useContext(UserContext);
 	const channel_context: ChannelContext = useContext(ChannelsContext);
+	const popup_ctx = useContext(PopUpContext);
 
-  useEffect(() => {
+	useEffect(() => {
 		const NewGateway = () => {
 			const gateway = new WebSocket(Routes.ws);
 			gateway.onopen = () => {
@@ -35,7 +42,7 @@ function Home() {
 
 			const payload = JSON.parse(data);
 
-			switch(payload.event) {
+			switch (payload.event) {
 				case "READY":
 					const ready: ReadyOBJ = payload.data;
 					user_ctx.setId(ready.user.id);
@@ -44,7 +51,7 @@ function Home() {
 
 					ready.channels.forEach((channel: ChannelOBJ) => {
 						channel_context.setChannel(prev => new Map(prev.set(channel.id, channel)));
-						
+
 						GetMessages(channel.id).then((msgs: MessageOBJ[]) => {
 							channel_context.SetMessages(channel.id, msgs.reverse())
 						})
@@ -54,7 +61,7 @@ function Home() {
 						})
 					});
 					break
-				
+
 				case "INVAILD_SESSION":
 					Refresh().then(access_token => {
 						if (access_token === undefined) {
@@ -65,7 +72,7 @@ function Home() {
 						}
 					})
 					break
-				
+
 				case "MESSAGE_CREATE":
 					const message: MessageOBJ = payload.data;
 					channel_context.InsertMessage(message);
@@ -75,12 +82,12 @@ function Home() {
 					const edited_message: MessageOBJ = payload.data;
 					channel_context.UpdateMessage(edited_message);
 					break
-				
+
 				case "MESSAGE_DELETE":
 					const deleted_message: MessageOBJ = payload.data;
 					channel_context.DeleteMessage(deleted_message);
 					break
-				
+
 				case "CHANNEL_CREATE":
 					const channel: ChannelOBJ = payload.data;
 					channel_context.setChannel(prevChannels => new Map(prevChannels.set(channel.id, channel)));
@@ -105,7 +112,7 @@ function Home() {
 					const upinned_message: MessageOBJ = payload.data;
 					channel_context.DeletePinnedMessage(upinned_message);
 					break
-				
+
 				case "RELATIONSHIP_CREATE":
 					const new_relationship: RelationshipOBJ = payload.data;
 					user_ctx.setRelationships(prevRelationship => new Map(prevRelationship.set(new_relationship.id, new_relationship)));
@@ -123,7 +130,7 @@ function Home() {
 
 			if (payload.event === 'STATUS_UPDATE') {
 				const status: Status = payload.data;
-				
+
 				if (status.type === 0) {
 					const relationship_ = user_ctx.relationships.get(status.user_id);
 					if (relationship_ !== undefined) {
@@ -131,7 +138,7 @@ function Home() {
 						user_ctx.setRelationships(prevFriends => new Map(prevFriends.set(relationship_.id, relationship_)));
 					}
 				}
-				
+
 				if (status.type === 1) {
 					const UpdateChannelStatus = (prevChannels: Map<String, ChannelOBJ>, status: Status) => {
 						const channel = prevChannels.get(status.channel_id)
@@ -147,32 +154,46 @@ function Home() {
 						}
 
 						return prevChannels.set(channel.id, channel)
-						
+
 					}
 					channel_context.setChannel(prevChannels => new Map(UpdateChannelStatus(prevChannels, status)));
 				}
 			}
 		}
-		
+
 		const onClose = () => {
 			console.log("Disconnected from server");
 			gateway = NewGateway();
 		};
-		
+
 		gateway.onclose = onClose;
-	  	gateway.onmessage = onMessage;
-  
+		gateway.onmessage = onMessage;
+
 		return () => {
 			gateway.close();
 		};
 	}, []);
 
-  return (
-    <div className="h-screen w-full flex flex-col-reverse md:flex-row">
-      <NavBar />
-      <Outlet />
-    </div>
-  );
+	const ctx_menu_context: ContextMenuCtx = useContext(ContextMenu);
+	useEffect(() => {
+		const handleClick = () => { 
+			ctx_menu_context.closeAll();
+		};
+		window.addEventListener('click', handleClick);
+		return () => window.removeEventListener('click', handleClick);
+	}, []);
+	
+	return (
+		<div className="h-screen w-full flex flex-col-reverse md:flex-row">
+			<NavBar />
+			<Outlet />
+			{ popup_ctx.show && <PopUp /> }
+			{ ctx_menu_context.showMsgCtxMenu && <MessageContextMenu {...ctx_menu_context.msgCtxMenu} /> }
+			{ ctx_menu_context.showChannelCtxMenu && <ChannelContextMenu {...ctx_menu_context.channelCtxMenu} /> }
+			{ ctx_menu_context.showMemberCtxMenu && <MemberContextMenu {...ctx_menu_context.memberCtxMenu} /> }
+			{ ctx_menu_context.showFriendCtxMenu && <FriendContextMenu {...ctx_menu_context.friendCtxMenu} /> }
+		</div>
+	);
 }
 
 export default Home;

@@ -4,7 +4,7 @@ import { ChannelsContext, ChannelContext } from '../contexts/channelctx';
 import { StatesContext, StateContext } from "../contexts/states";
 import Routes from '../config';
 import { PopUpContext } from '../contexts/popup';
-import CreateChannel from './createchannel';
+import CreateChannel from './popup/createchannel';
 
 export default function SideBarHeader() {
     const navegate = useNavigate();
