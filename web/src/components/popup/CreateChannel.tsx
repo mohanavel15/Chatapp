@@ -1,10 +1,10 @@
 import { useContext, useRef } from "react";
-import { UserContextOBJ, UserContext } from "../contexts/usercontext";
-import { CreateChannel as APICreateChannel } from "../api/channel";
-import { ChannelContext, ChannelsContext } from "../contexts/channelctx";
+import { UserContextOBJ, UserContext } from "../../contexts/usercontext";
+import { CreateChannel as APICreateChannel } from "../../api/channel";
+import { ChannelContext, ChannelsContext } from "../../contexts/channelctx";
 import { HiCamera, HiX } from "react-icons/hi";
-import { PopUpContext } from "../contexts/popup";
-import { setDefaultIcon } from "../utils/errorhandle";
+import { PopUpContext } from "../../contexts/popup";
+import { setDefaultIcon } from "../../utils/errorhandle";
 
 export default function CreateChannel() {
     const popup_ctx = useContext(PopUpContext);
@@ -34,7 +34,7 @@ export default function CreateChannel() {
             })
         }
 
-        popup_ctx.setShow(false);
+        popup_ctx.close();
     }
 
     function onIconChange() {
@@ -51,7 +51,7 @@ export default function CreateChannel() {
 
     return (
         <div onClick={(e) => e.stopPropagation()} className='relative rounded-2xl text-black bg-white h-96 w-1/5 flex items-center'>
-            <HiX size={24}  onClick={() => popup_ctx.setShow(false)} className="absolute top-0 right-0 m-4 cursor-pointer text-slate-400" />
+            <HiX size={24}  onClick={() => popup_ctx.close()} className="absolute top-0 right-0 m-4 cursor-pointer text-slate-400" />
             <div className="flex flex-col items-center w-full">
                 <div className="relative flex items-center justify-center h-32 w-32">
                     <img onClick={() => icon_input.current.click()} onError={setDefaultIcon} className="h-24 w-24 rounded-full cursor-pointer p-0 m-2 border-slate-300 border-2 border-dashed" ref={icon_image} alt="icon" src="" />

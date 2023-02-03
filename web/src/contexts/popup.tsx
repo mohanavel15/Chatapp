@@ -2,9 +2,9 @@ import { useState, createContext } from "react";
 
 export interface PopUpContextOBJ {
     component: React.ReactChild | undefined
-    setComponent: React.Dispatch<React.SetStateAction<React.ReactChild | undefined>>
     show: boolean
-    setShow: React.Dispatch<React.SetStateAction<boolean>>
+    open: (child: React.ReactChild) => void
+    close: () => void
 }
 
 export const PopUpContext = createContext<PopUpContextOBJ>(undefined!);
@@ -13,11 +13,21 @@ export default function PopUpProvider({ children }: { children: React.ReactChild
     const [component, setComponent] = useState<React.ReactChild>();
     const [show, setShow] = useState(false);
 
+    const open = (child: React.ReactChild) => {
+        setComponent(child);
+        setShow(true)
+    }
+
+    const close = () => {
+        setShow(false)
+        setComponent(undefined);
+    }
+
     const value: PopUpContextOBJ = {
         component,
-        setComponent,
         show,
-        setShow
+        open,
+        close
     }
 
     return (

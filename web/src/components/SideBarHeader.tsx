@@ -1,17 +1,14 @@
 import React, { useRef, useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChannelsContext, ChannelContext } from '../contexts/channelctx';
-import { StatesContext, StateContext } from "../contexts/states";
 import Routes from '../config';
 import { PopUpContext } from '../contexts/popup';
-import CreateChannel from './popup/createchannel';
+import CreateChannel from './popup/CreateChannel';
 
 export default function SideBarHeader() {
     const navegate = useNavigate();
     const popup_ctx = useContext(PopUpContext);
     const InviteCode = useRef<HTMLInputElement>(undefined!);
-
-    const state_context: StateContext = useContext(StatesContext);
     const channel_context: ChannelContext = useContext(ChannelsContext);
 
     function JoinChannel(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
@@ -39,7 +36,7 @@ export default function SideBarHeader() {
         <div className='relative w-full flex flex-col p-2 border-b border-zinc-800'>
             <input className='h-6 border-none rounded bg-zinc-800 focus:outline-none' type="text" placeholder="Invite Code" ref={InviteCode} />
             <button className='bg-green-600 rounded-md h-6 hover:bg-green-700 my-2' onClick={JoinChannel}>Join Channel</button>
-            <button className="bg-green-600 rounded-md h-6 hover:bg-green-700" onClick={(e) => {e.preventDefault(); popup_ctx.setComponent(<CreateChannel />);popup_ctx.setShow(true) }}>Create Channel</button>
+            <button className="bg-green-600 rounded-md h-6 hover:bg-green-700" onClick={() => popup_ctx.open(<CreateChannel />) }>Create Channel</button>
         </div>
   )
 }
