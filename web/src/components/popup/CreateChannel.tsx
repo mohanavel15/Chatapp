@@ -50,7 +50,7 @@ export default function CreateChannel() {
     }
 
     return (
-        <div onClick={(e) => e.stopPropagation()} className='relative rounded-2xl text-black bg-white h-96 w-1/5 flex items-center'>
+        <div onClick={(e) => e.stopPropagation()} className='relative rounded-2xl text-black bg-white h-96 w-96 flex items-center'>
             <HiX size={24}  onClick={() => popup_ctx.close()} className="absolute top-0 right-0 m-4 cursor-pointer text-slate-400" />
             <div className="flex flex-col items-center w-full">
                 <div className="relative flex items-center justify-center h-32 w-32">

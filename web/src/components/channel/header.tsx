@@ -14,7 +14,6 @@ import AddUser from '../popup/AddUser';
 function Header({ channel, toggleRecipients }: { channel: ChannelOBJ, toggleRecipients: React.Dispatch<React.SetStateAction<boolean>> }) {
     const navigate = useNavigate()
     const channel_context: ChannelContext = useContext(ChannelsContext);
-    const state_context: StateContext = useContext(StatesContext);
     const popup_ctx = useContext(PopUpContext);
 
     const [showPinnedMessage, setShowPinnedMessage] = useState(false);
