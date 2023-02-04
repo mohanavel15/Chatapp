@@ -61,7 +61,7 @@ function App() {
 						<Route path="relationships" element={ <Relationships /> } />
 						<Route path="settings" element={ <Settings /> } />
 					</Route>
-					<Route path="/auth" element={
+					<Route path="auth" element={
 						<LoginContextProvider>
 							<LoginContainer />
 						</LoginContextProvider>
