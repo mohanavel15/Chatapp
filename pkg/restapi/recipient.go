@@ -49,6 +49,13 @@ func AddRecipient(ctx *Context) {
 		return
 	}
 
+	for _, rid := range channel.Recipients {
+		if rid == user.ID {
+			ctx.Res.WriteHeader(http.StatusNotAcceptable)
+			return
+		}
+	}
+
 	relationship, statusCode := ctx.Db.GetRelationship(ctx.User.ID, user.ID)
 	if statusCode != http.StatusOK {
 		ctx.Res.WriteHeader(statusCode)
