@@ -1,10 +1,10 @@
 import { useContext, useState, useEffect } from 'react'
 import Recipient from './Recipient';
 import { ChannelOBJ } from '../../models/models';
-import { ContextMenuCtx, ContextMenu } from "../../contexts/context_menu_ctx";
+import { ContextMenu } from "../../contexts/context_menu_ctx";
 
 export default function Recipients({ channel }: { channel: ChannelOBJ }) {
-	const ctx_menu_context: ContextMenuCtx = useContext(ContextMenu);
+	const ctx_menu = useContext(ContextMenu);
 	const [recipients, setRecipients] = useState<JSX.Element[]>([]);
 
   	useEffect(() => {
@@ -14,9 +14,9 @@ export default function Recipients({ channel }: { channel: ChannelOBJ }) {
 			<div key={recipient.id} onContextMenu={
 				(event) => {
 					event.preventDefault();
-					ctx_menu_context.closeAll();
-					ctx_menu_context.setMemberCtxMenu({event: event, member: recipient, channel: channel});
-					ctx_menu_context.setShowMemberCtxMenu(true);
+					ctx_menu.closeAll();
+					ctx_menu.setMemberCtxMenu({event: event, member: recipient, channel: channel});
+					ctx_menu.setShowMemberCtxMenu(true);
 				}
 			}>
 			<Recipient user={recipient} isOwner={recipient.id == channel.owner_id} />

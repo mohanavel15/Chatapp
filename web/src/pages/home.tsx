@@ -9,7 +9,7 @@ import FriendContextMenu from "../contextmenu/friend_context_menu";
 import MemberContextMenu from "../contextmenu/member_context_menu";
 import MessageContextMenu from "../contextmenu/message_context_menu";
 import { ChannelContext, ChannelsContext } from "../contexts/channelctx";
-import CtxMenuCtx, { ContextMenu, ContextMenuCtx } from "../contexts/context_menu_ctx";
+import { ContextMenu } from "../contexts/context_menu_ctx";
 import { PopUpContext } from "../contexts/popup";
 import { UserContext, UserContextOBJ } from "../contexts/usercontext";
 import { ChannelOBJ, MessageOBJ, ReadyOBJ, Status } from "../models/models";
@@ -174,7 +174,8 @@ function Home() {
 		};
 	}, []);
 
-	const ctx_menu_context: ContextMenuCtx = useContext(ContextMenu);
+	const ctx_menu_context = useContext(ContextMenu);
+
 	useEffect(() => {
 		const handleClick = () => { 
 			ctx_menu_context.closeAll();

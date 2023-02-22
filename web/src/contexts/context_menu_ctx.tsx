@@ -1,7 +1,7 @@
 import React, { useState, createContext } from 'react'
 import { MessageOBJ, ChannelOBJ, UserOBJ } from '../models/models';
 import { Relationship } from '../models/relationship';
-export interface ContextMenuCtx {
+export interface ContextMenuType {
     showMsgCtxMenu: boolean;
     msgCtxMenu: {x: number, y: number, message:MessageOBJ};
     setShowMsgCtxMenu: React.Dispatch<React.SetStateAction<boolean>>;
@@ -25,9 +25,9 @@ export interface ContextMenuCtx {
     closeAll: () => void;
 }
 
-export const ContextMenu = createContext<ContextMenuCtx>(undefined!);
+export const ContextMenu = createContext<ContextMenuType>(undefined!);
 
-export default function CtxMenuCtx({ children }: {children: React.ReactChild}) {
+export default function ContextMenuProvider({ children }: {children: React.ReactChild}) {
 	const [showMsgCtxMenu, setShowMsgCtxMenu] = useState(false);
 	const [msgCtxMenu, setMsgCtxMenu] = useState<{x: number, y: number, message:MessageOBJ}>(undefined!);
 
@@ -47,7 +47,7 @@ export default function CtxMenuCtx({ children }: {children: React.ReactChild}) {
         setShowFriendCtxMenu(false);
     }
 
-    const context_value: ContextMenuCtx = {
+    const context_value: ContextMenuType = {
 		showMsgCtxMenu: showMsgCtxMenu,
 		msgCtxMenu: msgCtxMenu,
 		setShowMsgCtxMenu: setShowMsgCtxMenu,

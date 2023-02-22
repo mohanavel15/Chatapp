@@ -1,5 +1,5 @@
 import { ChannelContext, ChannelsContext } from '../contexts/channelctx';
-import { ContextMenu, ContextMenuCtx } from '../contexts/context_menu_ctx';
+import { ContextMenu } from '../contexts/context_menu_ctx';
 import { useContext, useEffect, useState } from 'react';
 import { ChannelOBJ } from '../models/models';
 import ChannelList from './channel_list';
@@ -9,7 +9,7 @@ import SideBarHeader from './SideBarHeader';
 function SideBar() {
 	const [channels_element, setChannels_element] = useState<JSX.Element[]>([])
 	const channel_context: ChannelContext = useContext(ChannelsContext);
-	const ctx_menu_context: ContextMenuCtx = useContext(ContextMenu);
+	const ctx_menu = useContext(ContextMenu);
 	const location = useLocation()
 
 	useEffect(() => {
@@ -44,9 +44,9 @@ function SideBar() {
 			setChannels_element(prevElement => [...prevElement,
 			<div key={channel.id} onContextMenu={(event) => {
 				event.preventDefault();
-				ctx_menu_context.closeAll();
-				ctx_menu_context.setChannelCtxMenu({ x: event.clientX, y: event.clientY, channel: channel })
-				ctx_menu_context.setShowChannelCtxMenu(true);
+				ctx_menu.closeAll();
+				ctx_menu.setChannelCtxMenu({ x: event.clientX, y: event.clientY, channel: channel })
+				ctx_menu.setShowChannelCtxMenu(true);
 			}}>
 				<ChannelList channel={channel} />
 			</div>
@@ -55,7 +55,7 @@ function SideBar() {
 	}, [channel_context.channels, channel_context.messages])
 
 	return (
-		<div className={`h-full w-full lg:w-64 ${location.pathname !== "/channels" ? "hidden" : "block"} lg:block md:border-r border-zinc-800`}>
+		<div className={`h-full w-full lg:w-64 ${location.pathname !== "/channels" ? "hidden" : "block"} overflow-y-scroll lg:block md:border-r border-zinc-800`}>
 			<SideBarHeader />
 			{channels_element}
 		</div>

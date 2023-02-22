@@ -20,7 +20,7 @@ import './css/settings.css';
 
 import States from "./contexts/states";
 import ChannelCTX from "./contexts/channelctx";
-import CtxMenuCtx from "./contexts/context_menu_ctx";
+import ContextMenuProvider from "./contexts/context_menu_ctx";
 import LoginContainer from "./pages/LoginContainer";
 import LoginContextProvider from "./contexts/Login";
 import Chat from "./components/channel/chat";
@@ -39,17 +39,15 @@ function App() {
 					<Route path="/" element={
 						<ChannelCTX>
 							<PopUpProvider>
-								<CtxMenuCtx>
-								<Home />
-								</CtxMenuCtx>
+								<ContextMenuProvider>
+									<Home />
+								</ContextMenuProvider>
 							</PopUpProvider>
 						</ChannelCTX>
 					}>
 						<Route path="channels" element={
 								<States>
-									<CtxMenuCtx>
 										<Channel />
-									</CtxMenuCtx>
 								</States>
 							}>
 							<Route path=":id" element={ 

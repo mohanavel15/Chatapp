@@ -6,7 +6,7 @@ import { faFaceLaughBeam, faCirclePlus, faFile, faCircleXmark } from '@fortaweso
 import Header from './header';
 import { MessageOBJ, ChannelOBJ } from '../../models/models';
 import { ChannelsContext, ChannelContext } from "../../contexts/channelctx";
-import { ContextMenuCtx, ContextMenu } from "../../contexts/context_menu_ctx";
+import { ContextMenu } from "../../contexts/context_menu_ctx";
 import { UserContextOBJ, UserContext } from "../../contexts/usercontext";
 import { BsPlusCircleFill } from 'react-icons/bs';
 
@@ -46,9 +46,9 @@ function Chat() {
 			messagesList.push(
 				<div key={message.id} onContextMenu={(event) => {
 					event.preventDefault();
-					ctx_menu_context.closeAll();
-					ctx_menu_context.setMsgCtxMenu({ x: event.clientX, y: event.clientY, message: message });
-					ctx_menu_context.setShowMsgCtxMenu(true);
+					ctx_menu.closeAll();
+					ctx_menu.setMsgCtxMenu({ x: event.clientX, y: event.clientY, message: message });
+					ctx_menu.setShowMsgCtxMenu(true);
 				}
 				}>
 					<Message message={message} />
@@ -63,7 +63,7 @@ function Chat() {
 	const file_input = useRef<HTMLInputElement>(undefined!);
 	const [fileJSX, setFileJSX] = useState<JSX.Element>(<></>);
 
-	const ctx_menu_context: ContextMenuCtx = useContext(ContextMenu);
+	const ctx_menu = useContext(ContextMenu);
 	const user_ctx: UserContextOBJ = useContext(UserContext);
 
 	const onEmojiClick = (_: React.MouseEvent<Element, MouseEvent>, data: IEmojiData) => {
@@ -157,7 +157,7 @@ function Chat() {
 						*/}
 						<input type="file" ref={file_input} name="filename" hidden onChange={onFileChange} />
 						<BsPlusCircleFill size={26} onClick={() => file_input.current.click()} />
-						<input className='w-[85%] h-8 rounded-md bg-zinc-800' type="text" placeholder="Type a message..." onKeyPress={updateChat} value={Input_message} onChange={onInputChange} />
+						<input className='w-[85%] h-8 rounded-md bg-zinc-800 px-4' type="text" placeholder="Type a message..." onKeyPress={updateChat} value={Input_message} onChange={onInputChange} />
 					</div>
 					{/* {showPicker && <div className="EmojiPicker"><Picker onEmojiClick={onEmojiClick} /></div>} */}
 				</div>

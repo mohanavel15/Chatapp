@@ -12,9 +12,6 @@ export default function DeleteMessage() {
         const url = Routes.Channels+"/"+state_context.messageOBJ.channel_id+"/messages/"+state_context.messageOBJ.id;
         fetch(url, {
             method: "DELETE",
-            headers: {
-                "Authorization": user_ctx.accessToken
-            }
         })
         state_context.setDeleteMessage(false);
     }
