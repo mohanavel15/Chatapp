@@ -32,10 +32,7 @@ export default function FriendContextMenu(props: propsChannelCtxProps) {
     function Message() {
         const url = Routes.host + "/dms/" + props.friend_obj.id;
         fetch(url, {
-            method: "GET",
-            headers: {
-                "Authorization": user_ctx.accessToken,
-            }
+            method: "GET"
         }).then(response => {
             if (response.status === 200) {
                 response.json().then(dm_channel => {

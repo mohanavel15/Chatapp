@@ -40,10 +40,7 @@ export default function MessageContextMenu(props:propsMsgCtxProps) {
     function PinMsg() {
         const url = Routes.Channels + '/' + message.channel_id + '/pins/' + message.id;
         fetch(url, {
-            method: 'PUT',
-            headers: {
-                'Authorization': user_ctx.accessToken
-            }
+            method: 'PUT'
         }).then(res => {
             if (res.status === 200) {
                 channel_ctx.UpdatePinnedMessage(message);
@@ -54,10 +51,7 @@ export default function MessageContextMenu(props:propsMsgCtxProps) {
     function UnpinMsg() {
         const url = Routes.Channels + '/' + message.channel_id + '/pins/' + message.id;
         fetch(url, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': user_ctx.accessToken
-            }
+            method: 'DELETE'
         }).then(res => {
             if (res.status === 200) {
                 channel_ctx.DeletePinnedMessage(message);
