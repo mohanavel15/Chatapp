@@ -1,11 +1,11 @@
-import { MessageOBJ } from '../../models/models';
+import { MessageOBJ } from '../../../models/models';
 
 export default function AttachmentAudio({ message }: { message: MessageOBJ }) {
   return (
     <div>
-        <audio controls>
-            <source src={message.attachments[0].url} type={message.attachments[0].content_type} />
-        </audio>
+      <audio controls>
+        <source src={message.attachments[0].url} type={message.attachments[0].content_type} />
+      </audio>
     </div>
   )
 }
