@@ -1,18 +1,17 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { StatesContext, StateContext } from "../contexts/states";
-import { UserContextOBJ, UserContext } from "../contexts/usercontext";
+import { UserContext } from "../contexts/usercontext";
 import { ChannelOBJ } from '../models/models';
 import { RelationshipToDefault, RelationshipToFriend, RelationshipToBlock } from '../api/relationship';
 import EditChannel from '../components/popup/EditChannel';
 import { PopUpContext } from '../contexts/popup';
+import DeleteChannel from '../components/popup/DeleteChannel';
 
 interface propsChannelCtxProps {
     x: number, y: number, channel: ChannelOBJ
 }
 
 export default function ChannelContextMenu(props: propsChannelCtxProps) {
-  	const state_context: StateContext = useContext(StatesContext);
-  	const user_ctx:UserContextOBJ = useContext(UserContext);
+  	const user_ctx = useContext(UserContext);
     const popup_ctx = useContext(PopUpContext);
 
   	let style: React.CSSProperties
@@ -55,7 +54,7 @@ export default function ChannelContextMenu(props: propsChannelCtxProps) {
     return (
     	<div className='ContextMenu' style={style}>
             { props.channel.type === 2 && props.channel.owner_id === user_ctx.id && <button className='CtxBtn' onClick={() => popup_ctx.open(<EditChannel channel={props.channel} />)}>Edit Channel</button> }
-            { props.channel.type === 2 && <button className='CtxDelBtn' onClick={() => {state_context.setChannelOBJ(props.channel);state_context.setDeleteChannel(true);}}>Leave Channel</button> }
+            { props.channel.type === 2 && <button className='CtxDelBtn' onClick={() => popup_ctx.open(<DeleteChannel channel={props.channel} />) }>Leave Channel</button> }
             { props.channel.type === 1 && relationshipStatus === 0 && <button className='CtxBtn' onClick={relationshipToFriend}>Add Friend</button> }
             { props.channel.type === 1 && relationshipStatus === 3 && <button className='CtxDelBtn' onClick={relationshipToDefault}>Cancel Request</button> }
             { props.channel.type === 1 && relationshipStatus === 4 && <button className='CtxDelBtn' onClick={relationshipToDefault}>Decline Request</button> }

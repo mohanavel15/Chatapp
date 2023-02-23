@@ -1,19 +1,20 @@
 import React, { useContext, useState, useEffect } from 'react'
 import { ChannelOBJ, UserOBJ } from '../models/models';
-import { UserContextOBJ, UserContext } from "../contexts/usercontext";
-import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
-import { StatesContext, StateContext } from "../contexts/states";
+import { UserContext } from "../contexts/usercontext";
+import { ChannelsContext } from "../contexts/channelctx";
 import { useNavigate } from "react-router-dom";
 import { GetDMChannel } from '../api/channel';
 import { RelationshipToDefault, RelationshipToFriend } from '../api/relationship'
+import { PopUpContext } from '../contexts/popup';
+import RemoveRecipient from '../components/popup/RemoveRecipient';
 interface propsMsgCtxProps {
     event: React.MouseEvent<HTMLDivElement, MouseEvent>, member: UserOBJ, channel: ChannelOBJ
 }
 
 export default function MemberContextMenu(props:propsMsgCtxProps) {
-    const user_ctx:UserContextOBJ = useContext(UserContext);    
-	const channel_context: ChannelContext = useContext(ChannelsContext);
-    const state_context: StateContext = useContext(StatesContext);
+    const user_ctx = useContext(UserContext);
+	const channel_context = useContext(ChannelsContext);
+    const popup_ctx = useContext(PopUpContext);
     const channel = props.channel;
     const navigate = useNavigate();
     const [isFriend, setIsFriend] = useState(0);
@@ -25,10 +26,7 @@ export default function MemberContextMenu(props:propsMsgCtxProps) {
     }
 
     function handleKickOrBan(ban: boolean) {
-        state_context.setKickBanMember(props.member);
-        state_context.setChannelOBJ(channel);
-        state_context.setIsBan(ban);
-        state_context.setShowKickBan(true);
+        popup_ctx.open(<RemoveRecipient isBan={ban} recipient={props.member} channel={channel} />)
     }
 
     function Message() {

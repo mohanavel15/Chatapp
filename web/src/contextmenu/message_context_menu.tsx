@@ -1,19 +1,20 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { MessageOBJ } from '../models/models';
-import { UserContextOBJ, UserContext } from "../contexts/usercontext";
-import { StatesContext, StateContext } from "../contexts/states";
+import { UserContext } from "../contexts/usercontext";
 import { MessageContext } from "../contexts/messagectx";
-import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
+import { ChannelsContext } from "../contexts/channelctx";
 import Routes from '../config'
+import DeleteMessage from '../components/popup/DeleteMessage';
+import { PopUpContext } from '../contexts/popup';
 interface propsMsgCtxProps {
     x: number, y: number, message: MessageOBJ
 }
 
-export default function MessageContextMenu(props:propsMsgCtxProps) {
+export default function MessageContextMenu(props: propsMsgCtxProps) {
     const message = props.message;
-    const user_ctx:UserContextOBJ = useContext(UserContext);
-    const state_context: StateContext = useContext(StatesContext);
-    const channel_ctx:ChannelContext = useContext(ChannelsContext);
+    const user_ctx = useContext(UserContext);
+    const popup_ctx = useContext(PopUpContext);
+    const channel_ctx = useContext(ChannelsContext);
     const msgctx = useContext(MessageContext);
     const channel = channel_ctx.channels.get(props.message.channel_id);
 
@@ -61,22 +62,12 @@ export default function MessageContextMenu(props:propsMsgCtxProps) {
 
     return (
         <div className='ContextMenu' style={style}>
-            <button className='CtxBtn' onClick={() => {navigator.clipboard.writeText(props.message.content)}}>Copy Text</button>
+            <button className='CtxBtn' onClick={() => { navigator.clipboard.writeText(props.message.content) }}>Copy Text</button>
             { !isPinned && <button className='CtxBtn' onClick={PinMsg}>Pin Message</button> }
             { isPinned && <button className='CtxBtn' onClick={UnpinMsg}>Unpin Message</button> }
-            { user_ctx.id === message.author.id && <button className='CtxBtn' onClick={
-                () => {
-                    msgctx.setMessage(message);
-                    msgctx.setMessageEdit(true);
-                }
-            }
-            >Edit Message</button> }
-            { (user_ctx.id === message.author.id || channel?.owner_id === user_ctx.id) && <button className='CtxDelBtn' onClick={ () => {
-                    state_context.setDeleteMessage(true);
-                    state_context.setMessageOBJ(message);
-            }
-            }>Delete Message</button> }
-            <button className='CtxBtn' onClick={() => {navigator.clipboard.writeText(props.message.id)}}>Copy ID</button>
+            { user_ctx.id === message.author.id && <button className='CtxBtn' onClick={() => { msgctx.setMessage(message); msgctx.setMessageEdit(true) }}>Edit Message</button> }
+            { (user_ctx.id === message.author.id || channel?.owner_id === user_ctx.id) && <button className='CtxDelBtn' onClick={() => popup_ctx.open(<DeleteMessage message={message} />)}>Delete Message</button> }
+            <button className='CtxBtn' onClick={() => navigator.clipboard.writeText(props.message.id)}>Copy ID</button>
         </div>
     )
 }
