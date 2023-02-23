@@ -1,6 +1,6 @@
 import { useState, useContext, useEffect, useRef } from 'react'
 import { UserContextOBJ, UserContext } from "../contexts/usercontext";
-import { ContextMenuCtx, ContextMenu } from "../contexts/context_menu_ctx";
+import { ContextMenu } from "../contexts/context_menu_ctx";
 import { RelationshipToFriend } from '../api/relationship';
 import Relationship from './relationships/relationship';
 
@@ -8,7 +8,7 @@ function Relationships() {
 	const user_ctx:UserContextOBJ = useContext(UserContext);
 	const [TopBarSelected, setTopBarSelected] = useState(0)
 	const [elements, setElements] = useState<JSX.Element[]>([]);
-	const ctx_menu_context: ContextMenuCtx = useContext(ContextMenu);
+	const ctx_menu = useContext(ContextMenu);
 
 	const FriendUserUUID = useRef<HTMLInputElement>(undefined!);
 
@@ -36,9 +36,9 @@ function Relationships() {
 				<div key={relationship.id} onContextMenu={
 					(event) => {
 						event.preventDefault();
-						ctx_menu_context.closeAll();
-						ctx_menu_context.setFriendCtxMenu({x: event.clientX, y: event.clientY, friend_obj: relationship})
-						ctx_menu_context.setShowFriendCtxMenu(true);
+						ctx_menu.closeAll();
+						ctx_menu.setFriendCtxMenu({x: event.clientX, y: event.clientY, friend_obj: relationship})
+						ctx_menu.setShowFriendCtxMenu(true);
 					}
 				}>
 				<Relationship relationship_obj={relationship} />

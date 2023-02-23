@@ -18,7 +18,6 @@ import './css/friends.css';
 import './css/profile.css';
 import './css/settings.css';
 
-import States from "./contexts/states";
 import ChannelCTX from "./contexts/channelctx";
 import ContextMenuProvider from "./contexts/context_menu_ctx";
 import LoginContainer from "./pages/LoginContainer";
@@ -45,11 +44,7 @@ function App() {
 							</PopUpProvider>
 						</ChannelCTX>
 					}>
-						<Route path="channels" element={
-								<States>
-										<Channel />
-								</States>
-							}>
+						<Route path="channels" element={<Channel />}>
 							<Route path=":id" element={ 
 								<MessageCTX>
 									<Chat />

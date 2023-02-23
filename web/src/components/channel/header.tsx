@@ -1,7 +1,6 @@
 import { setDefaultIcon, setDefaultAvatar } from '../../utils/errorhandle';
 import { useContext, useState, useEffect } from 'react';
-import { ChannelsContext, ChannelContext } from "../../contexts/channelctx";
-import { StatesContext, StateContext } from "../../contexts/states";
+import { ChannelsContext } from "../../contexts/channelctx";
 import PinnedMessage from '../pinned_message';
 import { ChannelOBJ } from '../../models/models';
 
@@ -13,7 +12,7 @@ import AddUser from '../popup/AddUser';
 
 function Header({ channel, toggleRecipients }: { channel: ChannelOBJ, toggleRecipients: React.Dispatch<React.SetStateAction<boolean>> }) {
     const navigate = useNavigate()
-    const channel_context: ChannelContext = useContext(ChannelsContext);
+    const channel_context = useContext(ChannelsContext);
     const popup_ctx = useContext(PopUpContext);
 
     const [showPinnedMessage, setShowPinnedMessage] = useState(false);
