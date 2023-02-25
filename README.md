@@ -1,8 +1,10 @@
 # Chatapp
+#### New UI work in progress
 
 ![friends_all](images/friends-all.png)
 ![channel_png](images/channel.png)
 more [images](images)
+
 
 ## Features
 - Authentication
@@ -50,7 +52,7 @@ go get .
 ```
 
 ## Setup Database
-### Postgres Database Docker
+### Database Docker
 ```bash
 docker-compose up -d mongodb
 ```

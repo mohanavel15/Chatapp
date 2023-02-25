@@ -17,7 +17,7 @@ function Register() {
 		if (response.status === 200) {
 			login_ctx.setShowError(false);
 			alert("Successfully registered!")
-			navigate("/login")
+			navigate("/auth/login")
 		} else {
 			login_ctx.setShowError(true);
 			response.text().then(text => {

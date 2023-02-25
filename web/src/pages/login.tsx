@@ -6,7 +6,7 @@ import { UserContext } from "../contexts/usercontext";
 
 function Login() {
 	const login_ctx = useContext(LoginContext);
-
+	const navigate = useNavigate();
 	const Username = useRef<HTMLInputElement>(undefined!);
 	const Password = useRef<HTMLInputElement>(undefined!);
 	
@@ -15,7 +15,7 @@ function Login() {
 	async function HandleResponse(response: Response) {
 		if (response.status === 200) {
 			login_ctx.setShowError(false);
-			useNavigate()("/")
+			navigate("/")
 		} else {
 			login_ctx.setShowError(true);
 			response.text().then(text => {
