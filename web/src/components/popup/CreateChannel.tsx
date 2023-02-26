@@ -54,7 +54,7 @@ export default function CreateChannel() {
             <HiX size={24}  onClick={() => popup_ctx.close()} className="absolute top-0 right-0 m-4 cursor-pointer text-slate-400" />
             <div className="flex flex-col items-center w-full">
                 <div className="relative flex items-center justify-center h-32 w-32">
-                    <img onClick={() => icon_input.current.click()} onError={setDefaultIcon} className="h-24 w-24 rounded-full cursor-pointer p-0 m-2 border-slate-300 border-2 border-dashed" ref={icon_image} alt="icon" src="" />
+                    <img onClick={() => icon_input.current.click()} onError={setDefaultIcon} className="h-24 w-24 rounded-xl cursor-pointer p-0 m-2 border-slate-300 border-2 border-dashed" ref={icon_image} alt="icon" src="" />
                     <HiCamera size={64} onClick={() => icon_input.current.click()} className="absolute self-center justify-self-center text-white opacity-75 cursor-pointer" />
                     <input type="file" ref={icon_input} name="filename" hidden onChange={onIconChange} accept="image/*"></input>
                 </div>

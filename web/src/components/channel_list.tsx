@@ -1,59 +1,41 @@
 import { Link, useParams } from "react-router-dom";
 import { setDefaultIcon, setDefaultAvatar } from '../utils/errorhandle';
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircle, faDotCircle, faCircleMinus, IconDefinition } from '@fortawesome/free-solid-svg-icons'
 import { ChannelOBJ } from "../models/models";
+import { RxDot, RxDotFilled } from "react-icons/rx";
 
-interface ChannelHeaderProps {
-    channel: ChannelOBJ
-}
+export default function ChannelList({ channel }: { channel: ChannelOBJ }) {
+    const parameter = useParams<string>();
 
-export default function ChannelList(props: ChannelHeaderProps) {
-    const parameter  = useParams<string>();
-	let channel_id = parameter.id || "@me";
+    let isActive = parameter.id === channel.id;
+    const isChannel = channel.type === 2;
 
-    let style: React.CSSProperties
-    let icon: IconDefinition
-    if (props.channel.recipients[0].status === 1) {
-        style = {
-            color: "lime"
-        }
-        icon = faCircle
-    } else if (props.channel.recipients[0].status === 2) {
-        style = {
-            color: "red"
-        }
-        icon = faCircleMinus
+    let icon: string;
+    let name: string;
+    let alt: string;
+    let defaultIcon: (event: React.SyntheticEvent<HTMLImageElement, Event>) => void;
+    
+    if (isChannel) {
+        icon = channel.icon;
+        name = channel.name;
+        alt = "Icon";
+        defaultIcon = setDefaultIcon;
     } else {
-        style = {
-            color: "grey"
-        }
-        icon = faDotCircle
+        icon = channel.recipients[0].avatar;
+        name = channel.recipients[0].username;
+        alt = "Avatar";
+        defaultIcon = setDefaultAvatar;
     }
-    
-    const active_channel_style: React.CSSProperties = {}
 
-    if (channel_id === props.channel.id) {
-        active_channel_style.backgroundColor = "#393d42"
-        active_channel_style.borderRadius = "5px"
-    }
-    
     return (
-        <Link to={`/channels/${props.channel.id}`} className="linktag" >
-            <div className='channel_list' style={active_channel_style}>
-                <div className='channel_name'>
-                    { props.channel.type === 1 && 
-                        <div className="dm_avatar">
-                            <img src={props.channel.recipients[0].avatar} onError={setDefaultAvatar} alt={"Avatar"} />
-                            <FontAwesomeIcon className='dm_status_icon' style={style} icon={icon} />
-                        </div>
-                    }
-                    { props.channel.type === 2 && <img className='channel_avatar' src={props.channel.icon} alt={"Icon"} onError={setDefaultIcon}/> }
-                    <p>{    props.channel.type === 1 ? 
-                            props.channel.recipients[0].username : 
-                            props.channel.name 
-                    }</p>
+        <Link to={`/channels/${channel.id}`} className="linktag">
+            <div className={`w-full h-12 px-2 mt-2 flex items-center cursor-pointer rounded ${isActive && 'bg-zinc-800'} hover:bg-zinc-900`}>
+                <div className='relative h-10 w-10 mx-4'>
+                    <img className='rounded-xl h-10 w-10 bg-zinc-900' src={icon} onError={defaultIcon} alt={alt} />
+                    { !isChannel && <div className='absolute right-0 bg-black rounded-full bottom-0'>
+                        {channel.recipients[0].status === 1 ? <RxDotFilled size={20} className="text-green-600" /> : <RxDot size={20} className="text-gray-400" />}
+                    </div> }
                 </div>
+                <p className="w-28 h-6 overflow-hidden text-ellipsis whitespace-nowrap">{name}</p>
             </div>
         </Link>
     )

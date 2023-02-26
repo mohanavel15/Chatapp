@@ -7,7 +7,7 @@ export default function Recipient({ user, isOwner }: {user: UserOBJ, isOwner: bo
     return (
         <div className='h-12 flex items-center rounded hover:bg-zinc-900 cursor-pointer'>
             <div className='relative h-10 w-10 mx-4'>
-            <img className='rounded-xl' src={user.avatar} onError={setDefaultAvatar} alt={"Icon"} />
+            <img className='rounded-xl bg-zinc-900' src={user.avatar} onError={setDefaultAvatar} alt={"Icon"} />
             <div className='absolute right-0 bg-black rounded-full bottom-0'>
                 { user.status === 1 ? <RxDotFilled size={20} className="text-green-600" /> : <RxDot size={20} className="text-gray-400" /> }
             </div>
