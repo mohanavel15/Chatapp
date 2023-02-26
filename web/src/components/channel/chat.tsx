@@ -36,12 +36,16 @@ function Chat() {
 			messages = [] as MessageOBJ[]
 		}
 
-		let preDate: string
+		let preDate: string = ""
+		let prevAuthor: string = ""
 		messages.forEach((message) => {
 			let date = new Date(message.created_at * 1000).toLocaleDateString();
-			if (preDate === undefined || preDate !== date) {
+			let short = prevAuthor === message.author.id;
+			prevAuthor = message.author.id;
+			if (preDate !== date) {
 				messagesList.push(<div key={date} className="date-divider">{date}</div>);
 				preDate = date;
+				short = false;
 			}
 			messagesList.push(
 				<div key={message.id} onContextMenu={(event) => {
@@ -51,7 +55,7 @@ function Chat() {
 					ctx_menu.setShowMsgCtxMenu(true);
 				}
 				}>
-					<Message message={message} />
+					<Message message={message} short={short} />
 				</div>
 			)
 		});
