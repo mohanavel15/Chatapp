@@ -1,8 +1,7 @@
 import { useContext, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Login as APILogin } from "../api/auth";
-import { LoginContext } from "../contexts/Login";
-import { UserContext } from "../contexts/usercontext";
+import { Login as APILogin } from "../../api/auth";
+import { LoginContext } from "../../contexts/Login";
 
 function Login() {
 	const login_ctx = useContext(LoginContext);

@@ -1,11 +1,5 @@
 import { BrowserRouter, Routes as RouterRoutes, Route } from "react-router-dom";
 
-import Channel from "./pages/channel";
-import Login from "./pages/login";
-import Home from "./pages/home";
-import NoPage from "./pages/nopage";
-import Register from "./pages/register";
-
 import './App.css';
 import './css/chat.css';
 import './css/login.css';
@@ -18,14 +12,22 @@ import './css/friends.css';
 import './css/profile.css';
 import './css/settings.css';
 
-import ChannelCTX from "./contexts/channelctx";
-import ContextMenuProvider from "./contexts/context_menu_ctx";
+import Home from "./pages/home";
 import LoginContainer from "./pages/LoginContainer";
-import LoginContextProvider from "./contexts/Login";
-import Chat from "./components/channel/chat";
-import MessageCTX from "./contexts/messagectx";
-import Relationships from "./components/relationships";
+import Channel from "./pages/channel";
+import Relationships from "./pages/relationships";
 import Settings from "./pages/settings";
+import NoPage from "./pages/nopage";
+
+import Login from "./components/auth/login";
+import Register from "./components/auth/register";
+import Chat from "./components/channel/chat";
+
+
+import LoginContextProvider from "./contexts/Login";
+import MessageCTX from "./contexts/messagectx";
+import ContextMenuProvider from "./contexts/context_menu_ctx";
+import ChannelCTX from "./contexts/channelctx";
 import UserCTX from "./contexts/usercontext";
 import PopUpProvider from "./contexts/popup";
 

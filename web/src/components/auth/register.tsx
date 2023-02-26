@@ -1,7 +1,7 @@
 import { useContext, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import Routes from "../config";
-import { LoginContext } from "../contexts/Login";
+import { useNavigate } from "react-router-dom";
+import Routes from "../../config";
+import { LoginContext } from "../../contexts/Login";
 
 function Register() {
 	const navigate = useNavigate();
