@@ -2,14 +2,10 @@ import { BrowserRouter, Routes as RouterRoutes, Route } from "react-router-dom";
 
 import './App.css';
 import './css/chat.css';
-import './css/login.css';
 import './css/message.css';
-import './css/sidebar.css';
-import './css/members_bar.css';
 import './css/channel.css';
 import './css/contextmenu.css';
 import './css/friends.css';
-import './css/profile.css';
 import './css/settings.css';
 
 import Home from "./pages/home";
