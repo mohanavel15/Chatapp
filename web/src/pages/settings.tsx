@@ -1,12 +1,12 @@
 import { useContext, useRef } from 'react';
-import { StatesContext, StateContext } from "../contexts/states";
 import ToggleBtn from '../utils/togglebtn';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faX, faCamera } from '@fortawesome/free-solid-svg-icons';
 import { UserContext } from "../contexts/usercontext";
 import { useNavigate } from "react-router-dom";
 import Routes from '../config';
 import { ChangePassword, Logout } from '../api/auth';
+import { setDefaultAvatar } from '../utils/errorhandle';
+import { HiCamera, HiXCircle } from 'react-icons/hi';
+import SettingsItem from '../components/settings/SettingsItem';
 
 function Settings() {
     const naviagte = useNavigate();
@@ -79,7 +79,7 @@ function Settings() {
             const file = avatar_input.current.files[0];
             if (file.size > 2097152) {
                 alert("image is bigger than 2MB")
-                avatar_input.current.value=''
+                avatar_input.current.value = ''
                 return
             }
             avatar_image.current.src = URL.createObjectURL(file);
@@ -87,38 +87,34 @@ function Settings() {
     }
 
     return (
-        <div className='settings'>
-            <div className='settings-header'>
+        <div className='h-full w-full flex flex-col'>
+            <div className='h-16 flex items-center justify-around bg-zinc-900'>
                 <h2>Settings</h2>
-                <button className='settings-close' onClick={() => naviagte(-1)}> <FontAwesomeIcon icon={faX} /> </button>
+                <button onClick={() => naviagte(-1)}><HiXCircle className='hover:text-gray-600' size={42} /></button>
             </div>
-            <div className='settings-content'>
-                <div className='settings-content-item'>
-                <h3 className='settings-content-item-title'>Profile</h3>
-                <div className="channel-edit-icon-container">
-                    <img className="channel-edit-icon" ref={avatar_image} src={user_ctx.avatar} />
-                    <FontAwesomeIcon icon={faCamera} className="channel-edit-icon-camera" onClick={() => avatar_input.current.click()} />
-				    <input type="file" ref={avatar_input} name="filename" hidden onChange={onIconChange} accept="image/*"></input>
-                </div>
-                <button className='btn-green' onClick={avatar}>Save</button>
-                </div>
-                <div className='settings-content-item'>
-                <h3 className='settings-content-item-title'>Chanage Password</h3>
-                <input type="password" placeholder='Current Password' ref={password_ref} />
-                <input type="password" placeholder='New Password' ref={new_password_ref} />
-                <input type="password" placeholder='Retype New Password' ref={confirm_password_ref} />
-                <button className='btn-green' onClick={changePassword}>Save</button>
-                </div>
-                <div className='settings-content-item'>
-                <h3 className='settings-content-item-title'>DMs</h3>
-                <ToggleBtn input_ref={who_can_dm_ref}> Only Friends Can Dm </ToggleBtn>
-                <ToggleBtn input_ref={who_can_dm_ref}> Only Friends Add To Channel </ToggleBtn>
-                <button className='btn-green' onClick={who_can_dm}>Save</button>
-                </div>
-                <div className='settings-content-item'>
-                <h3 className='settings-content-item-title'>Logout</h3>
-                <button className='btn-red' onClick={logout}>Logout</button> 
-                </div>
+            <div className='flex flex-col h-full w-full items-center overflow-y-scroll'>
+                <SettingsItem title='Profile'>
+                    <div className="relative flex items-center justify-center h-32 w-32">
+                        <img onClick={() => avatar_input.current.click()} src={user_ctx.avatar} onError={setDefaultAvatar} className="h-24 w-24 rounded-xl bg-zinc-900 cursor-pointer p-0 m-2 border-slate-300 border-2 border-dashed" ref={avatar_image} alt="icon" />
+                        <HiCamera size={64} onClick={() => avatar_input.current.click()} className="absolute self-center justify-self-center text-white opacity-75 cursor-pointer" />
+                        <input type="file" ref={avatar_input} name="filename" hidden onChange={onIconChange} accept="image/*"></input>
+                    </div>
+                    <button className='w-24 h-10 bg-green-700 rounded hover:bg-green-800' onClick={avatar}>Save</button>
+                </SettingsItem>
+                <SettingsItem title='Chanage Password'>
+                    <input className="h-8 w-4/5 rounded my-1 px-2 bg-zinc-800" type="password" placeholder='Current Password' ref={password_ref} />
+                    <input className="h-8 w-4/5 rounded my-1 px-2 bg-zinc-800" type="password" placeholder='New Password' ref={new_password_ref} />
+                    <input className="h-8 w-4/5 rounded my-1 px-2 bg-zinc-800" type="password" placeholder='Retype New Password' ref={confirm_password_ref} />
+                    <button className='w-24 h-10 bg-green-700 rounded hover:bg-green-800 my-1' onClick={changePassword}>Save</button>
+                </SettingsItem>
+                <SettingsItem title='DMs'>
+                    <ToggleBtn input_ref={who_can_dm_ref}> Only Friends Can Dm </ToggleBtn>
+                    <ToggleBtn input_ref={who_can_dm_ref}> Only Friends Add To Channel </ToggleBtn>
+                    <button className='w-24 h-10 bg-green-700 rounded hover:bg-green-800' onClick={who_can_dm}>Save</button>
+                </SettingsItem>
+                <SettingsItem title='Logout'>
+                    <button className='w-24 h-10 bg-red-800 rounded hover:bg-red-900' onClick={logout}>Logout</button>
+                </SettingsItem>
             </div>
         </div>
     )

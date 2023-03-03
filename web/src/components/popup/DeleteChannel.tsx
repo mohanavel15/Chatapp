@@ -18,11 +18,13 @@ export default function DeleteChannel({ channel }: { channel: ChannelOBJ }) {
     }
 
     return (
-        <div onClick={(e) => e.stopPropagation()} className='delete-channel'>
+        <div onClick={(e) => e.stopPropagation()} className='relative rounded-2xl p-8 text-white bg-zinc-900 min-h-fit w-80 flex flex-col items-center'>
             <h3>Leave '{channel.name}'?</h3>
             <p>Are you sure you want to leave? You won't be able to re-join unless you are re-invited</p>
-            <button className="popupbox-btn" onClick={() => popup_ctx.close() }>Cancel</button>
-            <button className="popupbox-btn-red popupbox-btn" onClick={HandleDeleteChannel}>Leave</button>
+            <div className='p-4'>
+                <button className="rounded mx-2 bg-gray-500 text-white h-10 w-24 hover:bg-gray-600" onClick={() => popup_ctx.close() }>Cancel</button>
+                <button className="rounded mx-2 bg-red-800 text-white h-10 w-24 hover:bg-red-900" onClick={HandleDeleteChannel}>Leave</button>
+            </div>
         </div>
     )
 }
