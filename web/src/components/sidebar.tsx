@@ -1,5 +1,4 @@
 import { ChannelContext, ChannelsContext } from '../contexts/channelctx';
-import { ContextMenu } from '../contexts/context_menu_ctx';
 import { useContext, useEffect, useState } from 'react';
 import { ChannelOBJ } from '../models/models';
 import ChannelList from './channel_list';
@@ -9,7 +8,6 @@ import SideBarHeader from './SideBarHeader';
 function SideBar() {
 	const [channels_element, setChannels_element] = useState<JSX.Element[]>([])
 	const channel_context: ChannelContext = useContext(ChannelsContext);
-	const ctx_menu = useContext(ContextMenu);
 	const location = useLocation()
 
 	useEffect(() => {
@@ -42,14 +40,7 @@ function SideBar() {
 
 		channels.forEach(channel => {
 			setChannels_element(prevElement => [...prevElement,
-			<div key={channel.id} onContextMenu={(event) => {
-				event.preventDefault();
-				ctx_menu.closeAll();
-				ctx_menu.setChannelCtxMenu({ x: event.clientX, y: event.clientY, channel: channel })
-				ctx_menu.setShowChannelCtxMenu(true);
-			}}>
-				<ChannelList channel={channel} />
-			</div>
+			<ChannelList key={channel.id} channel={channel} />
 			])
 		})
 	}, [channel_context.channels, channel_context.messages])

@@ -4,10 +4,7 @@ import Message from './message';
 import Header from './header';
 import { MessageOBJ, ChannelOBJ } from '../../models/models';
 import { ChannelsContext, ChannelContext } from "../../contexts/channelctx";
-import { ContextMenu } from "../../contexts/context_menu_ctx";
-import { UserContextOBJ, UserContext } from "../../contexts/usercontext";
 import { BsPlusCircleFill } from 'react-icons/bs';
-
 import Routes from '../../config';
 import { useParams } from 'react-router-dom';
 import Recipients from './Recipients';
@@ -47,17 +44,7 @@ function Chat() {
 				preDate = date;
 				short = false;
 			}
-			messagesList.push(
-				<div key={message.id} onContextMenu={(event) => {
-					event.preventDefault();
-					ctx_menu.closeAll();
-					ctx_menu.setMsgCtxMenu({ x: event.clientX, y: event.clientY, message: message });
-					ctx_menu.setShowMsgCtxMenu(true);
-				}
-				}>
-					<Message message={message} short={short} />
-				</div>
-			)
+			messagesList.push(<Message key={message.id} message={message} short={short} />)
 		});
 
 		return messagesList;
@@ -66,9 +53,6 @@ function Chat() {
 	const [hasFile, setHasFile] = useState(false);
 	const file_input = useRef<HTMLInputElement>(undefined!);
 	const [fileJSX, setFileJSX] = useState<JSX.Element>(<></>);
-
-	const ctx_menu = useContext(ContextMenu);
-	const user_ctx: UserContextOBJ = useContext(UserContext);
 
 	const onEmojiClick = (_: React.MouseEvent<Element, MouseEvent>, data: IEmojiData) => {
 		setInput_message(prevInput => prevInput + data.emoji);

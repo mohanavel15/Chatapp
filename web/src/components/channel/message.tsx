@@ -10,11 +10,13 @@ import AttachmentImage from "./attachment/image";
 import AttachmentVideo from "./attachment/video";
 import AttachmentAudio from "./attachment/audio";
 import { FaServer } from "react-icons/fa";
+import { ContextMenu } from "../../contexts/context_menu_ctx";
 
 function Message({ message, short }: { message: MessageOBJ, short: boolean }) {
     const msgctx = useContext(MessageContext);
     const user_ctx = useContext(UserContext);
     const messageElement = useRef<HTMLDivElement>(null);
+    const ctx_menu = useContext(ContextMenu);
 
     const [edit, setEdit] = useState(false);
     const [msg, setMsg] = useState(message.content);
@@ -117,7 +119,13 @@ function Message({ message, short }: { message: MessageOBJ, short: boolean }) {
     }
 
     return (
-        <div className="relative w-full flex my-1 hover:bg-zinc-900">
+        <div className="relative w-full flex my-1 hover:bg-zinc-900" onContextMenu={(event) => {
+            event.preventDefault();
+            ctx_menu.closeAll();
+            ctx_menu.setMsgCtxMenu({ x: event.clientX, y: event.clientY, message: message });
+            ctx_menu.setShowMsgCtxMenu(true);
+        }
+        }>
             <div className="absolute left-0 w-24 flex items-center justify-center">
                 {(!message.system_message && !short && ShowMsg) && <img className="h-12 w-12 rounded-xl bg-zinc-800" src={message.author.avatar} alt="Avatar" onError={setDefaultAvatar} />}
                 { message.system_message && <FaServer size={24} />}
