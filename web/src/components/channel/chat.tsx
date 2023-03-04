@@ -1,8 +1,6 @@
 import Picker, { IEmojiData } from 'emoji-picker-react';
 import React, { useState, useContext, useRef, useMemo } from 'react';
 import Message from './message';
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFaceLaughBeam, faCirclePlus, faFile, faCircleXmark } from '@fortawesome/free-solid-svg-icons'
 import Header from './header';
 import { MessageOBJ, ChannelOBJ } from '../../models/models';
 import { ChannelsContext, ChannelContext } from "../../contexts/channelctx";
@@ -13,6 +11,8 @@ import { BsPlusCircleFill } from 'react-icons/bs';
 import Routes from '../../config';
 import { useParams } from 'react-router-dom';
 import Recipients from './Recipients';
+import { FaFile } from 'react-icons/fa';
+import { HiXMark } from 'react-icons/hi2';
 
 function Chat() {
 	const parameter = useParams<string>();
@@ -124,13 +124,14 @@ function Chat() {
 				return
 			}
 			setHasFile(true);
+			
 			setFileJSX(
-				<div className='input-file' key={file.name}>
-					<FontAwesomeIcon icon={faFile} />
-					<button className='input-file-delete' onClick={() => { file_input.current.value = ''; onFileChange(); }}>
-						<FontAwesomeIcon icon={faCircleXmark} />
+				<div className='relative h-32 w-32 mx-4 bg-zinc-900 rounded flex items-center justify-center' key={file.name}>
+					<FaFile size={48} />
+					<button className='absolute top-1 right-1 bg-none border-none text-red-600' onClick={() => { file_input.current.value = ''; onFileChange(); }}>
+						<HiXMark size={20} />
 					</button>
-					<p>{file.name}</p>
+					<p className='absolute bottom-1 left-1 m-0 w-28 whitespace-nowrap overflow-hidden text-ellipsis text-xs'>{file.name}</p>
 				</div>
 			)
 		} else {
@@ -147,11 +148,7 @@ function Chat() {
 						{MessageElement}
 					</div>
 					<div className="h-16 absolute bottom-0 w-full flex items-center justify-evenly border-t border-zinc-800">
-						{/* { hasFile && 
-							<div className='input-file-container'>
-							{fileJSX}
-							</div> } 
-						*/}
+						{ hasFile && <div className='absolute bottom-16 right-0 h-40 w-full flex items-center rounded-t-xl bg-black border-t border-r border-l border-zinc-800'>{fileJSX}</div> } 
 						{/* <button aria-label='upload file' id="chat-file" onClick={() => { file_input.current.click() }}>
 							<FontAwesomeIcon icon={faCirclePlus} />
 							</button>
