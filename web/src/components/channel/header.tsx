@@ -31,7 +31,7 @@ function Header({ channel, toggleRecipients }: { channel: ChannelOBJ, toggleReci
                     setPinnedMessage(prev => [...prev, <PinnedMessage key={msg.id} message={msg} />])
                 });
             } else {
-                setPinnedMessage([<h1 className='no-pinned-messages'>No Pinned Messages</h1>]);
+                setPinnedMessage([<h1>No Pinned Messages</h1>]);
             }
         }
     }, [showPinnedMessage, channel_context.pinnedMessages]);
@@ -50,7 +50,7 @@ function Header({ channel, toggleRecipients }: { channel: ChannelOBJ, toggleReci
             <BsThreeDotsVertical className='mx-2 cursor-pointer' size={18} onClick={() => popup_ctx.open(<EditChannel channel={channel} />)} />
             </div>
             { showPinnedMessage && 
-                <div className='PinnedMessagesBox'>
+                <div className='absolute top-16 right-16 z-10 w-80 h-96 bg-zinc-900 rounded overflow-y-scroll flex flex-col items-center pt-4'>
                     {pinnedMessage}
                 </div>
             }
