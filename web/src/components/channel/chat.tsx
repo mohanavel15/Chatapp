@@ -40,7 +40,13 @@ function Chat() {
 			let short = prevAuthor === message.author.id;
 			prevAuthor = message.author.id;
 			if (preDate !== date) {
-				messagesList.push(<div key={date} className="date-divider">{date}</div>);
+				messagesList.push(
+					<div key={date} className="relative flex items-center justify-center">
+						<span className='bg-black z-10 px-4'>{date}</span>
+						<span className='absolute w-full border-t-2 border-zinc-800'>
+						</span>
+					</div>
+				);
 				preDate = date;
 				short = false;
 			}
@@ -71,7 +77,6 @@ function Chat() {
 	function updateChat(event: React.KeyboardEvent<HTMLInputElement>) {
 		if (event.key === 'Enter') {
 			event.preventDefault();
-			console.log(file_input.current.files);
 			if (Input_message.length > 0 && (file_input === null || file_input.current.files?.length === 0)) {
 				const url = Routes.Channels + "/" + channel_id + "/messages";
 				fetch(url, {

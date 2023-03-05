@@ -2,11 +2,8 @@ import { BrowserRouter, Routes as RouterRoutes, Route } from "react-router-dom";
 
 import './App.css';
 import './css/chat.css';
-import './css/message.css';
 import './css/channel.css';
 import './css/contextmenu.css';
-import './css/friends.css';
-import './css/settings.css';
 
 import Home from "./pages/home";
 import LoginContainer from "./pages/LoginContainer";
@@ -18,7 +15,6 @@ import NoPage from "./pages/nopage";
 import Login from "./components/auth/login";
 import Register from "./components/auth/register";
 import Chat from "./components/channel/chat";
-
 
 import LoginContextProvider from "./contexts/Login";
 import MessageCTX from "./contexts/messagectx";

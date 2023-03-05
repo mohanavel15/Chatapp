@@ -1,5 +1,5 @@
 class RoutesCls {
-    ip = 'localhost:3000';
+    ip = window.location.host;
     host = 'http://' + this.ip + '/api';
     ws = 'ws://' + this.ip + '/api/ws';
 

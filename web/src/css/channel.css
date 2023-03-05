@@ -233,27 +233,6 @@
     margin-right: 1rem;
 }
 
-.PinnedMessagesBox {
-    position: absolute;
-    top: 0;
-    right: 0;
-    margin-top: 4rem;
-    margin-right: 2rem;
-    min-height: 38rem;
-    max-height: 48rem;
-    width: 28rem;
-    border: #202020 solid 5px;
-    background-color: #23272a;
-    border-radius: 12px;
-    overflow-y: scroll;
-    overflow-x: hidden;
-}
-
-.no-pinned-messages {
-    margin-top: 50%;
-    margin-left: 15%;
-}
-
 .channel-edit-icon-container {
     position: relative;
     height: 8rem;
