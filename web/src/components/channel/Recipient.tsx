@@ -4,6 +4,7 @@ import { FaCrown } from "react-icons/fa";
 import { RxDot, RxDotFilled } from "react-icons/rx"
 import { useContext } from 'react';
 import { ContextMenu } from '../../contexts/context_menu_ctx';
+import MemberContextMenu from '../../contextmenu/member_context_menu';
 
 export default function Recipient({ user, channel }: {user: UserOBJ, channel: ChannelOBJ }) {
     const ctx_menu = useContext(ContextMenu);
@@ -12,9 +13,7 @@ export default function Recipient({ user, channel }: {user: UserOBJ, channel: Ch
         <div className='h-12 flex items-center rounded hover:bg-zinc-900 cursor-pointer' onContextMenu={
                 (event) => {
                     event.preventDefault();
-                    ctx_menu.closeAll();
-                    ctx_menu.setMemberCtxMenu({event: event, member: user, channel: channel});
-                    ctx_menu.setShowMemberCtxMenu(true);
+                    ctx_menu.open(<MemberContextMenu x={event.clientX} y={event.clientY} channel={channel} member={user} />);
                 }
             }>
             <div className='relative h-10 w-10 mx-4'>

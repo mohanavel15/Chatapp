@@ -1,5 +1,5 @@
 import { useContext, useEffect } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { GetMessages } from "../api/message";
 import { GetPinnedMessages } from "../api/pinned_msgs";
 import NavBar from "../components/NavBar";
@@ -14,13 +14,13 @@ import { PopUpContext } from "../contexts/popup";
 import { UserContext, UserContextOBJ } from "../contexts/usercontext";
 import { ChannelOBJ, MessageOBJ, ReadyOBJ, Status } from "../models/models";
 import { Relationship as RelationshipOBJ } from "../models/relationship";
-import { Refresh } from "../utils/api";
 import PopUp from "./popup";
 
 function Home() {
 	const user_ctx: UserContextOBJ = useContext(UserContext);
 	const channel_context: ChannelContext = useContext(ChannelsContext);
 	const popup_ctx = useContext(PopUpContext);
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		const NewGateway = () => {
@@ -63,14 +63,7 @@ function Home() {
 					break
 
 				case "INVAILD_SESSION":
-					Refresh().then(access_token => {
-						if (access_token === undefined) {
-							localStorage.removeItem('access_token');
-							window.location.href = '/';
-						} else {
-							window.location.reload()
-						}
-					})
+					navigate("/auth/login")
 					break
 
 				case "MESSAGE_CREATE":
@@ -174,11 +167,11 @@ function Home() {
 		};
 	}, []);
 
-	const ctx_menu_context = useContext(ContextMenu);
+	const ctx_menu = useContext(ContextMenu);
 
 	useEffect(() => {
 		const handleClick = () => { 
-			ctx_menu_context.closeAll();
+			ctx_menu.closeAll();
 		};
 		window.addEventListener('click', handleClick);
 		return () => window.removeEventListener('click', handleClick);
@@ -189,10 +182,7 @@ function Home() {
 			<NavBar />
 			<Outlet />
 			{ popup_ctx.show && <PopUp /> }
-			{ ctx_menu_context.showMsgCtxMenu && <MessageContextMenu {...ctx_menu_context.msgCtxMenu} /> }
-			{ ctx_menu_context.showChannelCtxMenu && <ChannelContextMenu {...ctx_menu_context.channelCtxMenu} /> }
-			{ ctx_menu_context.showMemberCtxMenu && <MemberContextMenu {...ctx_menu_context.memberCtxMenu} /> }
-			{ ctx_menu_context.showFriendCtxMenu && <FriendContextMenu {...ctx_menu_context.friendCtxMenu} /> }
+			{ ctx_menu.showCtxMenu && ctx_menu.ctxMenu }
 		</div>
 	);
 }

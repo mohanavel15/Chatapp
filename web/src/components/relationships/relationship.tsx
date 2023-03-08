@@ -12,6 +12,7 @@ import { RxDot, RxDotFilled } from "react-icons/rx";
 import { FaCheck } from 'react-icons/fa';
 import { AiTwotoneMessage } from 'react-icons/ai';
 import { HiXMark } from 'react-icons/hi2';
+import FriendContextMenu from '../../contextmenu/friend_context_menu';
 
 export default function Relationship({ relationship_obj }: { relationship_obj: RelationshipOBJ }) {
   const user_ctx: UserContextOBJ = useContext(UserContext);
@@ -48,9 +49,7 @@ export default function Relationship({ relationship_obj }: { relationship_obj: R
   return (
     <div className='h-12 w-3/5 flex items-center rounded border-b border-zinc-800 hover:bg-neutral-900' onContextMenu={(event) => {
       event.preventDefault();
-      ctx_menu.closeAll();
-      ctx_menu.setFriendCtxMenu({x: event.clientX, y: event.clientY, friend_obj: relationship_obj})
-      ctx_menu.setShowFriendCtxMenu(true);
+      ctx_menu.open(<FriendContextMenu x={event.clientX} y={event.clientY} friend_obj={relationship_obj} />);
     }}>
       <div className='flex w-1/2 items-center'>
         <div className='relative h-10 w-10 mx-4'>

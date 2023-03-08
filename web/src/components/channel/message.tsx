@@ -11,6 +11,7 @@ import AttachmentVideo from "./attachment/video";
 import AttachmentAudio from "./attachment/audio";
 import { FaServer } from "react-icons/fa";
 import { ContextMenu } from "../../contexts/context_menu_ctx";
+import MessageContextMenu from "../../contextmenu/message_context_menu";
 
 function Message({ message, short }: { message: MessageOBJ, short: boolean }) {
     const msgctx = useContext(MessageContext);
@@ -121,9 +122,7 @@ function Message({ message, short }: { message: MessageOBJ, short: boolean }) {
     return (
         <div className="relative w-full flex my-1 hover:bg-zinc-900" onContextMenu={(event) => {
             event.preventDefault();
-            ctx_menu.closeAll();
-            ctx_menu.setMsgCtxMenu({ x: event.clientX, y: event.clientY, message: message });
-            ctx_menu.setShowMsgCtxMenu(true);
+            ctx_menu.open(<MessageContextMenu x={event.clientX} y={event.clientY} message={message} />)
         }
         }>
             <div className="absolute left-0 w-24 flex items-center justify-center">

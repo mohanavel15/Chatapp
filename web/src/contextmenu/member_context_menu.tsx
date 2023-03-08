@@ -8,7 +8,7 @@ import { RelationshipToDefault, RelationshipToFriend } from '../api/relationship
 import { PopUpContext } from '../contexts/popup';
 import RemoveRecipient from '../components/popup/RemoveRecipient';
 interface propsMsgCtxProps {
-    event: React.MouseEvent<HTMLDivElement, MouseEvent>, member: UserOBJ, channel: ChannelOBJ
+    x: number, y: number, member: UserOBJ, channel: ChannelOBJ
 }
 
 export default function MemberContextMenu(props:propsMsgCtxProps) {
@@ -21,8 +21,8 @@ export default function MemberContextMenu(props:propsMsgCtxProps) {
 
     let style: React.CSSProperties
     style = {
-        top: props.event.clientY,
-        left: props.event.clientX,
+        top: props.y,
+        left: props.x,
     }
 
     function handleKickOrBan(ban: boolean) {

@@ -4,6 +4,7 @@ import { ChannelOBJ } from "../models/models";
 import { RxDot, RxDotFilled } from "react-icons/rx";
 import { useContext } from "react";
 import { ContextMenu } from "../contexts/context_menu_ctx";
+import ChannelContextMenu from "../contextmenu/channel_context_menu";
 
 export default function ChannelList({ channel }: { channel: ChannelOBJ }) {
     const parameter = useParams<string>();
@@ -32,9 +33,7 @@ export default function ChannelList({ channel }: { channel: ChannelOBJ }) {
     return (
         <Link to={`/channels/${channel.id}`} className="linktag" onContextMenu={(event) => {
                 event.preventDefault();
-                ctx_menu.closeAll();
-                ctx_menu.setChannelCtxMenu({ x: event.clientX, y: event.clientY, channel: channel })
-                ctx_menu.setShowChannelCtxMenu(true);
+                ctx_menu.open(<ChannelContextMenu x={event.clientX} y={event.clientY} channel={channel} />);
             }}>
             <div className={`w-full h-12 px-2 mt-2 flex items-center cursor-pointer rounded ${isActive && 'bg-zinc-800'} hover:bg-zinc-900`}>
                 <div className='relative h-10 w-10 mx-4'>
