@@ -5,7 +5,7 @@ import { Relationship } from "../models/relationship";
 import { GetRelationships } from "../api/relationship";
 import { useNavigate } from "react-router-dom";
 
-export interface UserContextOBJ {
+export type UserContextOBJ = {
     id: string;
     username: string;
     avatar: string;

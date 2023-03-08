@@ -171,7 +171,7 @@ function Home() {
 
 	useEffect(() => {
 		const handleClick = () => { 
-			ctx_menu.closeAll();
+			ctx_menu.close();
 		};
 		window.addEventListener('click', handleClick);
 		return () => window.removeEventListener('click', handleClick);

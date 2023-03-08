@@ -4,7 +4,7 @@ export type ContextMenuType = {
     showCtxMenu: boolean,
     ctxMenu: JSX.Element | null,
     open: (ctx_menu: JSX.Element) => void
-    closeAll: () => void,
+    close: () => void,
 }
 
 export const ContextMenu = createContext<ContextMenuType>(undefined!);
@@ -13,7 +13,7 @@ export default function ContextMenuProvider({ children }: {children: React.React
 	const [showCtxMenu, setShowCtxMenu] = useState(false);
 	const [ctxMenu, setCtxMenu] = useState<JSX.Element | null>(null);
 
-    function closeAll() {
+    function close() {
         setShowCtxMenu(false);
         setCtxMenu(null);
     }
@@ -25,7 +25,7 @@ export default function ContextMenuProvider({ children }: {children: React.React
 
     const context_value: ContextMenuType = {
         open: open,
-        closeAll: closeAll,
+        close: close,
         ctxMenu: ctxMenu,
 		showCtxMenu: showCtxMenu,
     }
