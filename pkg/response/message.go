@@ -3,6 +3,13 @@ package response
 import (
 	"Chatapp/pkg/database"
 	"fmt"
+	"os"
+)
+
+var (
+	TLS         = os.Getenv("TLS")
+	PUBLIC_HOST = os.Getenv("PUBLIC_HOST")
+	URL         = fmt.Sprintf("http%s://%s/api", TLS, PUBLIC_HOST)
 )
 
 type Message struct {
@@ -50,7 +57,7 @@ type Attachment struct {
 func NewAttachments(message *database.Message) []Attachment {
 	res_attachments := []Attachment{}
 	for _, attachment := range message.Attachments {
-		url := fmt.Sprintf("http://127.0.0.1:3000/api/attachments/%s/%s/%s/%s", message.ChannelID.Hex(), message.ID.Hex(), attachment.ID.Hex(), attachment.Filename)
+		url := fmt.Sprintf("%s/attachments/%s/%s/%s/%s", URL, message.ChannelID.Hex(), message.ID.Hex(), attachment.ID.Hex(), attachment.Filename)
 		res_attachment := Attachment{
 			ID:          attachment.ID.Hex(),
 			Filename:    attachment.Filename,
