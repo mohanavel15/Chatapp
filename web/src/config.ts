@@ -1,7 +1,8 @@
 class RoutesCls {
+    protocol = window.location.protocol;
     ip = window.location.host;
-    host = 'http://' + this.ip + '/api';
-    ws = 'ws://' + this.ip + '/api/ws';
+    host = this.protocol + '//' + this.ip + '/api';
+    ws = (window.location.protocol === "https:" ? "wss:" : "ws:") + '//' + this.ip + '/api/ws';
 
     signin = this.host + '/login';
     signup = this.host + '/register';

@@ -1,13 +1,11 @@
 import { useContext } from 'react';
 import { MessageOBJ } from '../models/models';
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faX } from '@fortawesome/free-solid-svg-icons';
-import { ChannelsContext, ChannelContext } from "../contexts/channelctx";
+import { ChannelsContext } from "../contexts/channelctx";
 import Routes from '../config'
 import { HiXMark } from 'react-icons/hi2';
 
 export default function PinnedMessage({ message }: {message: MessageOBJ}) {
-    const channel_ctx:ChannelContext = useContext(ChannelsContext);
+    const channel_ctx = useContext(ChannelsContext);
 
     let date = new Date(message.created_at * 1000).toLocaleDateString();
     let time = new Date(message.created_at * 1000).toLocaleTimeString();
