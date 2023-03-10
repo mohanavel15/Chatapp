@@ -34,7 +34,7 @@ export default function SideBarHeader() {
 
     return (
         <div className='relative w-full flex flex-col p-2 border-b border-zinc-800'>
-            <input className='h-6 border-none rounded bg-zinc-800 focus:outline-none' type="text" placeholder="Invite Code" ref={InviteCode} />
+            <input className='h-6 px-2 border-none rounded bg-zinc-800 focus:outline-none' type="text" placeholder="Invite Code" ref={InviteCode} />
             <button className='bg-green-600 rounded-md h-6 hover:bg-green-700 my-2' onClick={JoinChannel}>Join Channel</button>
             <button className="bg-green-600 rounded-md h-6 hover:bg-green-700" onClick={() => popup_ctx.open(<CreateChannel />) }>Create Channel</button>
         </div>

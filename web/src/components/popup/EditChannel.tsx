@@ -1,30 +1,64 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import { StatesContext, StateContext } from "../contexts/states";
-import Member from "./member";
-import { ContextMenuCtx, ContextMenu } from "../contexts/context_menu_ctx";
-import { InviteOBJ, BanOBJ } from "../models/models";
-import { UserContextOBJ, UserContext } from "../contexts/usercontext";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrashCan, faCamera } from '@fortawesome/free-solid-svg-icons'
-import { setDefaultAvatar } from "../utils/errorhandle";
-import Routes from "../config";
+import Recipient from "../channel/Recipient";
+import { InviteOBJ, BanOBJ, ChannelOBJ } from "../../models/models";
+import { setDefaultAvatar, setDefaultIcon } from "../../utils/errorhandle";
+import Routes from "../../config";
+import { PopUpContext } from "../../contexts/popup";
+import { FaTrash } from "react-icons/fa";
+import { HiCamera } from "react-icons/hi";
 
 function Invite({ invite, onDelete }: { invite: InviteOBJ, onDelete: (invite_code: string) => void }) {
     return (
-    <div className="invites">
-        <p className="invite-code">{invite.invite_code}</p>
-        <div className="invite-date-and-delete-button"><p className="invite-date">{invite.created_at}</p><button className="delete-invite-button" onClick={() => {onDelete(invite.invite_code)}}><FontAwesomeIcon icon={faTrashCan} /></button></div>
-    </div>
+        <div className="m-4 h-14 flex bg-zinc-900 rounded items-center w-11/12">
+            <p className="w-1/2 text-lg ml-4">{invite.invite_code}</p>
+            <div className="w-1/2 flex items-center justify-end">
+                <p>{invite.created_at}</p>
+                <FaTrash className="h-8 w-8 mx-4 text-red-700 hover:text-red-600 cursor-pointer" onClick={() => onDelete(invite.invite_code)} />
+            </div>
+        </div>
     )
 }
 
-export default function EditChannel() {
-    const user:UserContextOBJ = useContext(UserContext);
-    const state_context: StateContext = useContext(StatesContext);
-    const ctx_menu_context: ContextMenuCtx = useContext(ContextMenu);
-    
+function Ban({ ban, channel_id, setBanReload }: { ban: BanOBJ, channel_id: string, setBanReload: React.Dispatch<React.SetStateAction<boolean>> }) {
+    function Unban(ban_id: string) {
+        const url = Routes.Channels + "/" + channel_id + "/bans/" + ban_id;
+        fetch(url, {
+            method: "DELETE",
+        }).then(response => {
+            if (response.status === 200) {
+                setBanReload(prevBanReload => !prevBanReload);
+            }
+        })
+    }
+
+    return (
+        <div className="m-4 p-2 flex flex-col bg-zinc-900 rounded w-11/12">
+            <div className="flex items-center">
+                <div className="w-1/2 flex items-center">
+                    <img className="h-10 w-10 rounded mr-2" src={ban.banned_user.avatar} alt="BannedUserAvatar" onError={setDefaultAvatar} />
+                    <p>{ban.banned_user.username}</p>
+                </div>
+                <div className="w-1/2 flex justify-end">
+                    <FaTrash size={10} className="h-8 w-8 mr-4 text-red-700 hover:text-red-600 cursor-pointer" onClick={() => Unban(ban.id) } />
+                </div>
+            </div>
+            <div className="flex items-center">
+                <h4>Reason:</h4>
+                <p>{ban.reason}</p>
+            </div>
+            <div className="flex items-center">
+                <h4>Banned By:</h4>
+                <p>{ban.banned_by.username}</p>
+            </div>
+        </div>
+    )
+}
+
+export default function EditChannel({ channel }: { channel: ChannelOBJ }) {
+    const popup_ctx = useContext(PopUpContext);
+
     const [channelEditSection, setChannelEditSection] = useState(0);
-    const [membersElement, setMembersElement] = useState<JSX.Element[]>([]);
+    const [recipientsElement, setRecipientsElement] = useState<JSX.Element[]>([]);
     const [invites, setInvites] = useState<JSX.Element[]>([]);
     const [bans, setBans] = useState<JSX.Element[]>([]);
 
@@ -35,31 +69,16 @@ export default function EditChannel() {
     const icon_image = useRef<HTMLImageElement>(undefined!);
 
     useEffect(() => {
-        setMembersElement([]);
-        state_context.ChannelOBJ.recipients.forEach(member => {
-                setMembersElement(prevMembers => [...prevMembers,
-                <div key={member.id} onContextMenu={
-					(event) => {
-						event.preventDefault();
-						ctx_menu_context.closeAll();
-						ctx_menu_context.setMemberCtxMenu({event: event, member: member, channel: state_context.ChannelOBJ});
-						ctx_menu_context.setShowMemberCtxMenu(true);
-					}
-          		}>
-          		<Member member_obj={member} channel_obj={state_context.ChannelOBJ} />
-          		</div>])
-            })
-    }, [state_context.ChannelOBJ]);
+        setRecipientsElement([]);
+        channel.recipients.forEach(recipient => {
+            setRecipientsElement(prevRecipient => [...prevRecipient, <Recipient key={recipient.id} user={recipient} channel={channel} />])
+        })
+    }, [channel]);
 
     useEffect(() => {
         setInvites([]);
-        const url = Routes.Channels + "/" + state_context.ChannelOBJ.id + "/invites";
-        fetch(url, {
-            method: "GET",
-            headers: {
-                'Authorization': user.accessToken
-            }
-        }).then(res => {
+        const url = Routes.Channels + "/" + channel.id + "/invites";
+        fetch(url).then(res => {
             if (res.status === 200) {
                 res.json().then((invites: InviteOBJ[]) => {
                     setInvites(prevInvites => [...prevInvites, ...invites.map(invite => <Invite invite={invite} onDelete={delete_invite} />)])
@@ -68,52 +87,15 @@ export default function EditChannel() {
         })
     }, [InviteReload]);
 
-    function Unban(ban_id: string) {
-        const url = Routes.Channels + "/" + state_context.ChannelOBJ.id + "/bans/" + ban_id;
-        fetch(url, {
-            method: "DELETE",
-            headers: {
-                'Authorization': user.accessToken
-            }
-        }).then(response => {
-            if (response.status === 200) {
-                setBanReload(prevBanReload => !prevBanReload);
-            }
-        })
-    }
-
     useEffect(() => {
         setBans([]);
-        const url = Routes.Channels + "/" + state_context.ChannelOBJ.id + "/bans";
-        fetch(url, {
-            method: "GET",
-            headers: {
-                'Authorization': user.accessToken
-            }
-        }).then(response => {
+        const url = Routes.Channels + "/" + channel.id + "/bans";
+        fetch(url).then(response => {
             if (response.status === 200) {
                 response.json().then((bans: BanOBJ[]) => {
                     bans.forEach(ban => {
                         setBans(prevBans => [...prevBans,
-                        <div className="bans">
-                            <div className="ban-container">
-                                <div className="ban-user-container">
-                                    <img className="ban-avatar" src={ban.banned_user.avatar} alt="BannedUserAvatar" onError={setDefaultAvatar} />
-                                    <p>{ban.banned_user.username}</p>
-                                </div>
-                                <div className="ban-action">
-                                    <button className="delete-invite-button" onClick={() => {Unban(ban.id)}}><FontAwesomeIcon icon={faTrashCan} /></button>
-                                </div>
-                            </div>
-                            <div className="ban-container">
-                                <h4>Reason:</h4>
-                                <p>{ban.reason}</p>
-                            </div>
-                            <div className="ban-container">
-                                <h4>Banned By:</h4>
-                                <p className="ban-by-username">{ban.banned_by.username}</p>
-                            </div>
-                        </div>
+                            <Ban ban={ban} channel_id={channel.id} setBanReload={setBanReload} />
                         ])
                     })
                 })
@@ -133,25 +115,19 @@ export default function EditChannel() {
             let reader = new FileReader();
             reader.readAsDataURL(icon_input.current.files[0]);
             reader.onload = () => {
-                const url = Routes.Channels+"/"+state_context.ChannelOBJ.id;
+                const url = Routes.Channels + "/" + channel.id;
                 fetch(url, {
                     method: "PATCH",
-                    headers: {
-                        "Authorization": user.accessToken,
-                    },
                     body: JSON.stringify({ name: channelName, icon: reader.result })
                 })
             }
         }
     }
- 
+
     function create_invite() {
-        const url = Routes.Channels + "/" + state_context.ChannelOBJ.id + "/invites";
+        const url = Routes.Channels + "/" + channel.id + "/invites";
         fetch(url, {
             method: "POST",
-            headers: {
-                'Authorization': user.accessToken
-            }
         }).then(res => {
             if (res.status === 200) {
                 res.json().then((invite: InviteOBJ) => {
@@ -162,12 +138,9 @@ export default function EditChannel() {
     }
 
     function delete_invite(invite_code: string) {
-        const url = Routes.Channels +  `/${state_context.ChannelOBJ.id}/invites/${invite_code}`;
+        const url = Routes.Channels + `/${channel.id}/invites/${invite_code}`;
         fetch(url, {
             method: 'DELETE',
-            headers: {
-                'Authorization': user.accessToken
-            }
         }).then(response => {
             if (response.status === 200) {
                 setInviteReload(prevInviteReload => !prevInviteReload);
@@ -180,7 +153,7 @@ export default function EditChannel() {
             const file = icon_input.current.files[0];
             if (file.size > 2097152) {
                 alert("image is bigger than 2MB")
-                icon_input.current.value=''
+                icon_input.current.value = ''
                 return
             }
             icon_image.current.src = URL.createObjectURL(file);
@@ -188,53 +161,52 @@ export default function EditChannel() {
     }
 
     return (
-        <div className="channel-edit">
-            <div className="channel-edit-sidebar">
-                <button className="channel-edit-side-bar-btn" onClick={() => {setChannelEditSection(0)}}>Overview</button>
-                <button className="channel-edit-side-bar-btn" onClick={() => {setChannelEditSection(1)}}>Invites</button>
-                <button className="channel-edit-side-bar-btn" onClick={() => {setChannelEditSection(2)}}>Members</button>
-                <button className="channel-edit-side-bar-btn" onClick={() => {setChannelEditSection(3)}}>Bans</button>
-                <button className="channel-edit-side-bar-btn" onClick={() => {state_context.setEditChannel(false)}}>Close</button>
+        <div className="h-full w-full flex bg-black overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="h-full w-64 flex flex-col border-r border-r-neutral-700">
+                <button className="m-2 h-8 rounded border-none bg-neutral-700 hover:cursor-pointer hover:bg-neutral-800" onClick={() => { setChannelEditSection(0) }}>Overview</button>
+                <button className="m-2 h-8 rounded border-none bg-neutral-700 hover:cursor-pointer hover:bg-neutral-800" onClick={() => { setChannelEditSection(1) }}>Invites</button>
+                <button className="m-2 h-8 rounded border-none bg-neutral-700 hover:cursor-pointer hover:bg-neutral-800" onClick={() => { setChannelEditSection(2) }}>Recipients</button>
+                <button className="m-2 h-8 rounded border-none bg-neutral-700 hover:cursor-pointer hover:bg-neutral-800" onClick={() => { setChannelEditSection(3) }}>Bans</button>
+                <button className="m-2 h-8 rounded border-none bg-neutral-700 hover:cursor-pointer hover:bg-neutral-800" onClick={() => { popup_ctx.close() }}>Close</button>
             </div>
-            <div className="channel-edit-main">
-                { channelEditSection === 0 &&
+            <div className="h-full w-full flex flex-col items-center md:items-start">
+                {channelEditSection === 0 &&
                     <>
-                    <input className="channel-edit-input" ref={channel_name} type="text" placeholder="Channel Name" defaultValue={state_context.ChannelOBJ.name}/>
-                    <div className="channel-edit-icon-container">
-                        <img className="channel-edit-icon" ref={icon_image} alt="icon" src={state_context.ChannelOBJ.icon} />
-                        <FontAwesomeIcon icon={faCamera} className="channel-edit-icon-camera" onClick={() => icon_input.current.click()} />
-				        <input type="file" ref={icon_input} name="filename" hidden onChange={onIconChange} accept="image/*"></input>
-                    </div>
-                    <button className="create-channel-create-button" onClick={HandleCreateChannel}>Save</button>
+                        <input className="bg-zinc-800 h-8 w-11/12 md:w-48" ref={channel_name} type="text" placeholder="Channel Name" defaultValue={channel.name} />
+                        <div className="relative flex items-center justify-center h-32 w-32">
+                            <img src={channel.icon} onClick={() => icon_input.current.click()} onError={setDefaultIcon} className="h-24 w-24 rounded-xl cursor-pointer p-0 m-2 border-slate-300 border-2 border-dashed" ref={icon_image} alt="icon" />
+                            <HiCamera size={64} onClick={() => icon_input.current.click()} className="absolute self-center justify-self-center text-white opacity-75 cursor-pointer" />
+                            <input type="file" ref={icon_input} name="filename" hidden onChange={onIconChange} accept="image/*"></input>
+                        </div>
+                        <button className="h-10 bg-green-600 w-24 rounded hover:bg-green-500" onClick={HandleCreateChannel}>Save</button>
                     </>
                 }
-                { channelEditSection === 1 &&
+                {channelEditSection === 1 &&
                     <>
-                    <div className="channel-edit-top-bar">
-                        <h3 className="channel-edit-title">Invites—{invites.length}</h3>
-                        <button className="create-invite-btn" onClick={create_invite}>Create Invite</button>
-                    </div>
-                    {invites}
+                        <div className="h-16 w-full flex justify-between">
+                            <h3 className="m-4 text-left">Invites—{invites.length}</h3>
+                            <button className="h-8 m-4 bg-green-600 px-2 rounded cursor-pointer hover:bg-green-500" onClick={create_invite}>Create Invite</button>
+                        </div>
+                        {invites}
                     </>
                 }
-                { channelEditSection === 2 &&
+                {channelEditSection === 2 &&
                     <>
-                    <div className="channel-edit-top-bar">
-                    <h3 className="channel-edit-title">Members—{membersElement.length}</h3>
-                    </div>
-                    {membersElement}
+                        <div className="h-16 w-full flex justify-between">
+                            <h3 className="m-4 text-left">Recipients—{recipientsElement.length}</h3>
+                        </div>
+                        {recipientsElement}
                     </>
                 }
-                { channelEditSection === 3 &&
+                {channelEditSection === 3 &&
                     <>
-                    <div className="channel-edit-top-bar">
-                    <h3 className="channel-edit-title">Bans—{bans.length}</h3>
-                    </div>
-                    {bans}
+                        <div className="h-16 w-full flex justify-between">
+                            <h3 className="m-4 text-left">Bans—{bans.length}</h3>
+                        </div>
+                        {bans}
                     </>
                 }
             </div>
         </div>
-
     )
 }

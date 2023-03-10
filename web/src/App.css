@@ -70,3 +70,51 @@ body {
   font-size: larger;
   text-decoration: solid;
 }
+
+.EmojiPicker {
+  position: absolute;
+  bottom: 7rem;
+  right: 1rem;
+  height: 20rem;
+  width: 20rem;
+  background: none;
+  overflow: hidden;
+}
+
+.ContextMenu {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  background-color: #202020;
+  padding: 0.3rem;
+  border-radius: 10px;
+  box-shadow: 0 0 2px 2px #181818;
+}
+
+.ContextMenu button {
+  height: 2rem;
+  width: 8rem;
+  margin: 0.5rem;
+  background: none;
+  border: none;
+}
+
+.CtxBtn {
+  color: beige;
+}
+
+.CtxBtn:hover {
+  border-radius: 10px;
+  background-color: green;
+  color: beige;
+}
+
+.CtxDelBtn {
+  color: brown;
+}
+
+.CtxDelBtn:hover {
+  border-radius: 10px;
+  background-color: brown;
+  color: beige;
+}

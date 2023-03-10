@@ -1,9 +1,6 @@
 import { BrowserRouter, Routes as RouterRoutes, Route } from "react-router-dom";
 
 import './App.css';
-import './css/chat.css';
-import './css/channel.css';
-import './css/contextmenu.css';
 
 import Home from "./pages/home";
 import LoginContainer from "./pages/LoginContainer";

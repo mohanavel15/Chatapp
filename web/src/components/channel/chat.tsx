@@ -41,10 +41,9 @@ function Chat() {
 			prevAuthor = message.author.id;
 			if (preDate !== date) {
 				messagesList.push(
-					<div key={date} className="relative flex items-center justify-center">
-						<span className='bg-black z-10 px-4'>{date}</span>
-						<span className='absolute w-full border-t-2 border-zinc-800'>
-						</span>
+					<div key={date} className="relative flex items-center justify-center h-8">
+						<span className='absolute w-full border-t-2 border-zinc-800'></span>
+						<span className='absolute bg-black px-4'>{date}</span>
 					</div>
 				);
 				preDate = date;
