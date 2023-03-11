@@ -10,7 +10,7 @@ func (ws *Ws) ConnectUser() {
 	user := ws.User
 	res_user := response.NewUser(user, 1)
 
-	log.Printf("%s joined", user.Username)
+	log.Printf("%s Connected\n", user.Username)
 	ws.Conns.AddUser(user.ID.Hex(), ws)
 
 	res_channels := []response.Channel{}

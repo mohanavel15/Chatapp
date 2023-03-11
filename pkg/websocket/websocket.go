@@ -64,13 +64,7 @@ func (ws *Ws) HandleWSMessage(data []byte) {
 		Db:    ws.Db,
 	}
 
-	if ws.User == nil {
-		if ws_message.Event == "CONNECT" {
-			ws.Handler.Handle(ctx)
-		}
-	} else {
-		ws.Handler.Handle(ctx)
-	}
+	ws.Handler.Handle(ctx)
 }
 
 func (ws *Ws) Close() {

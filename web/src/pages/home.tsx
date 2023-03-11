@@ -150,6 +150,12 @@ function Home() {
 			}
 		}
 
+		let interval = setInterval(() => {
+			if (gateway.readyState === WebSocket.OPEN) {
+				gateway.send(JSON.stringify({ event: "PING", data: "" }));
+			}
+		}, 60000);
+
 		const onClose = () => {
 			console.log("Disconnected from server");
 			gateway = NewGateway();
@@ -160,6 +166,7 @@ function Home() {
 
 		return () => {
 			gateway.close();
+			clearInterval(interval)
 		};
 	}, []);
 

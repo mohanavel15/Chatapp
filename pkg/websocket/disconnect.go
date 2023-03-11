@@ -2,6 +2,7 @@ package websocket
 
 import (
 	"Chatapp/pkg/response"
+	"log"
 )
 
 func (ws *Ws) Disconnect() {
@@ -38,4 +39,5 @@ func (ws *Ws) Disconnect() {
 
 	ws.Conns.RemoveUser(ws.User.ID.Hex())
 	ws.Close()
+	log.Printf("%s Disconnected\n", ws.User.Username)
 }

@@ -4,6 +4,7 @@ import (
 	"Chatapp/pkg/database"
 	"Chatapp/pkg/restapi"
 	"Chatapp/pkg/websocket"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -34,6 +35,11 @@ func main() {
 	origins := handlers.AllowedOrigins([]string{"*"})
 	router.Use(handlers.CORS(headers, methods, origins))
 	router.Use(handlers.RecoveryHandler())
+
+	handler.Add("PING", func(ctx *websocket.Context) {
+		ws_msg, _ := json.Marshal(websocket.WS_Message{Event: "pong", Data: ""})
+		ctx.Send(ws_msg)
+	})
 
 	api := router.PathPrefix("/api").Subrouter()
 	// Auth
