@@ -87,7 +87,7 @@ function Settings() {
     }
 
     return (
-        <div className='h-full w-full flex flex-col'>
+        <div className='h-full w-full overflow-hidden flex flex-col'>
             <div className='h-16 flex items-center justify-around bg-zinc-900'>
                 <h2>Settings</h2>
                 <button onClick={() => naviagte(-1)}><HiXCircle className='hover:text-gray-600' size={42} /></button>

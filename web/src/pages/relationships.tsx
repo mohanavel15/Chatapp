@@ -49,13 +49,13 @@ function Relationships() {
 	}
 	
 	return (
-		<div className="relative h-screen w-full">
+		<div className="relative h-full overflow-hidden w-full">
 			<div className='h-12 flex justify-evenly md:justify-start items-center border-b border-zinc-800'>
 				<button className={`mx-2 p-1 rounded cursor-pointer ${ TopBarSelected === 0 && "bg-zinc-700" } hover:bg-zinc-800`} onClick={() => {setTopBarSelected(0)}}>Online</button>
 				<button className={`mx-2 p-1 rounded cursor-pointer ${ TopBarSelected === 1 && "bg-zinc-700" } hover:bg-zinc-800`} onClick={() => {setTopBarSelected(1)}}>All</button> 
 				<button className={`mx-2 p-1 rounded cursor-pointer ${ TopBarSelected === 2 && "bg-zinc-700" } hover:bg-zinc-800`} onClick={() => {setTopBarSelected(2)}}>Pending</button>
 				<button className={`mx-2 p-1 rounded cursor-pointer ${ TopBarSelected === 3 && "bg-zinc-700" } hover:bg-zinc-800`} onClick={() => {setTopBarSelected(3)}}>Blocked</button>
-				<button className={`mx-2 p-1 rounded cursor-pointer ${ TopBarSelected === 4 ? "bg-green-600" : "text-green-500" }`} onClick={() => {setTopBarSelected(4)}}>Add Friend</button>
+				<button className={`mx-2 p-1 rounded cursor-pointer ${ TopBarSelected === 4 ? "bg-green-600" : "text-green-500" }`} onClick={() => {setTopBarSelected(4)}}>Add</button>
 			</div>
 			{TopBarSelected === 0 && <h3>Online — {elements.length}</h3>}
 			{TopBarSelected === 1 && <h3>All — {elements.length}</h3>}
@@ -63,9 +63,9 @@ function Relationships() {
 			{TopBarSelected === 3 && <h3>Blocked — {elements.length}</h3>}
 			<div className='flex flex-col overflow-y-scroll h-full w-full items-center'>
 				{TopBarSelected === 4 && 
-					<div className='h-12 w-2/5 flex mt-8 bg-zinc-900 rounded p-2'>
-						<input className='h-8 w-3/4 bg-zinc-900 outline-none' type='text' placeholder='username' ref={FriendUsername} />
-						<button className='w-1/4 bg-green-600 rounded' onClick={SendFriendRequest}>Add Friend</button>
+					<div className='w-11/12 md:w-2/5 flex flex-col md:flex-row items-center mt-8 bg-zinc-900 rounded p-1'>
+						<input className='h-8 w-full md:w-3/4 bg-zinc-900 outline-none' type='text' placeholder='username' ref={FriendUsername} />
+						<button className='h-8 w-full md:w-1/4 bg-green-600 rounded m-1' onClick={SendFriendRequest}>Add</button>
 					</div>
 				}
 				{elements}
