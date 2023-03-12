@@ -91,8 +91,14 @@ func main() {
 	// Gateway
 	api.HandleFunc("/ws", Authenticated(Gateway))
 
-	router.PathPrefix("/assets/").Handler(http.StripPrefix("/assets/", http.FileServer(http.Dir("./web/dist/assets/"))))
-	router.PathPrefix("/").HandlerFunc((func(w http.ResponseWriter, r *http.Request) { http.ServeFile(w, r, "./web/dist/index.html") }))
+	fileServer := http.FileServer(http.Dir("./web/dist/"))
+	router.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if _, err := os.Stat("./web/dist" + r.URL.Path); err != nil {
+			http.ServeFile(w, r, "./web/dist/index.html")
+		} else {
+			fileServer.ServeHTTP(w, r)
+		}
+	})
 
 	server_uri := fmt.Sprintf("%s:%s", HOST, PORT)
 	log.Println("Listening on ", server_uri)
