@@ -1,8 +1,13 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { VitePWA } from "vite-plugin-pwa"
+import { icons } from "react-icons";
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(), 
+    VitePWA()
+  ],
   server: {
     port: 3000,
     proxy: {
