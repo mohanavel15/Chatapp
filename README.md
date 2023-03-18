@@ -1,9 +1,8 @@
 # Chatapp
 #### New UI work in progress
 
-![friends_all](images/friends-all.png)
 ![channel_png](images/channel.png)
-more [images](images)
+![relationship-online](images/relationship-online.png)
 
 
 ## Features
