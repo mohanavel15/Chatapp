@@ -1,4 +1,4 @@
-import { useContext, useRef, useState } from "react";
+import { useContext, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Routes from "../../config";
 import { LoginContext } from "../../contexts/Login";
@@ -10,8 +10,6 @@ function Register() {
 	const Password = useRef<HTMLInputElement>(undefined!);
 
 	const login_ctx = useContext(LoginContext)
-
-	const [loading, setLoading] = useState<boolean>(false);
 
 	function HandleResponse(response: Response) {
 		if (response.status === 200) {
@@ -28,7 +26,7 @@ function Register() {
 
 	function HandleRegister(event: React.FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		setLoading(true);
+		login_ctx.setLoading(true);
 		const username_text = Username.current.value
 		const password_text = Password.current.value
 		const email_text = Email.current.value
@@ -43,7 +41,7 @@ function Register() {
 				"email": email_text,
 				"password": password_text
 			})
-		}).then(response => { HandleResponse(response); setLoading(false)})
+		}).then(response => { HandleResponse(response); login_ctx.setLoading(false)})
 	}
 	return (
 		<form onSubmit={HandleRegister} className="h-full flex flex-col items-center justify-evenly">

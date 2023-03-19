@@ -1,5 +1,6 @@
 import { useContext } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { ClipLoader } from 'react-spinners';
 import { LoginContext } from '../contexts/Login'
 
 export default function LoginContainer() {
@@ -15,7 +16,13 @@ export default function LoginContainer() {
 					<button className={`bg-zinc-${location.pathname === "/auth/login" ? "900" : "800"} w-1/2 hover:bg-zinc-600`} onClick={() => navigate("/auth/login")}>Login</button>
 					<button className={`bg-zinc-${location.pathname === "/auth/register" ? "900" : "800"} w-1/2 hover:bg-zinc-600`} onClick={() => navigate("/auth/register")}>Register</button>
 				</div>
-				<Outlet />
+				{ login_ctx.loading ?
+					<div className='h-full flex items-center justify-center'>
+						<ClipLoader size={128} color="#999999" />
+					</div>
+					:
+					<Outlet />
+				}
 			</div>
 		</div>
 	)

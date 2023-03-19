@@ -1,4 +1,4 @@
-import { useContext, useRef, useState } from "react";
+import { useContext, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Login as APILogin } from "../../api/auth";
 import { LoginContext } from "../../contexts/Login";
@@ -8,8 +8,6 @@ function Login() {
 	const navigate = useNavigate();
 	const Username = useRef<HTMLInputElement>(undefined!);
 	const Password = useRef<HTMLInputElement>(undefined!);
-	
-	const [loading, setLoading] = useState<boolean>(false);
 
 	async function HandleResponse(response: Response) {
 		if (response.status === 200) {
@@ -25,13 +23,13 @@ function Login() {
 
 	function HandleLogin(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
-		setLoading(true);
+		login_ctx.setLoading(true);
 		const username_text = Username.current.value
 		const password_text = Password.current.value
 		if (username_text === undefined || password_text === undefined) {
 			return;
 		}
-		APILogin(username_text, password_text).then(response => { HandleResponse(response); setLoading(false) })
+		APILogin(username_text, password_text).then(response => { HandleResponse(response); login_ctx.setLoading(false) })
   	}
 
 	return (
