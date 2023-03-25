@@ -37,5 +37,6 @@ source .env
 ## Deploy on Docker
 - change environment variables before running
 ```bash
+cp docker-compose.example.yml docker-compose.yml
 docker-compose up -d
 ```
