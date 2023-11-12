@@ -19,17 +19,31 @@ function Home() {
 	const navigate = useNavigate();
 
 	useEffect(() => {
+		let last_ping = new Date().getTime();
+		let last_pong = new Date().getTime();
+
 		const NewGateway = () => {
 			const gateway = new WebSocket(Routes.ws);
-			gateway.onopen = () => {
-				console.log("Connecting to the server");
-			}
+			last_ping = new Date().getTime();
+			last_pong = new Date().getTime();
 			return gateway;
 		}
 
 		let gateway = NewGateway();
 
-		const onMessage = (message: MessageEvent) => {
+		let interval = setInterval(() => {
+			if (last_ping > last_pong || gateway.readyState > WebSocket.OPEN) {
+				console.log("Reconnecting...")
+				gateway.close();
+				gateway = NewGateway();
+			} else {
+				const message = JSON.stringify({ event: "PING", data: "" });
+				last_ping = new Date().getTime();
+				gateway.send(message);
+			}
+		}, 5_000);
+
+		gateway.onmessage = (message: MessageEvent) => {
 			const data = message.data;
 
 			if (typeof data !== "string") {
@@ -40,6 +54,7 @@ function Home() {
 
 			switch (payload.event) {
 				case "READY":
+					console.log("connected to ws")
 					const ready: ReadyOBJ = payload.data;
 					user_ctx.setId(ready.user.id);
 					user_ctx.setUsername(ready.user.username);
@@ -56,31 +71,35 @@ function Home() {
 							channel_context.SetPinnedMessages(channel.id, msgs.reverse())
 						})
 					});
-					break
+					break;
 
 				case "INVAILD_SESSION":
-					navigate("/auth/login")
-					break
+					navigate("/auth/login");
+					break;
+				
+				case "PONG":
+					last_pong = new Date().getTime();
+					break;
 
 				case "MESSAGE_CREATE":
 					const message: MessageOBJ = payload.data;
 					channel_context.InsertMessage(message);
-					break
+					break;
 
 				case "MESSAGE_MODIFY":
 					const edited_message: MessageOBJ = payload.data;
 					channel_context.UpdateMessage(edited_message);
-					break
+					break;
 
 				case "MESSAGE_DELETE":
 					const deleted_message: MessageOBJ = payload.data;
 					channel_context.DeleteMessage(deleted_message);
-					break
+					break;
 
 				case "CHANNEL_CREATE":
 					const channel: ChannelOBJ = payload.data;
 					channel_context.setChannel(prevChannels => new Map(prevChannels.set(channel.id, channel)));
-					break
+					break;
 
 				case "CHANNEL_MODIFY":
 					const edited_channel: ChannelOBJ = payload.data;
@@ -90,31 +109,32 @@ function Home() {
 				case "CHANNEL_DELETE":
 					const deleted_channel: ChannelOBJ = payload.data;
 					channel_context.deleteChannel(deleted_channel.id)
-					break
+					break;
 
 				case "MESSAGE_PINNED":
 					const pinned_message: MessageOBJ = payload.data;
 					channel_context.InsertPinnedMessage(pinned_message);
-					break
+					break;
 
 				case "MESSAGE_UNPINNED":
 					const upinned_message: MessageOBJ = payload.data;
 					channel_context.DeletePinnedMessage(upinned_message);
-					break
+					break;
 
 				case "RELATIONSHIP_CREATE":
 					const new_relationship: RelationshipOBJ = payload.data;
 					user_ctx.setRelationships(prevRelationship => new Map(prevRelationship.set(new_relationship.id, new_relationship)));
-					break
+					break;
 
 				case "RELATIONSHIP_MODIFY":
 					const relationship: RelationshipOBJ = payload.data;
 					user_ctx.setRelationships(prevRelationship => new Map(prevRelationship.set(relationship.id, relationship)));
-					break
+					break;
 
 				case "RELATIONSHIP_DELETE":
 					const relationship_: RelationshipOBJ = payload.data;
 					user_ctx.deleterelationship(relationship_.id);
+					break;
 			}
 
 			if (payload.event === 'STATUS_UPDATE') {
@@ -150,23 +170,10 @@ function Home() {
 			}
 		}
 
-		let interval = setInterval(() => {
-			if (gateway.readyState === WebSocket.OPEN) {
-				gateway.send(JSON.stringify({ event: "PING", data: "" }));
-			}
-		}, 60000);
-
-		const onClose = () => {
-			console.log("Disconnected from server");
-			gateway = NewGateway();
-		};
-
-		gateway.onclose = onClose;
-		gateway.onmessage = onMessage;
-
 		return () => {
+			console.log("cleaning up...");
+			clearInterval(interval);
 			gateway.close();
-			clearInterval(interval)
 		};
 	}, []);
 
