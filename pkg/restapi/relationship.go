@@ -11,6 +11,14 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+const (
+	RTDefault = iota
+	RTFriend
+	RTBlock
+	RTInComing
+	RTOutGoing
+)
+
 func GetRelationships(ctx *Context) {
 	relationships := ctx.Db.GetRelationships(ctx.User.ID)
 
@@ -88,7 +96,7 @@ func ChangeRelationshipToDefault(ctx *Context) {
 			ID:         primitive.NewObjectID(),
 			FromUserID: ctx.User.ID,
 			ToUserID:   relationship_user.ID,
-			Type:       0,
+			Type:       RTDefault,
 		}
 
 		_, err := relationshipsCollection.InsertOne(context.TODO(), new_relationship)
@@ -104,7 +112,7 @@ func ChangeRelationshipToDefault(ctx *Context) {
 		}
 	}
 
-	relationship_user_type := 2
+	relationship_user_type := RTBlock
 
 	var relationship2 database.Relationship
 	err = relationshipsCollection.FindOne(context.TODO(), bson.M{"from_user_id": relationship_user.ID, "to_user_id": ctx.User.ID}).Decode(&relationship2)
@@ -113,7 +121,7 @@ func ChangeRelationshipToDefault(ctx *Context) {
 			ID:         primitive.NewObjectID(),
 			FromUserID: relationship_user.ID,
 			ToUserID:   ctx.User.ID,
-			Type:       0,
+			Type:       RTDefault,
 		}
 
 		_, err := relationshipsCollection.InsertOne(context.TODO(), new_relationship)
@@ -122,16 +130,16 @@ func ChangeRelationshipToDefault(ctx *Context) {
 			return
 		}
 
-		relationship_user_type = 0
+		relationship_user_type = RTDefault
 	} else {
 		if relationship2.Type != 2 {
-			_, err := relationshipsCollection.UpdateByID(context.TODO(), relationship2.ID, bson.M{"$set": bson.M{"type": 0}})
+			_, err := relationshipsCollection.UpdateByID(context.TODO(), relationship2.ID, bson.M{"$set": bson.M{"type": RTDefault}})
 			if err != nil {
 				ctx.Res.WriteHeader(http.StatusInternalServerError)
 				return
 			}
 
-			relationship_user_type = 0
+			relationship_user_type = RTDefault
 		}
 	}
 
