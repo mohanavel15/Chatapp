@@ -37,7 +37,7 @@ func main() {
 	router.Use(handlers.RecoveryHandler())
 
 	handler.Add("PING", func(ctx *websocket.Context) {
-		ws_msg, _ := json.Marshal(websocket.WS_Message{Event: "pong", Data: ""})
+		ws_msg, _ := json.Marshal(websocket.WS_Message{Event: "PONG", Data: ""})
 		ctx.Send(ws_msg)
 	})
 
