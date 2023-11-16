@@ -64,7 +64,7 @@ function Relationships() {
 			<div className='flex flex-col overflow-y-scroll h-full w-full items-center'>
 				{TopBarSelected === 4 && 
 					<div className='w-11/12 md:w-2/5 flex flex-col md:flex-row items-center mt-8 bg-zinc-900 rounded p-1'>
-						<input className='h-8 w-full md:w-3/4 bg-zinc-900 outline-none' type='text' placeholder='username' ref={FriendUsername} />
+						<input className='h-8 w-full md:w-3/4 bg-zinc-900 outline-none' type='text' placeholder='user id' ref={FriendUsername} />
 						<button className='h-8 w-full md:w-1/4 bg-green-600 rounded m-1' onClick={SendFriendRequest}>Add</button>
 					</div>
 				}
