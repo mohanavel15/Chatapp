@@ -99,6 +99,7 @@ function Settings() {
                         <HiCamera size={64} onClick={() => avatar_input.current.click()} className="absolute self-center justify-self-center text-white opacity-75 cursor-pointer" />
                         <input type="file" ref={avatar_input} name="filename" hidden onChange={onIconChange} accept="image/*"></input>
                     </div>
+                    <input className="h-8 w-4/5 cursor-not-allowed rounded my-1 px-2 bg-zinc-700 text-gray-400" type="text" disabled value={user_ctx.username} onClick={() => alert("Username changing is not supported!")} />
                     <button className='w-24 h-10 bg-green-700 rounded hover:bg-green-800' onClick={avatar}>Save</button>
                 </SettingsItem>
                 <SettingsItem title='Chanage Password'>
