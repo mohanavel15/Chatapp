@@ -8,6 +8,7 @@ import Channel from "./pages/channel";
 import Relationships from "./pages/relationships";
 import Settings from "./pages/settings";
 import NoPage from "./pages/nopage";
+import HomeDefault from "./pages/HomeDefault";
 
 import Login from "./components/auth/login";
 import Register from "./components/auth/register";
@@ -35,6 +36,7 @@ function App() {
 							</PopUpProvider>
 						</ChannelCTX>
 					}>
+						<Route index element={<HomeDefault />}/>
 						<Route path="channels" element={<Channel />}>
 							<Route path=":id" element={ 
 								<MessageCTX>

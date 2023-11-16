@@ -137,18 +137,10 @@ function Chat() {
 					</div>
 					<div className="h-16 absolute bottom-0 w-full flex items-center justify-evenly border-t border-zinc-800">
 						{ hasFile && <div className='absolute bottom-16 right-0 h-40 w-full flex items-center rounded-t-xl bg-black border-t border-r border-l border-zinc-800'>{fileJSX}</div> } 
-						{/* <button aria-label='upload file' id="chat-file" onClick={() => { file_input.current.click() }}>
-							<FontAwesomeIcon icon={faCirclePlus} />
-							</button>
-							<button aria-label='emoji picker' id="chat-emoji-picker" onClick={() => setShowPicker(val => !val)}>
-							<FontAwesomeIcon icon={faFaceLaughBeam} />
-							</button> 
-						*/}
 						<input type="file" ref={file_input} name="filename" hidden onChange={onFileChange} />
 						<BsPlusCircleFill size={26} onClick={() => file_input.current.click()} />
 						<input className='w-[85%] h-8 rounded-md bg-zinc-800 px-4' type="text" placeholder="Type a message..." onKeyPress={updateChat} value={Input_message} onChange={onInputChange} />
 					</div>
-					{/* {showPicker && <div className="EmojiPicker"><Picker onEmojiClick={onEmojiClick} /></div>} */}
 				</div>
 				{ channel.type === 2 && showRecipients && <Recipients channel={channel} /> }
 			</div>
