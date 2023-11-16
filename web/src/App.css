@@ -1,10 +1,12 @@
 html {
-  min-height:100%;
+  min-height: stretch;
+  min-height: -moz-available;
 }
 
 body {
-  height: 100%;
-  overflow-y: hidden;
+  height: stretch;
+  height: -moz-available;
+  /* overflow-y: hidden; */
 }
 
 ::-webkit-scrollbar {
