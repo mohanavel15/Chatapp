@@ -115,7 +115,7 @@ func main() {
 		Addr:         server_uri,
 		Handler:      router,
 		ReadTimeout:  time.Second * 3,
-		WriteTimeout: time.Second * 10,
+		WriteTimeout: time.Second * 3,
 		IdleTimeout:  time.Second * 3,
 	}
 
