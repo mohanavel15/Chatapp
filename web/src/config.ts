@@ -9,6 +9,8 @@ class RoutesCls {
     logout = this.host + '/logout';
     refresh = this.host + '/refresh';
     signout = this.host + '/signout';
+    forgotPassword = this.host + '/forgotpassword';
+    resetPassword = this.host + '/resetpassword';
     changePassword = this.host + '/changepassword';
 
     users = this.host + '/users';

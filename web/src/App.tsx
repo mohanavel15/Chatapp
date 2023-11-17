@@ -20,6 +20,8 @@ import ContextMenuProvider from "./contexts/context_menu_ctx";
 import ChannelCTX from "./contexts/channelctx";
 import UserCTX from "./contexts/usercontext";
 import PopUpProvider from "./contexts/popup";
+import ForgotPassword from "./components/auth/forgetpassword";
+import ResetPassword from "./components/auth/resetpassword";
 
 function App() {
   	return (
@@ -54,6 +56,8 @@ function App() {
 					}>
 						<Route path="login" element={ <Login /> } />
 						<Route path="register" element={ <Register /> } />
+						<Route path="forgotpassword" element={ <ForgotPassword /> } />
+						<Route path="resetpassword" element={ <ResetPassword /> } />
 					</Route>
 					<Route path="*" element={<NoPage />} />
 				</RouterRoutes>

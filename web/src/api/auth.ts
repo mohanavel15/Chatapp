@@ -33,3 +33,32 @@ export async function ChangePassword(current_password: string, new_password: str
 
     return response;
 }
+
+export async function ForgotPassword(email: string) {
+    const response = fetch(Routes.forgotPassword, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            "email": email
+        })
+    });
+
+    return response;
+}
+
+export async function ResetPassword(token: string, password: string) {
+    const response = fetch(Routes.resetPassword, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            "token": token,
+            "password": password
+        })
+    });
+
+    return response;
+}

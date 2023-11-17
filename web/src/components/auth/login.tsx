@@ -1,5 +1,5 @@
 import { useContext, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Login as APILogin } from "../../api/auth";
 import { LoginContext } from "../../contexts/Login";
 
@@ -38,6 +38,7 @@ function Login() {
 			<input className="w-3/4 px-4 h-12 bg-zinc-700" type="text" placeholder="Username" ref={Username} required />
 			<input className="w-3/4 px-4 h-12 bg-zinc-700" type="password" placeholder="Password" ref={Password} required />
 			<button className="w-3/4 h-12 bg-zinc-700" type="submit"> Login </button>
+			<Link className="text-cyan-400" to="/auth/forgotpassword">Forgot your password?</Link>
 		</form>
 	);
 }

@@ -43,7 +43,9 @@ function UserCTX({ children }: { children: React.ReactChild }) {
                     });
                 });
             } else {
-                navigate('/auth/login')
+                if (!location.pathname.includes("auth")) {
+                    navigate('/auth/login')
+                }
             }
         })
     }, []);

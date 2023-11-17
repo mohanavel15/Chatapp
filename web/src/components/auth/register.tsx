@@ -36,6 +36,7 @@ function Register() {
 
 		if (password_text !== confirm_password_text) {
 			login_ctx.setError("Password and Confirm Password don't match");
+			login_ctx.setShowError(true);
 			login_ctx.setLoading(false);
 			return
 		}
