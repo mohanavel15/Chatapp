@@ -16,7 +16,11 @@ type ChangePassword struct {
 	NewPassword     string `json:"new_password"`
 }
 
-type Refresh struct {
-	AccessToken string `json:"access_token"`
-	ClientToken string `json:"client_token"`
+type ForgotPassword struct {
+	Email string `json:"email"`
+}
+
+type ResetPassword struct {
+	Password string `json:"password"`
+	Token    string `json:"token"`
 }

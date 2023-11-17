@@ -2,9 +2,12 @@ package restapi
 
 import (
 	"Chatapp/pkg/database"
+	"Chatapp/pkg/mail"
 	"Chatapp/pkg/request"
 	"Chatapp/pkg/utils"
 	"context"
+	"log"
+	"os"
 	"time"
 
 	"encoding/json"
@@ -123,7 +126,7 @@ func Login(w http.ResponseWriter, r *http.Request, db *database.Database) {
 		return
 	}
 
-	accessToken, err := utils.GenerateJWT(user.ID.Hex())
+	accessToken, err := utils.GenerateJWT(user.ID.Hex(), "auth")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Failed to generate access token"))
@@ -183,4 +186,58 @@ func ChangePassword(ctx *Context) {
 	ctx.User.Password = hashedPassword
 	collection.UpdateOne(context.TODO(), bson.M{"_id": ctx.User.ID}, bson.M{"$set": bson.M{"password": hashedPassword}})
 	ctx.Res.WriteHeader(http.StatusOK)
+}
+
+var (
+	TLS         = os.Getenv("TLS")
+	PUBLIC_HOST = os.Getenv("PUBLIC_HOST")
+	URL         = fmt.Sprintf("http%s://%s/api", TLS, PUBLIC_HOST)
+)
+
+func ForgotPassword(w http.ResponseWriter, r *http.Request, db *database.Database) {
+	var request request.ForgotPassword
+	_ = json.NewDecoder(r.Body).Decode(&request)
+
+	user, err := db.GetUserByEmail(request.Email)
+	if err != http.StatusOK {
+		w.WriteHeader(err)
+		return
+	}
+
+	token, tokerr := utils.GenerateJWT(user.ID.Hex(), "reset")
+	if tokerr != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Fatalln("Failed to generate token")
+		return
+	}
+
+	body := `Reset Password
+Click the link below to reset your password
+Note The link will expire in 30 minutes
+` + URL + `/reset-password?token=` + token
+
+	mail.SendMail(user.Email, "Password Reset", body)
+	w.WriteHeader(http.StatusOK)
+}
+
+func ResetPassword(w http.ResponseWriter, r *http.Request, db *database.Database) {
+	var request request.ResetPassword
+	_ = json.NewDecoder(r.Body).Decode(&request)
+
+	vaild, user := utils.ValidateResetToken(request.Token, db.Mongo)
+	if !vaild {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.DefaultCost)
+	if err != nil {
+		fmt.Println("Password Hashing Failed :", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Something went Wrong"))
+	}
+
+	collection := db.Mongo.Collection("users")
+	collection.UpdateOne(context.TODO(), bson.M{"_id": user.ID}, bson.M{"$set": bson.M{"password": hashedPassword}})
+	w.WriteHeader(http.StatusOK)
 }

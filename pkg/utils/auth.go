@@ -16,14 +16,19 @@ import (
 
 var JWT_SECRET = os.Getenv("JWT_SECRET")
 
-func GenerateJWT(id string) (string, error) {
+func GenerateJWT(id, use string) (string, error) {
 	secret_key := []byte(JWT_SECRET)
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
 
 	claims["id"] = id
+	claims["use"] = use
 	claims["iat"] = time.Now().Unix()
-	claims["exp"] = time.Now().Unix() * 2
+	if use == "reset" {
+		claims["exp"] = time.Now().Add(time.Minute * 30).Unix()
+	} else {
+		claims["exp"] = time.Now().Unix() * 2
+	}
 
 	tokenString, err := token.SignedString(secret_key)
 
@@ -35,32 +40,52 @@ func GenerateJWT(id string) (string, error) {
 }
 
 func ValidateAccessToken(AccessToken string, db *mongo.Database) (bool, database.User) {
+	valid, use, user := ValidateToken(AccessToken, db)
+	if use != "auth" {
+		return false, user
+	}
+
+	return valid, user
+}
+
+func ValidateResetToken(AccessToken string, db *mongo.Database) (bool, database.User) {
+	valid, use, user := ValidateToken(AccessToken, db)
+	if use != "reset" {
+		return false, user
+	}
+
+	return valid, user
+}
+
+func ValidateToken(AccessToken string, db *mongo.Database) (bool, string, database.User) {
 	var user database.User
 
 	claims, err := ValidateJWT(AccessToken)
 	if err != nil {
-		return false, user
+		return false, "", user
 	}
+
+	use := claims["use"].(string)
 
 	collection := db.Collection("users")
 	id, err := primitive.ObjectIDFromHex(claims["id"].(string))
 	if err != nil {
-		return false, user
+		return false, use, user
 	}
 
 	err = collection.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&user)
 
 	if err != nil {
-		return false, user
+		return false, use, user
 	}
 
 	iat := int64(claims["iat"].(float64))
 
 	if user.LastLogout >= iat {
-		return false, user
+		return false, use, user
 	}
 
-	return true, user
+	return true, use, user
 }
 
 func ValidateJWT(tokenString string) (jwt.MapClaims, error) {

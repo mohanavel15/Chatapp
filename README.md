@@ -19,6 +19,9 @@ export TLS="" # "" for http & "s" for https.
 export JWT_SECRET="YOUR-JWT-SECRET"
 export MONGO_URI="mongodb://USERNAME:PASSWORD@HOST:27017"
 export MONGO_DATABASE="DATABASE_NAME"
+export SMTP_SERVER="SMTP_SERVER" # e.g smtp.gmail.com
+export SMTP_USERNAME="USERNAME"
+export SMTP_PASSWORD="PASSWORD"
 ```
 
 ### To Build & Run Chatapp

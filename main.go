@@ -53,6 +53,8 @@ func main() {
 	api.HandleFunc("/login", IncludeDB(restapi.Login)).Methods("POST")
 	api.HandleFunc("/logout", Authenticated(restapi.Logout)).Methods("POST")
 	api.HandleFunc("/changepassword", Authenticated(restapi.ChangePassword)).Methods("POST")
+	api.HandleFunc("/forgotpassword", IncludeDB(restapi.ForgotPassword)).Methods("POST")
+	api.HandleFunc("/resetpassword", IncludeDB(restapi.ResetPassword)).Methods("POST")
 	// Channels
 	api.HandleFunc("/channels/{id}", Authenticated(restapi.GetChannel)).Methods("GET")
 	api.HandleFunc("/channels/{id}", Authenticated(restapi.EditChannel)).Methods("PATCH")
@@ -113,7 +115,7 @@ func main() {
 		Addr:         server_uri,
 		Handler:      router,
 		ReadTimeout:  time.Second * 3,
-		WriteTimeout: time.Second * 3,
+		WriteTimeout: time.Second * 10,
 		IdleTimeout:  time.Second * 3,
 	}
 
