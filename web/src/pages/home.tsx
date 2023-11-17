@@ -18,7 +18,25 @@ function Home() {
 	const popup_ctx = useContext(PopUpContext);
 	const navigate = useNavigate();
 
+	const SendNotification = (message: MessageOBJ) => {
+		let url = location.pathname;
+		if (!url.includes(message.channel_id)) {
+			if (Notification.permission === "granted") {
+				const notification = new Notification(message.author.username, {
+					body: message.content,
+					icon: message.author.avatar,
+				});
+				notification.onclick = () => {
+					navigate(`/channels/${message.channel_id}`);
+				};
+			}
+		}
+	}
+
 	useEffect(() => {
+		if (Notification.permission === "default") {
+			Notification.requestPermission();
+		}
 		let last_ping = new Date().getTime();
 		let last_pong = new Date().getTime();
 
@@ -35,7 +53,7 @@ function Home() {
 			if (last_ping > last_pong || gateway.readyState > WebSocket.OPEN) {
 				console.log("Reconnecting...")
 				gateway.close();
-				gateway = NewGateway();
+				location.reload();
 			} else {
 				const message = JSON.stringify({ event: "PING", data: "" });
 				last_ping = new Date().getTime();
@@ -84,6 +102,7 @@ function Home() {
 				case "MESSAGE_CREATE":
 					const message: MessageOBJ = payload.data;
 					channel_context.InsertMessage(message);
+					SendNotification(message);
 					break;
 
 				case "MESSAGE_MODIFY":
