@@ -2,6 +2,7 @@ package main
 
 import (
 	"Chatapp/pkg/database"
+	"Chatapp/pkg/mail"
 	"Chatapp/pkg/restapi"
 	"Chatapp/pkg/websocket"
 	"encoding/json"
@@ -20,6 +21,9 @@ var (
 	PORT           = os.Getenv("SERVER_PORT")
 	MONGO_URI      = os.Getenv("MONGO_URI")
 	MONGO_DATABASE = os.Getenv("MONGO_DATABASE")
+	SMTP_SERVER    = os.Getenv("SMTP_SERVER")
+	SMTP_USERNAME  = os.Getenv("SMTP_USERNAME")
+	SMTP_PASSWORD  = os.Getenv("SMTP_PASSWORD")
 )
 
 var (
@@ -29,6 +33,8 @@ var (
 )
 
 func main() {
+	mail.NewMailSystem(SMTP_SERVER, SMTP_USERNAME, SMTP_PASSWORD)
+
 	router := mux.NewRouter()
 	headers := handlers.AllowedHeaders([]string{"Content-Type", "Authorization"})
 	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "PATCH", "DELETE"})
