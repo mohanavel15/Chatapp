@@ -79,8 +79,8 @@ func Register(w http.ResponseWriter, r *http.Request, db *database.Database) {
 
 	new_account := database.User{
 		ID:         primitive.NewObjectID(),
-		Username:   request.Username,
-		Email:      request.Email,
+		Username:   username,
+		Email:      email,
 		Password:   hashedPassword,
 		CreatedAt:  time.Now().Unix(),
 		LastLogout: 0,
