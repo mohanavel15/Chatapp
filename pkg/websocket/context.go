@@ -7,7 +7,7 @@ import (
 type Context struct {
 	Ws    *Ws
 	Event string
-	Data  []byte
+	Data  interface{}
 	Db    *database.Database
 }
 

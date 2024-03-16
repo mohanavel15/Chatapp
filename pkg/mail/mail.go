@@ -29,6 +29,10 @@ func SendMail(recipient, subject, body string) error {
 }
 
 func NewMailSystem(server, username, password string) {
+	if server == "" || username == "" || password == "" {
+		fmt.Println("Warn: SMTP server, username or password is empty. SMTP mails won't be sent!")
+		return
+	}
 	auth := smtp.PlainAuth("", username, password, server)
 	mailsystem = &MailSystem{
 		server:   server,

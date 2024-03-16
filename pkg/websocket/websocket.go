@@ -27,10 +27,7 @@ func (ws *Ws) Write(data []byte) {
 
 func (ws *Ws) Read() ([]byte, error) {
 	_, data, err := ws.Conn.ReadMessage()
-	if err != nil {
-		return nil, err
-	}
-	return data, nil
+	return data, err
 }
 
 func (ws *Ws) ReadLoop() {
@@ -52,15 +49,10 @@ func (ws *Ws) HandleWSMessage(data []byte) {
 		fmt.Println(err)
 	}
 
-	data_json, err := json.Marshal(ws_message.Data)
-	if err != nil {
-		fmt.Println(err)
-	}
-
 	ctx := Context{
 		Ws:    ws,
 		Event: strings.ToUpper(ws_message.Event),
-		Data:  data_json,
+		Data:  ws_message.Data,
 		Db:    ws.Db,
 	}
 
