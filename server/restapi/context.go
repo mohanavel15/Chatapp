@@ -1,8 +1,8 @@
 package restapi
 
 import (
-	"Chatapp/pkg/database"
-	"Chatapp/pkg/websocket"
+	"Chatapp/server/database"
+	"Chatapp/server/websocket"
 	"encoding/json"
 	"net/http"
 )

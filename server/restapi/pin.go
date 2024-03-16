@@ -1,8 +1,8 @@
 package restapi
 
 import (
-	"Chatapp/pkg/database"
-	"Chatapp/pkg/response"
+	"Chatapp/server/database"
+	"Chatapp/server/response"
 	"context"
 	"net/http"
 	"time"

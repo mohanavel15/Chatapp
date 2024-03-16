@@ -4,8 +4,8 @@ import (
 	"log"
 	"net/http"
 
-	"Chatapp/pkg/restapi"
-	ws "Chatapp/pkg/websocket"
+	"Chatapp/server/restapi"
+	ws "Chatapp/server/websocket"
 
 	"github.com/gorilla/websocket"
 )

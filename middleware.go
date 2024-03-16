@@ -1,9 +1,9 @@
 package main
 
 import (
-	"Chatapp/pkg/database"
-	"Chatapp/pkg/restapi"
-	"Chatapp/pkg/utils"
+	"Chatapp/server/database"
+	"Chatapp/server/restapi"
+	"Chatapp/server/utils"
 	"net/http"
 )
 

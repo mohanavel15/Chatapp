@@ -1,7 +1,7 @@
 package restapi
 
 import (
-	"Chatapp/pkg/database"
+	"Chatapp/server/database"
 	"bytes"
 	"context"
 	"encoding/base64"

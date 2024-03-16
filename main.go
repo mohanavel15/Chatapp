@@ -1,10 +1,11 @@
 package main
 
 import (
-	"Chatapp/pkg/database"
-	"Chatapp/pkg/mail"
-	"Chatapp/pkg/restapi"
-	"Chatapp/pkg/websocket"
+	"Chatapp/server/config"
+	"Chatapp/server/database"
+	"Chatapp/server/mail"
+	"Chatapp/server/restapi"
+	"Chatapp/server/websocket"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -33,6 +34,7 @@ var (
 )
 
 func main() {
+	config.LoadConfig()
 	mail.NewMailSystem(SMTP_SERVER, SMTP_USERNAME, SMTP_PASSWORD)
 
 	router := mux.NewRouter()

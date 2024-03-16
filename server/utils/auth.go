@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"Chatapp/pkg/database"
+	"Chatapp/server/database"
 	"context"
 	"fmt"
 	"log"

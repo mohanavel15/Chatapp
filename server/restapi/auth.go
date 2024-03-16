@@ -1,10 +1,10 @@
 package restapi
 
 import (
-	"Chatapp/pkg/database"
-	"Chatapp/pkg/mail"
-	"Chatapp/pkg/request"
-	"Chatapp/pkg/utils"
+	"Chatapp/server/database"
+	"Chatapp/server/mail"
+	"Chatapp/server/request"
+	"Chatapp/server/utils"
 	"context"
 	"log"
 	"os"
