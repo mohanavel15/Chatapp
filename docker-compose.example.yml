@@ -25,7 +25,7 @@ services:
       PUBLIC_HOST: "0.0.0.0:5000"
       TLS: ""
       JWT_SECRET: "JWT-SECRET-STRING"
-      MONGO_URI: "mongodb://USERNAME:PASSWORD@mongodb:27017"
+      MONGO_URI: "mongodb://mongodb:27017"
       MONGO_DATABASE: "DATABASE_NAME"
     ports:
       - 5000:5000

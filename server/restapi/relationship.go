@@ -31,7 +31,7 @@ func GetRelationships(ctx *Context) {
 		}
 
 		status := 0
-		if relationship.Type == 1 {
+		if relationship.Type == RTFriend {
 			status = ctx.Conn.GetUserStatus(user.ID.Hex())
 		}
 
@@ -155,7 +155,6 @@ func ChangeRelationshipToDefault(ctx *Context) {
 func ChangeRelationshipToFriend(ctx *Context) {
 	url_vars := mux.Vars(ctx.Req)
 	relationship_id := url_vars["rid"]
-	relationshipsCollection := ctx.Db.Mongo.Collection("relationships")
 
 	relationship_user, statusCode := ctx.Db.GetUser(relationship_id)
 	if statusCode != http.StatusOK {
@@ -163,7 +162,8 @@ func ChangeRelationshipToFriend(ctx *Context) {
 		return
 	}
 
-	relationship_user_type := 3
+	relationship_user_type := RTInComing
+	relationshipsCollection := ctx.Db.Mongo.Collection("relationships")
 
 	var relationship1 database.Relationship
 	err := relationshipsCollection.FindOne(context.TODO(), bson.M{"from_user_id": relationship_user.ID, "to_user_id": ctx.User.ID}).Decode(&relationship1)
@@ -186,7 +186,7 @@ func ChangeRelationshipToFriend(ctx *Context) {
 			return
 		}
 
-		if relationship1.Type == 1 || relationship1.Type == 3 || relationship1.Type == 4 {
+		if relationship1.Type == RTFriend || relationship1.Type == RTOutGoing {
 			relationship_user_type = 1
 		}
 
@@ -197,9 +197,9 @@ func ChangeRelationshipToFriend(ctx *Context) {
 		}
 	}
 
-	relationship_type := 4
-	if relationship_user_type == 1 {
-		relationship_type = 1
+	relationship_type := RTOutGoing
+	if relationship_user_type == RTFriend {
+		relationship_type = RTFriend
 	}
 
 	var relationship2 database.Relationship
@@ -252,7 +252,7 @@ func ChangeRelationshipToBlock(ctx *Context) {
 			ID:         primitive.NewObjectID(),
 			FromUserID: ctx.User.ID,
 			ToUserID:   relationship_user.ID,
-			Type:       2,
+			Type:       RTBlock,
 		}
 
 		_, err := relationshipsCollection.InsertOne(context.TODO(), new_relationship)
@@ -261,14 +261,12 @@ func ChangeRelationshipToBlock(ctx *Context) {
 			return
 		}
 	} else {
-		_, err = relationshipsCollection.UpdateByID(context.TODO(), relationship1.ID, bson.M{"$set": bson.M{"type": 2}})
+		_, err = relationshipsCollection.UpdateByID(context.TODO(), relationship1.ID, bson.M{"$set": bson.M{"type": RTBlock}})
 		if err != nil {
 			ctx.Res.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 	}
-
-	relationship_user_type := 2
 
 	var relationship2 database.Relationship
 	err = relationshipsCollection.FindOne(context.TODO(), bson.M{"from_user_id": relationship_user.ID, "to_user_id": ctx.User.ID}).Decode(&relationship2)
@@ -277,7 +275,7 @@ func ChangeRelationshipToBlock(ctx *Context) {
 			ID:         primitive.NewObjectID(),
 			FromUserID: relationship_user.ID,
 			ToUserID:   ctx.User.ID,
-			Type:       0,
+			Type:       RTDefault,
 		}
 
 		_, err := relationshipsCollection.InsertOne(context.TODO(), new_relationship)
@@ -286,7 +284,7 @@ func ChangeRelationshipToBlock(ctx *Context) {
 			return
 		}
 
-		relationship_user_type = 0
+		relationship2.Type = RTDefault
 	} else {
 		if relationship2.Type != 2 {
 			_, err := relationshipsCollection.UpdateByID(context.TODO(), relationship2.ID, bson.M{"$set": bson.M{"type": 0}})
@@ -295,15 +293,11 @@ func ChangeRelationshipToBlock(ctx *Context) {
 				return
 			}
 
-			relationship_user_type = 0
+			relationship2.Type = 0
 		}
 	}
 
-	res := response.NewRelationship(response.NewUser(relationship_user, ctx.Conn.GetUserStatus(relationship_user.ID.Hex())), 2)
+	res := response.NewRelationship(response.NewUser(relationship_user, 0), RTBlock)
 	ctx.WriteJSON(res)
-	status := 0
-	if relationship_user_type == 1 {
-		status = ctx.Conn.GetUserStatus(ctx.User.ID.Hex())
-	}
-	ctx.Conn.SendToUser(relationship_user.ID.Hex(), "RELATIONSHIP_MODIFY", response.NewRelationship(response.NewUser(&ctx.User, status), relationship_user_type))
+	ctx.Conn.SendToUser(relationship_user.ID.Hex(), "RELATIONSHIP_MODIFY", response.NewRelationship(response.NewUser(&ctx.User, 0), relationship2.Type))
 }
